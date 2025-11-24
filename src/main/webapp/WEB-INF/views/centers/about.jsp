@@ -118,8 +118,6 @@
 		  </div><!-- /ci-container -->
 		</main>
 
-
-
 <!-- 공통 푸터 -->
 <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
 

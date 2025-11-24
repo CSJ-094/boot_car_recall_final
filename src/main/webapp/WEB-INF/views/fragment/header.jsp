@@ -42,6 +42,7 @@
                         <li><a href="/notice/list">공지사항</a></li>
                         <li><a href="/faq/list">FAQ</a></li>
                         <li><a href="/centers/about">리콜센터 소개</a></li>
+                        <li><a href="/centers/map">주변 리콜센터 찾기</a></li>
                     </ul>
                 </li>
 
