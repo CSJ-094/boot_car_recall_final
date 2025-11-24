@@ -4,20 +4,16 @@
 
 <mapper namespace="com.boot.dao.DefectReportDAO">
 
-    <insert id="insertReport" parameterType="com.boot.dto.DefectReportDTO">
-        <selectKey keyProperty="id" resultType="long" order="BEFORE">
-            SELECT DEFECT_REPORT_SEQ.NEXTVAL FROM DUAL
-        </selectKey>
+    <insert id="insertReport" parameterType="com.boot.dto.DefectReportDTO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO DEFECT_REPORT (
-            ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+            REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
         ) VALUES (
-            #{id},
             #{reporterName},
             #{contact},
             #{carModel},
             #{vin},
             #{defectDetails},
-            SYSDATE,
+            NOW(),
             #{password}
         )
     </insert>
@@ -35,27 +31,17 @@
 
     <!-- 페이징 및 검색 처리를 위한 selectAll 쿼리 수정 -->
     <select id="selectAll" resultMap="defectReportResultMap">
-        SELECT *
-        FROM (
-            SELECT
-                ROWNUM AS rn,
-                ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
-            FROM (
-                SELECT
-                    ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
-                FROM DEFECT_REPORT
-                <where>
-                    <if test="keyword != null and keyword != ''">
-                        UPPER(REPORTER_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
-                        OR UPPER(CAR_MODEL) LIKE '%' || UPPER(#{keyword}) || '%'
-                        OR UPPER(VIN) LIKE '%' || UPPER(#{keyword}) || '%'
-                    </if>
-                </where>
-                ORDER BY ID DESC
-            )
-            WHERE ROWNUM &lt;= #{pageNum} * #{amount}
-        )
-        WHERE rn > (#{pageNum} - 1) * #{amount}
+        SELECT ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+        FROM DEFECT_REPORT
+        <where>
+            <if test="keyword != null and keyword != ''">
+                UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+            </if>
+        </where>
+        ORDER BY ID DESC
+        LIMIT #{amount} OFFSET ${(pageNum - 1) * amount}
     </select>
 
 
@@ -64,9 +50,9 @@
         SELECT COUNT(*) FROM DEFECT_REPORT
         <where>
             <if test="keyword != null and keyword != ''">
-                UPPER(REPORTER_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
-                OR UPPER(CAR_MODEL) LIKE '%' || UPPER(#{keyword}) || '%'
-                OR UPPER(VIN) LIKE '%' || UPPER(#{keyword}) || '%'
+                UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
             </if>
         </where>
     </select>
