@@ -10,6 +10,7 @@ import com.boot.dto.SearchResultsDTO;
 import com.boot.service.DefectReportService;
 import com.boot.service.NoticeService;
 import com.boot.service.BoardService;
+import com.boot.service.PdfExportService;
 import com.boot.service.RecallService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,7 @@ public class MainController {
     private final DefectReportService defectReportService;
     private final NoticeService noticeService;
     private final BoardService boardService;
+    private final PdfExportService pdfExportService;
 
     // -------------------------------------------------------------------
     // 1. 메인 페이지 (리콜 검색 기능 포함)
@@ -277,7 +279,20 @@ public class MainController {
     }
 
     // -------------------------------------------------------------------
-    // 12. 결함 신고(리콜 신청) 내역 CSV 다운로드
+    // 12. 리콜 데이터 PDF 다운로드
+    // URL: /recall/download/pdf
+    // -------------------------------------------------------------------
+    @GetMapping("/recall/download/pdf")
+    public void downloadRecallPdf(HttpServletResponse response) throws IOException {
+        log.info("@# Recall PDF download requested");
+
+        List<RecallDTO> recallList = recallService.getAllRecallsWithoutPaging();
+        byte[] pdfBytes = pdfExportService.generateRecallPdf(recallList);
+        writePdfResponse(response, pdfBytes, "리콜내역");
+    }
+
+    // -------------------------------------------------------------------
+    // 13. 결함 신고(리콜 신청) 내역 CSV 다운로드
     // URL: /report/download/csv
     // -------------------------------------------------------------------
     @GetMapping("/report/download/csv")
@@ -334,5 +349,29 @@ public class MainController {
             log.error("@# Defect Report CSV download error", e);
             throw new IOException("CSV 파일 생성 중 오류가 발생했습니다.", e);
         }
+    }
+
+    // -------------------------------------------------------------------
+    // 14. 결함 신고(리콜 신청) 내역 PDF 다운로드
+    // URL: /report/download/pdf
+    // -------------------------------------------------------------------
+    @GetMapping("/report/download/pdf")
+    public void downloadDefectReportPdf(HttpServletResponse response) throws IOException {
+        log.info("@# Defect Report PDF download requested");
+
+        List<DefectReportDTO> reportList = defectReportService.getAllReportsWithoutPaging();
+        byte[] pdfBytes = pdfExportService.generateDefectReportPdf(reportList);
+        writePdfResponse(response, pdfBytes, "리콜신청내역");
+    }
+
+    private void writePdfResponse(HttpServletResponse response, byte[] pdfBytes, String prefix) throws IOException {
+        byte[] payload = pdfBytes == null ? new byte[0] : pdfBytes;
+        String fileName = prefix + "_" + System.currentTimeMillis() + ".pdf";
+        String encodedFileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFileName + "\"");
+        response.setContentLength(payload.length);
+        response.getOutputStream().write(payload);
     }
 }
