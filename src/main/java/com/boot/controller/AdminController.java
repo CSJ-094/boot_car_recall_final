@@ -67,29 +67,18 @@ public class AdminController {
         return "admin/login";
     }
 
-    @PostMapping("/login")
-    public String loginProcess(@RequestParam HashMap<String, String> param, HttpServletRequest request, RedirectAttributes rttr) {
-        log.info("@# Admin login process");
-        AdminDTO admin = service.login(param);
-
-        if (admin != null) {
-            HttpSession session = request.getSession();
-            session.setAttribute("admin", admin);
-            return "redirect:/admin/main"; // 로그인 성공 시 관리자 메인 페이지로 이동
-        } else {
-            rttr.addFlashAttribute("error", "아이디 또는 비밀번호가 일치하지 않습니다.");
-            return "redirect:/admin/login"; // 로그인 실패 시 다시 로그인 폼으로
-        }
-    }
+    // @PostMapping("/login")은 Spring Security가 자동으로 처리하므로 삭제합니다.
+    // SecurityConfig에 설정된 loginProcessingUrl("/admin/login")이 이 역할을 대신합니다.
 
     @GetMapping("/logout")
     public String logout(HttpServletRequest request) {
         log.info("@# Admin logout");
-        HttpSession session = request.getSession(false); // 세션이 없으면 새로 생성하지 않음
-        if (session != null) {
-            session.invalidate(); // 세션 무효화
-        }
-        return "redirect:/"; // 로그아웃 후 사이트 메인 페이지로 리다이렉트
+        // Spring Security가 로그아웃을 처리하므로, 컨트롤러에서는 별도 로직이 필요 없습니다.
+        // SecurityConfig의 .logout() 설정에 따라 자동으로 로그아웃되고 리다이렉트됩니다.
+        // 이 메소드는 SecurityConfig의 logoutUrl과 겹치지 않게 하거나,
+        // Security가 제공하는 로그아웃을 사용하도록 유도하는 것이 좋습니다.
+        // 여기서는 Security 설정을 따르도록 남겨두거나 삭제할 수 있습니다.
+        return "redirect:/admin/login?logout";
     }
 
     @GetMapping("/main")
