@@ -22,17 +22,17 @@
     </sql>
 
     <select id="listWithPaging" parameterType="com.boot.dto.Criteria" resultType="com.boot.dto.BoardDTO">
-        SELECT BOARD_NO AS boardNo,
+        SELECT BOARD_NO    AS boardNo,
                BOARD_NAME AS boardName,
                BOARD_TITLE AS boardTitle,
                BOARD_CONTENT AS boardContent,
                BOARD_DATE AS boardDate,
                HIT AS boardHit
         FROM RECALL_BOARD
-        WHERE 1=1
-        <include refid="criteria"/>
+        WHERE 1 = 1
+        <include refid="criteria" />
         ORDER BY BOARD_NO DESC
-        LIMIT #{amount} OFFSET #{offset}
+        LIMIT #{amount} OFFSET ${(pageNum - 1) * amount}
     </select>
 
     <select id="getTotalCount" parameterType="com.boot.dto.Criteria" resultType="int">

@@ -16,7 +16,7 @@
         SELECT faqNo, faqCategory, faqTitle, faqContent, DATE_FORMAT(faqDate, '%Y-%m-%d') as created_at
         FROM tbl_faq
         ORDER BY faqNo DESC
-        LIMIT #{amount} OFFSET #{offset}
+        LIMIT #{amount} OFFSET ${(pageNum - 1) * amount}
     </select>
 
     <select id="getTotalCount" resultType="int">
@@ -33,7 +33,7 @@
     </insert>
 
     <update id="modify">
-        UPDATE tbl_faq SET faqCategory = #{category}, faqTitle = #{question}, faqContent = #{answer}, faqDate = CURRENT_TIMESTAMP WHERE faqNo = #{faq_id}
+        UPDATE tbl_faq SET faqCategory = #{category}, faqTitle = #{question}, faqContent = #{answer}, faqDate = NOW() WHERE faqNo = #{faq_id}
     </update>
 
     <delete id="delete">

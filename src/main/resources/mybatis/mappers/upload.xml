@@ -19,7 +19,7 @@
 			#{uploadPath},
 			#{fileName},
 			#{image},
-			(SELECT IFNULL(MAX(BOARD_NO), 0) FROM RECALL_BOARD)
+			#{boardNo}
 		)
 	</insert>
 

@@ -12,7 +12,7 @@
     <select id="getDailyReportStats" resultMap="dailyStatsResultMap">
         SELECT DATE_FORMAT(REPORT_DATE, '%Y-%m-%d') AS REPORT_DAY, COUNT(*) AS count
         FROM DEFECT_REPORT
-        WHERE REPORT_DATE >= CURDATE() - INTERVAL 6 DAY AND REPORT_DATE &lt; CURDATE() + INTERVAL 1 DAY
+        WHERE REPORT_DATE >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND REPORT_DATE &lt; DATE_ADD(CURDATE(), INTERVAL 1 DAY)
         GROUP BY DATE_FORMAT(REPORT_DATE, '%Y-%m-%d')
         ORDER BY REPORT_DAY ASC
     </select>
@@ -28,7 +28,7 @@
     <select id="getRecentReports" resultMap="defectReportResultMap">
         SELECT ID, REPORTER_NAME, CAR_MODEL, VIN, REPORT_DATE
         FROM DEFECT_REPORT
-        WHERE REPORT_DATE >= NOW() - INTERVAL 7 DAY
+        WHERE REPORT_DATE >= DATE_SUB(NOW(), INTERVAL 7 DAY)
         ORDER BY REPORT_DATE DESC
         LIMIT 5
     </select>

@@ -17,7 +17,7 @@
         SELECT notice_id, title, views, DATE_FORMAT(created_at, '%Y-%m-%d') as created_at, is_urgent
         FROM RECALL_NOTICE_DB
         ORDER BY is_urgent DESC, notice_id DESC
-        LIMIT #{amount} OFFSET #{offset}
+        LIMIT #{amount} OFFSET ${(pageNum - 1) * amount}
     </select>
 
     <select id="getTotalCount" resultType="int">
@@ -44,9 +44,9 @@
     <update id="modify" parameterType="com.boot.dto.NoticeDTO">
         UPDATE RECALL_NOTICE_DB
         SET title = #{title},
-        content = #{content},
-        is_urgent = #{is_urgent},
-        updated_at = NOW()
+            content = #{content},
+            is_urgent = #{is_urgent},
+            updated_at = NOW()
         WHERE notice_id = #{notice_id}
     </update>
 
