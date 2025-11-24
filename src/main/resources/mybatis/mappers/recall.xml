@@ -64,5 +64,13 @@
         WHERE UPPER(MODEL_NAME) LIKE CONCAT('%', UPPER(#{modelName}), '%')
         ORDER BY RECALL_DATE DESC
     </select>
+    
+    <select id="selectDistinctMaker" resultType="string">
+    	SELECT DISTINCT MAKER
+    	FROM RECALL
+    	WHERE MAKER IS NOT NULL
+      		AND TRIM(MAKER) != ''
+    	ORDER BY MAKER
+</select>
 
 </mapper>

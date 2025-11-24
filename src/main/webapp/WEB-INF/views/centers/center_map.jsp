@@ -5,6 +5,9 @@
 <!-- 공통 헤더 -->
 <jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
 
+<!-- 카카오 지도 SDK (반드시 kakao 객체 쓰기 전에 로드) -->
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=0f08a719a533ce4c77b85bb7a496e7b8&libraries=services"></script>
+
 <!-- 페이지 전용 CSS -->
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/center_map.css" />
 <link rel="stylesheet" href="/css/main.css" />
@@ -12,33 +15,36 @@
 <link rel="stylesheet" href="/css/footer.css" />
 
 <main class="content-body">
-    <jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
-        <jsp:param name="menu" value="center"/>
-    </jsp:include>
-
     <section class="content-area">
-        <h2>주변 리콜센터 / 정비소 찾기</h2>
+        <h2 class="center-page-title">주변 리콜센터 / 정비소 찾기</h2>
 
         <div class="center-page-wrap">
 
             <!-- 상단 필터 -->
             <div class="center-filter-row">
-                <label>제조사</label>
-                <select id="manufacturerSelect">
-                    <option value="">전체</option>
-                    <c:forEach var="m" items="${manufacturers}">
-                        <option value="${m}">${m}</option>
-                    </c:forEach>
-                </select>
+                <div class="filter-group">
+                    <label class="filter-label" for="categorySelect">종류</label>
+                    <select id="categorySelect" class="filter-select">
+                        <option value="ALL">전체</option>
+                        <option value="CAR">자동차 정비소</option>
+                        <option value="BIKE">오토바이 정비소</option>
+                        <option value="TRUCK">트럭/버스 정비소</option>
+                        <option value="EV">전기차 정비/충전</option>
+                    </select>
+                </div>
 
-                <label>반경</label>
-                <select id="radiusSelect">
-                    <option value="3000">3km</option>
-                    <option value="5000" selected>5km</option>
-                    <option value="10000">10km</option>
-                </select>
+                <div class="filter-group">
+                    <label class="filter-label" for="radiusSelect">반경</label>
+                    <select id="radiusSelect" class="filter-select">
+                        <option value="3000">3km</option>
+                        <option value="5000" selected>5km</option>
+                        <option value="10000">10km</option>
+                    </select>
+                </div>
 
-                <button id="btnMyLocation" class="btn-primary">내 위치 기준 검색</button>
+                <button id="btnMyLocation" class="btn-primary center-search-btn">
+                    내 위치 기준 검색
+                </button>
             </div>
 
             <!-- 하단 지도 + 리스트 -->
@@ -58,5 +64,4 @@
 <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
 
 <!-- 페이지 전용 JS -->
-<script src="${ctx}/resources/js/center_map.js"></script>
-
+<script src="/js/center_map.js"></script>
