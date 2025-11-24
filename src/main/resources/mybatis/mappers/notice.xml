@@ -14,32 +14,23 @@
         <result property="is_urgent" column="is_urgent"/>
     </resultMap>
     <select id="listWithPaging" resultMap="noticeResultMap">
-        SELECT notice_id, title, views, created_at, is_urgent
-        FROM (
-             SELECT notice_id, title, views, created_at, is_urgent, ROWNUM as rnum
-             FROM (
-                  SELECT notice_id, title, views, TO_CHAR(created_at, 'YYYY-MM-DD') as created_at, is_urgent
-                  FROM RECALL_NOTICE_DB
-                  ORDER BY is_urgent DESC, notice_id DESC
-             )
-             WHERE ROWNUM &lt;= #{pageNum} * #{amount}
-         )
-        WHERE rnum &gt; (#{pageNum} - 1) * #{amount}
+        SELECT notice_id, title, views, DATE_FORMAT(created_at, '%Y-%m-%d') as created_at, is_urgent
+        FROM RECALL_NOTICE_DB
+        ORDER BY is_urgent DESC, notice_id DESC
+        LIMIT #{amount} OFFSET ${(pageNum - 1) * amount}
     </select>
 
     <select id="getTotalCount" resultType="int">
         SELECT count(*) FROM RECALL_NOTICE_DB
     </select>
 
-    <insert id="write" parameterType="com.boot.dto.NoticeDTO">
-        <selectKey keyProperty="notice_id" resultType="long" order="BEFORE">
-            SELECT RECALL_NOTICE_SEQ.NEXTVAL FROM DUAL
-        </selectKey>
-        INSERT INTO RECALL_NOTICE_DB (notice_id, title, content, is_urgent) VALUES (#{notice_id}, #{title}, #{content}, NVL(#{is_urgent, jdbcType=CHAR}, 'N'))
+    <insert id="write" parameterType="com.boot.dto.NoticeDTO" useGeneratedKeys="true" keyProperty="notice_id">
+        INSERT INTO RECALL_NOTICE_DB (title, content, is_urgent)
+        VALUES (#{title}, #{content}, IFNULL(#{is_urgent, jdbcType=CHAR}, 'N'))
     </insert>
 
     <select id="getNotice" parameterType="long" resultMap="noticeResultMap">
-        SELECT notice_id, title, content, views, TO_CHAR(created_at, 'YYYY-MM-DD HH24:MI') as created_at, is_urgent
+        SELECT notice_id, title, content, views, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') as created_at, is_urgent
         FROM RECALL_NOTICE_DB
         WHERE notice_id = #{notice_id}
     </select>
@@ -55,7 +46,7 @@
         SET title = #{title},
             content = #{content},
             is_urgent = #{is_urgent},
-            updated_at = SYSDATE
+            updated_at = NOW()
         WHERE notice_id = #{notice_id}
     </update>
 
