@@ -6,20 +6,18 @@
 <mapper namespace="com.boot.dao.BoardDAO">
 
 
-    <insert id="write" parameterType="hashmap">
+    <insert id="write" parameterType="hashmap" useGeneratedKeys="true" keyProperty="boardNo">
         INSERT INTO RECALL_BOARD (
-        BOARD_NO,
         BOARD_TITLE,
         BOARD_CONTENT,
         BOARD_NAME,
         BOARD_DATE,
         HIT
         ) VALUES (
-        RECALL_BOARD_SEQ.NEXTVAL,
         #{boardTitle},
         #{boardContent},
         #{boardName},
-        SYSDATE,
+        NOW(),
         0
         )
     </insert>
@@ -41,18 +39,11 @@
 
     <select id="listWithPaging" resultMap="boardResultMap">
         SELECT BOARD_NO, BOARD_TITLE, BOARD_NAME, BOARD_DATE, HIT
-        FROM (
-             SELECT ROWNUM AS rnum, BOARD_NO, BOARD_TITLE, BOARD_NAME, BOARD_DATE, HIT
-             FROM (
-                  SELECT BOARD_NO, BOARD_TITLE, BOARD_NAME, BOARD_DATE, HIT
-                  FROM RECALL_BOARD
-                  ORDER BY BOARD_NO DESC
-              )
-             WHERE ROWNUM &lt;= #{pageNum} * #{amount}
-         )
-        WHERE rnum &gt; (#{pageNum} - 1) * #{amount}
+        FROM RECALL_BOARD
+        ORDER BY BOARD_NO DESC
+        LIMIT #{amount} OFFSET ${(pageNum - 1) * amount}
     </select>
-
+    
     <select id="getTotalCount" parameterType="com.boot.dto.Criteria" resultType="int">
         SELECT COUNT(*) FROM RECALL_BOARD
         <where>
