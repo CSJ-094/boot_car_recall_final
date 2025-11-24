@@ -1,0 +1,175 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 대시보드</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+        .chart-container {
+            margin-top: 40px;
+        }
+        .table-container {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+<%@ include file="../fragment/adminheader.jsp" %>
+<div class="container admin-container">
+    <div class="admin-container">
+
+        <div class="chart-container text-center">
+            <h4>최근 7일간 결함 신고 건수</h4>
+            <canvas id="dailyReportChart"></canvas>
+        </div>
+
+        <div class="table-container">
+            <h4>최근 7일간 신고 목록</h4>
+            <table class="table table-hover text-left">
+                <thead class="thead-light text-center">
+                <tr>
+                    <th>#</th>
+                    <th>신고인</th>
+                    <th>차량 모델</th>
+                    <th>차대번호(VIN)</th>
+                    <th>접수일</th>
+                </tr>
+                </thead>
+                <tbody>
+                <c:choose>
+                    <c:when test="${not empty recentReports}">
+                        <c:forEach var="report" items="${recentReports}">
+                            <tr onclick="location.href='${pageContext.request.contextPath}/admin/report_detail/${report.id}'">
+                                <td><c:out value="${report.id}"/></td>
+                                <td><c:out value="${report.reporterName}"/></td>
+                                <td><c:out value="${report.carModel}"/></td>
+                                <td><c:out value="${report.vin}"/></td>
+                                <td>
+                                    <%-- reportDate가 Date 객체일 경우와 String일 경우 모두 처리 --%>
+                                    <c:set var="dateStr" value="${report.reportDate}"/>
+                                    <c:out value="${fn:substring(dateStr, 0, 10)}"/>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <tr>
+                            <td colspan="5" class="text-center">최근 7일간 접수된 결함 신고가 없습니다.</td>
+                        </tr>
+                    </c:otherwise>
+                </c:choose>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 서버로부터 받은 일별 통계 데이터
+        let dailyStatsData = [];
+        <c:if test="${not empty dailyStats}">
+            dailyStatsData = [
+                <c:forEach var="stat" items="${dailyStats}" varStatus="status">
+                { report_day: "${stat.report_day}", count: ${stat.count} }<c:if test="${not status.last}">,</c:if>
+                </c:forEach>
+            ];
+        </c:if>
+        console.log("서버에서 받은 원본 데이터 (dailyStatsData):", dailyStatsData);
+
+        // 1. 최근 7일 날짜 라벨 생성 (YYYY-MM-DD 형식)
+        const labels = [];
+        const labelStrings = []; // 데이터 매칭을 위한 YYYY-MM-DD 문자열 배열
+        const today = new Date();
+
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(today.getDate() - i);
+            const targetDate = d;
+
+            labels.push(targetDate); // 차트 라이브러리에 전달할 Date 객체
+            // YYYY-MM-DD 형식으로 변환 (padStart 호환성 문제 해결)
+            labelStrings.push(targetDate.getFullYear() + '-' + ('0' + (targetDate.getMonth() + 1)).slice(-2) + '-' + ('0' + targetDate.getDate()).slice(-2));
+        }
+        console.log("생성된 7일 날짜 라벨 (labelStrings):", labelStrings);
+
+        // 2. 서버 데이터를 날짜를 키로 하는 Map으로 변환합니다.
+        const statsMap = new Map(dailyStatsData.map(item => [item.report_day, item.count]));
+        console.log("날짜별로 가공된 데이터 (statsMap):", statsMap);
+
+        // 3. 차트에 사용할 최종 데이터 배열을 {x: 날짜, y: 값} 형태로 생성합니다.
+        const chartData = labels.map((date, index) => {
+            const dateString = labelStrings[index];
+            return {
+                x: date,
+                y: statsMap.get(dateString) || 0
+            };
+        });
+        console.log("차트에 사용될 최종 데이터 배열 (chartData):", chartData);
+
+        // 차트의 y축 최대값을 데이터에 맞춰 동적으로 설정
+        const suggestedMax = chartData.length > 0 ? Math.max(...chartData.map(d => d.y)) + 2 : 10;
+
+        const ctx = document.getElementById('dailyReportChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    label: '일일 신고 건수',
+                    data: chartData,
+                    barPercentage: 0.5, // 막대 너비 조절
+                    categoryPercentage: 0.7, // 카테고리 내 막대 너비 조절
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            tooltipFormat: 'yyyy-MM-dd',
+                            displayFormats: {
+                                day: 'MM-dd'
+                            }
+                        },
+                        ticks: {
+                            source: 'data' // 'auto' 대신 'data'로 설정하여 모든 데이터 포인트를 축에 표시
+                        },
+                        offset: true, // 막대를 날짜 라벨 중앙에 위치시킴
+                        grid: {
+                            display: false // X축 그리드 숨기기
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: suggestedMax,
+                        ticks: {
+                            stepSize: 1 // y축 눈금을 1단위로 설정
+                        },
+                        grid: {
+                            display: false // Y축 그리드 숨기기
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script> 
+<%@ include file="../fragment/footer.jsp" %>
+</body>
+</html>

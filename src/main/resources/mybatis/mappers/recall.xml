@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.dao.RecallDAO">
+
+    <insert id="insertRecall" parameterType="com.boot.dto.RecallDTO">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            SELECT RECALL_SEQ.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO RECALL (
+        ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END,
+        RECALL_DATE, RECALL_REASON
+        ) VALUES (
+        #{id},
+        #{maker}, #{modelName}, #{makeStart}, #{makeEnd},
+        #{recallDate}, #{recallReason}
+        )
+    </insert>
+
+    <insert id="insertRecallList" parameterType="java.util.List">
+        INSERT ALL
+        <foreach collection="list" item="recall">
+            INTO RECALL (ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON)
+            VALUES (RECALL_SEQ.NEXTVAL, #{recall.maker}, #{recall.modelName}, #{recall.makeStart}, #{recall.makeEnd}, #{recall.recallDate}, #{recall.recallReason})
+        </foreach>
+        SELECT * FROM DUAL
+    </insert>
+
+    <resultMap id="recallResultMap" type="com.boot.dto.RecallDTO">
+        <result property="id" column="ID"/>
+        <result property="maker" column="MAKER"/>
+        <result property="modelName" column="MODEL_NAME"/>
+        <result property="makeStart" column="MAKE_START"/>
+        <result property="makeEnd" column="MAKE_END"/>
+        <result property="recallDate" column="RECALL_DATE"/>
+        <result property="recallReason" column="RECALL_REASON"/>
+    </resultMap>
+
+
+    <select id="selectAll" parameterType="com.boot.dto.Criteria" resultMap="recallResultMap">
+        SELECT *
+        FROM (
+            SELECT
+                ROWNUM AS rn,
+                ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+            FROM (
+                SELECT
+                    ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+                FROM RECALL
+                <where>
+                    <if test="keyword != null and keyword != ''">
+                        UPPER(MAKER) LIKE '%' || UPPER(#{keyword}) || '%'
+                        OR UPPER(MODEL_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
+                    </if>
+                </where>
+                ORDER BY ID DESC
+            )
+            WHERE ROWNUM &lt;= #{pageNum} * #{amount}
+        )
+        WHERE rn > (#{pageNum} - 1) * #{amount}
+    </select>
+
+    <select id="count" parameterType="com.boot.dto.Criteria" resultType="int">
+        SELECT COUNT(*) FROM RECALL
+        <where>
+            <if test="keyword != null and keyword != ''">
+                UPPER(MAKER) LIKE '%' || UPPER(#{keyword}) || '%'
+                OR UPPER(MODEL_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
+            </if>
+        </where>
+    </select>
+
+    <select id="searchByModelName" parameterType="string" resultMap="recallResultMap">
+        SELECT
+        ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        FROM RECALL
+        WHERE UPPER(MODEL_NAME) LIKE '%' || UPPER(#{modelName}) || '%'
+        ORDER BY RECALL_DATE DESC
+    </select>
+
+</mapper>

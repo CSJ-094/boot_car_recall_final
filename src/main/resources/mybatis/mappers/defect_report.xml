@@ -1,0 +1,104 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.dao.DefectReportDAO">
+
+    <insert id="insertReport" parameterType="com.boot.dto.DefectReportDTO">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            SELECT DEFECT_REPORT_SEQ.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO DEFECT_REPORT (
+            ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+        ) VALUES (
+            #{id},
+            #{reporterName},
+            #{contact},
+            #{carModel},
+            #{vin},
+            #{defectDetails},
+            SYSDATE,
+            #{password}
+        )
+    </insert>
+
+    <resultMap id="defectReportResultMap" type="com.boot.dto.DefectReportDTO">
+        <result property="id" column="ID"/>
+        <result property="reporterName" column="REPORTER_NAME"/>
+        <result property="contact" column="CONTACT"/>
+        <result property="carModel" column="CAR_MODEL"/>
+        <result property="vin" column="VIN"/>
+        <result property="defectDetails" column="DEFECT_DETAILS"/>
+        <result property="reportDate" column="REPORT_DATE"/>
+        <result property="password" column="PASSWORD"/>
+    </resultMap>
+
+    <!-- 페이징 및 검색 처리를 위한 selectAll 쿼리 수정 -->
+    <select id="selectAll" resultMap="defectReportResultMap">
+        SELECT *
+        FROM (
+            SELECT
+                ROWNUM AS rn,
+                ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+            FROM (
+                SELECT
+                    ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+                FROM DEFECT_REPORT
+                <where>
+                    <if test="keyword != null and keyword != ''">
+                        UPPER(REPORTER_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
+                        OR UPPER(CAR_MODEL) LIKE '%' || UPPER(#{keyword}) || '%'
+                        OR UPPER(VIN) LIKE '%' || UPPER(#{keyword}) || '%'
+                    </if>
+                </where>
+                ORDER BY ID DESC
+            )
+            WHERE ROWNUM &lt;= #{pageNum} * #{amount}
+        )
+        WHERE rn > (#{pageNum} - 1) * #{amount}
+    </select>
+
+
+    <!-- 검색 조건에 따른 전체 데이터 수 조회 쿼리 수정 -->
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM DEFECT_REPORT
+        <where>
+            <if test="keyword != null and keyword != ''">
+                UPPER(REPORTER_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
+                OR UPPER(CAR_MODEL) LIKE '%' || UPPER(#{keyword}) || '%'
+                OR UPPER(VIN) LIKE '%' || UPPER(#{keyword}) || '%'
+            </if>
+        </where>
+    </select>
+
+    <!-- ID로 단일 결함 신고 조회 -->
+    <select id="selectById" parameterType="long" resultMap="defectReportResultMap">
+        SELECT
+            ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+        FROM DEFECT_REPORT
+        WHERE ID = #{id}
+    </select>
+
+    <!-- 결함 신고 수정 -->
+    <update id="updateReport" parameterType="com.boot.dto.DefectReportDTO">
+        UPDATE DEFECT_REPORT
+        SET
+            REPORTER_NAME = #{reporterName},
+            CONTACT = #{contact},
+            CAR_MODEL = #{carModel},
+            VIN = #{vin},
+            DEFECT_DETAILS = #{defectDetails}
+        WHERE ID = #{id}
+    </update>
+
+    <!-- 결함 신고 삭제 -->
+    <delete id="deleteReport" parameterType="long">
+        DELETE FROM DEFECT_REPORT WHERE ID = #{id}
+    </delete>
+
+    <!-- 비밀번호 조회 -->
+    <select id="selectPasswordById" parameterType="long" resultType="string">
+        SELECT PASSWORD FROM DEFECT_REPORT WHERE ID = #{id}
+    </select>
+
+</mapper>

@@ -1,0 +1,173 @@
+package com.boot.service;
+
+import com.boot.dao.DefectImageDAO;
+import com.boot.dao.DefectReportDAO;
+import com.boot.dto.Criteria;
+import com.boot.dto.DefectImageDTO;
+import com.boot.dto.DefectReportDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class DefectReportServiceImpl implements DefectReportService {
+
+    private final DefectReportDAO defectReportDAO;
+    private final DefectImageDAO defectImageDAO;
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    // 단일 파일 저장 로직
+    private String saveFile(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String savedFileName = UUID.randomUUID().toString() + extension;
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        file.transferTo(uploadPath.resolve(savedFileName));
+        return savedFileName;
+    }
+
+    // 파일 삭제 로직
+    private void deleteFile(String fileName) {
+        if (fileName != null && !fileName.isEmpty()) {
+            Path filePath = Paths.get(uploadDir, fileName);
+            try {
+                Files.deleteIfExists(filePath);
+            } catch (IOException e) {
+                System.err.println("파일 삭제 실패: " + fileName + " - " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void saveReport(DefectReportDTO report, List<MultipartFile> files) {
+        // 1. 신고 정보 저장 (ID가 생성됨)
+        defectReportDAO.insertReport(report);
+
+        // 2. 이미지 파일 저장 및 DB에 이미지 정보 저장
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
+                try {
+                    String savedFileName = saveFile(file);
+                    if (savedFileName != null) {
+                        DefectImageDTO image = new DefectImageDTO();
+                        image.setReportId(report.getId()); // 새로 생성된 신고 ID 사용
+                        image.setFileName(savedFileName);
+                        defectImageDAO.insertImage(image);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException("이미지 파일 저장 중 오류 발생", e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<DefectReportDTO> getAllReports(Criteria cri) {
+        List<DefectReportDTO> reports = defectReportDAO.selectAll(cri);
+        // 각 신고에 이미지 목록을 추가
+        for (DefectReportDTO report : reports) {
+            report.setImages(defectImageDAO.selectImagesByReportId(report.getId()));
+        }
+        return reports;
+    }
+
+    @Override
+    public int getTotalCount(Criteria cri) {
+        return defectReportDAO.count(cri.getKeyword()); // 검색 조건에 따른 카운트
+    }
+
+    @Override
+    public DefectReportDTO getReportById(Long id) {
+        DefectReportDTO report = defectReportDAO.selectById(id);
+        if (report != null) {
+            report.setImages(defectImageDAO.selectImagesByReportId(id));
+        }
+        return report;
+    }
+
+    @Override
+    @Transactional
+    public void updateReport(DefectReportDTO report, List<MultipartFile> newFiles, List<String> existingFileNames) {
+        // 1. 신고 정보 업데이트
+        defectReportDAO.updateReport(report);
+
+        // 2. 기존 이미지 처리 (삭제된 이미지 파일 및 DB 레코드 제거)
+        // 현재 DB에 저장된 이미지 파일 목록을 가져옵니다.
+        List<DefectImageDTO> currentImagesInDb = defectImageDAO.selectImagesByReportId(report.getId());
+        List<String> currentFileNamesInDb = new ArrayList<>();
+        if (currentImagesInDb != null) {
+            for (DefectImageDTO img : currentImagesInDb) {
+                currentFileNamesInDb.add(img.getFileName());
+            }
+        }
+
+        // existingFileNames (JSP에서 넘어온 기존 이미지 목록)에 없는 파일은 삭제
+        for (String dbFileName : currentFileNamesInDb) {
+            if (existingFileNames == null || !existingFileNames.contains(dbFileName)) {
+                deleteFile(dbFileName); // 실제 파일 삭제
+                defectImageDAO.deleteImageByFileName(report.getId(), dbFileName); // DB 레코드 삭제
+            }
+        }
+
+        // 3. 새로운 이미지 파일 저장 및 DB에 이미지 정보 저장
+        if (newFiles != null && !newFiles.isEmpty()) {
+            for (MultipartFile file : newFiles) {
+                try {
+                    String savedFileName = saveFile(file);
+                    if (savedFileName != null) {
+                        DefectImageDTO image = new DefectImageDTO();
+                        image.setReportId(report.getId());
+                        image.setFileName(savedFileName);
+                        defectImageDAO.insertImage(image);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException("새 이미지 파일 저장 중 오류 발생", e);
+                }
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteReport(Long id) {
+        // 1. 해당 신고에 연결된 모든 이미지 파일 삭제
+        List<DefectImageDTO> imagesToDelete = defectImageDAO.selectImagesByReportId(id);
+        if (imagesToDelete != null) {
+            for (DefectImageDTO image : imagesToDelete) {
+                deleteFile(image.getFileName());
+            }
+        }
+        // 2. DB에서 이미지 레코드 삭제 (DEFECT_REPORT 테이블의 FK에 ON DELETE CASCADE가 설정되어 있으므로,
+        // DEFECT_REPORT 레코드만 삭제하면 DEFECT_REPORT_IMAGES 레코드는 자동으로 삭제됩니다.)
+        // defectImageDAO.deleteImagesByReportId(id); // 이 라인은 필요 없을 수 있습니다.
+
+        // 3. DB에서 신고 레코드 삭제 (DEFECT_REPORT 테이블)
+        defectReportDAO.deleteReport(id);
+    }
+
+    @Override
+    public boolean checkPassword(Long id, String password) {
+        String storedPassword = defectReportDAO.selectPasswordById(id);
+        return storedPassword != null && storedPassword.equals(password);
+    }
+}
