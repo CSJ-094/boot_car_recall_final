@@ -5,6 +5,9 @@
 <!-- 공통 헤더 -->
 <jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
 
+<!-- 카카오 지도 SDK (반드시 kakao 객체 쓰기 전에 로드) -->
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=0f08a719a533ce4c77b85bb7a496e7b8&libraries=services"></script>
+
 <!-- 페이지 전용 CSS -->
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/center_map.css" />
 <link rel="stylesheet" href="/css/main.css" />
@@ -12,10 +15,6 @@
 <link rel="stylesheet" href="/css/footer.css" />
 
 <main class="content-body">
-    <jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
-        <jsp:param name="menu" value="center"/>
-    </jsp:include>
-
     <section class="content-area">
         <h2>주변 리콜센터 / 정비소 찾기</h2>
 
@@ -58,5 +57,5 @@
 <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
 
 <!-- 페이지 전용 JS -->
-<script src="${ctx}/resources/js/center_map.js"></script>
+<script src="/js/center_map.js"></script>
 

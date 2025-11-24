@@ -10,15 +10,20 @@ import java.util.List;
 @Mapper
 public interface RecallDAO {
 
-    // 1. 단일 리콜 정보 삽입
+    // 단일 리콜 정보 삽입
     void insertRecall(RecallDTO recallDTO);
+    
+    void insertRecallList(List<RecallDTO> list);
 
-    // 2. 전체 목록 조회 (페이징 및 검색 기능 포함)
+    // 전체 목록 조회 (페이징 및 검색 기능 포함)
     List<RecallDTO> selectAll(Criteria cri);
 
-    // 3. 전체 데이터 수 조회 (검색 기능 포함)
+    // 전체 데이터 수 조회 (검색 기능 포함)
     int count(Criteria cri);
 
-    // 4. 모델명으로 검색
+    // 모델명으로 검색
     List<RecallDTO> searchByModelName(@Param("modelName") String modelName);
+    
+    // 제조사 목록 조회 추가
+    List<String> selectDistinctMaker();
 }

@@ -75,6 +75,12 @@ public class RecallServiceImpl implements RecallService {
     public int countAllRecalls() {
         return recallDAO.count(new Criteria());
     }
+    
+    // 7. 제조사 목록 조회 (지도 페이지에서 사용)
+    @Override
+    public List<String> getMakerList() {
+        return recallDAO.selectDistinctMaker();
+    }
 
     // 리콜 알림을 확인하고 발송하는 내부 메서드
     private void checkAndSendRecallNotification(RecallDTO newRecall) {

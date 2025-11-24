@@ -144,6 +144,7 @@ function renderCenterList(data) {
     });
 }
 
+// 초기화
 document.addEventListener('DOMContentLoaded', function () {
     initMap();
 

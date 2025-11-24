@@ -25,4 +25,7 @@ public interface RecallService {
 
     // 6. 전체 리콜 데이터 수 조회 (Init 클래스에서 사용)
     int countAllRecalls();
+    
+    // 7. 제조사 목록 조회 (지도 페이지용)
+    List<String> getMakerList();
 }
