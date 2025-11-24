@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boot.dao.MemberDao">
+    <insert id="save" parameterType="com.boot.dto.MemberDto">
+        INSERT INTO member (username, password, email, email_verified)
+        VALUES (#{username}, #{password}, #{email}, #{emailVerified, typeHandler=com.boot.util.BooleanYNTypeHandler})
+    </insert>
+
+    <select id="findByUsername" parameterType="String" resultType="com.boot.dto.MemberDto">
+        SELECT username, password, email, email_verified as emailVerified
+        FROM member
+        WHERE username = #{username}
+    </select>
+
+    <select id="findByEmail" parameterType="String" resultType="com.boot.dto.MemberDto">
+        SELECT username, password, email, email_verified as emailVerified
+        FROM member
+        WHERE email = #{email}
+    </select>
+
+    <update id="updateEmailVerified">
+        UPDATE member
+        SET email_verified = #{emailVerified, typeHandler=com.boot.util.BooleanYNTypeHandler}
+        WHERE username = #{username}
+    </update>
+
+    <update id="updatePassword">
+        UPDATE member
+        SET password = #{password}
+        WHERE username = #{username}
+    </update>
+</mapper>

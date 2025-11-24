@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <link rel="stylesheet" href="/css/header.css" />
 
@@ -46,9 +47,17 @@
                     </ul>
                 </li>
 
-                <!-- 관리자 로그인페이지 이동 -->
+                <!-- 로그인/로그아웃 -->
                 <li class="menu-item has-sub">
-                    <a href="/admin/login" class="menu-link">관리자</a>
+                    <sec:authorize access="isAuthenticated()">
+                        <form action="/logout" method="post" style="display: inline;">
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                            <button type="submit" class="menu-link" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0;">로그아웃</button>
+                        </form>
+                    </sec:authorize>
+                    <sec:authorize access="isAnonymous()">
+                        <a href="/login" class="menu-link">로그인</a>
+                    </sec:authorize>
                 </li>
             </ul>
         </nav>

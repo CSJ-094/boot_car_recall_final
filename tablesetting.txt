@@ -39,3 +39,11 @@ CREATE TABLE VEHICLE (
          FOREIGN KEY (VEHICLE_VIN)
          REFERENCES VEHICLE (VIN)
  );
+
+-- 회원 테이블 MEMBER --
+CREATE TABLE member (
+    username VARCHAR2(255) NOT NULL PRIMARY KEY,
+    password VARCHAR2(255) NOT NULL,
+    email VARCHAR2(255) UNIQUE NOT NULL,
+    email_verified CHAR(1) DEFAULT 'N' NOT NULL
+);
