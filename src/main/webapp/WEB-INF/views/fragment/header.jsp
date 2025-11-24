@@ -52,7 +52,7 @@
                     <sec:authorize access="isAuthenticated()">
                         <form action="/logout" method="post" style="display: inline;">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                            <button type="submit" class="menu-link" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0;">로그아웃</button>
+                            <button type="submit" class="menu-link" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0;">로그아웃</button>
                         </form>
                     </sec:authorize>
                     <sec:authorize access="isAnonymous()">

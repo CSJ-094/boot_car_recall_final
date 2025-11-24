@@ -67,6 +67,7 @@
     </div>
 
     <form action="${pageContext.request.contextPath}/admin/complain/answer" method="post" class="mt-4">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <input type="hidden" name="report_id" value="<c:out value='${complain.report_id}'/>">
         <div class="form-group">
             <label for="answerTextarea">답변 등록 및 수정</label>

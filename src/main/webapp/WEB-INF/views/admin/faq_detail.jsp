@@ -41,6 +41,7 @@
 </div>
 
 <form id="deleteForm" action="${pageContext.request.contextPath}/admin/faq/delete" method="post" style="display: none;">
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     <input type="hidden" name="faq_id" value="${faq.faq_id}">
     <input type="hidden" name="pageNum" value="${cri.pageNum}">
     <input type="hidden" name="amount" value="${cri.amount}">

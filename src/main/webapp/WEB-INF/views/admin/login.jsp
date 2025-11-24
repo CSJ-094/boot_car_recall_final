@@ -52,6 +52,7 @@
                 <div class="alert alert-danger">${error}</div>
             </c:if>
             <form action="${pageContext.request.contextPath}/admin/login" method="post">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="form-group">
                     <label for="admin_id">Admin ID:</label>
                     <input type="text" class="form-control" id="admin_id" name="admin_id" required>

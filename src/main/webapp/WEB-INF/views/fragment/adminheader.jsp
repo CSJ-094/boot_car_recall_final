@@ -43,7 +43,10 @@
                 <!-- 로그아웃 -->
                 <c:if test="${not empty sessionScope.admin}">
                     <li class="menu-item">
-                        <a href="/admin/logout" class="menu-link logout-link">로그아웃</a>
+                        <form action="/admin/logout" method="post" style="display: inline;">
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                            <button type="submit" class="menu-link" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0;">로그아웃</button>
+                        </form>
                     </li>
                 </c:if>
             </ul>
