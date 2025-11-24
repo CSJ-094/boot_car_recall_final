@@ -5,37 +5,71 @@ let myMarker;
 let markers = [];
 let listItems = [];
 
+let lastKeyword = null;   // 마지막 검색 키워드
+let idleSearchTimeout = null; // 지도 이동 후 디바운스용
+
+// =============================
+// 1. 지도 초기화
+// =============================
 function initMap() {
     const container = document.getElementById('map');
     const options = {
-        center: new kakao.maps.LatLng(37.5665, 126.9780),
+        center: new kakao.maps.LatLng(35.1795543, 129.0756416), // 부산시청 좌표
         level: 5
     };
+
     map = new kakao.maps.Map(container, options);
     places = new kakao.maps.services.Places();
-    infowindow = new kakao.maps.InfoWindow({zIndex: 1});
+    infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
+
+    // 지도 이동/줌 끝났을 때 자동 재검색
+    kakao.maps.event.addListener(map, 'idle', onMapIdle);
 }
 
-function getSearchKeyword(manufacturer) {
-    // CSV/DB의 제조사 값 기준으로 매핑해 주면 됨
-    switch (manufacturer) {
-        case 'HYUNDAI':
-        case '현대':
-            return '현대자동차 서비스센터 블루핸즈';
-        case 'KIA':
-        case '기아':
-            return '기아오토큐 서비스센터';
-        case 'RENAULT':
-        case '르노':
-            return '르노코리아 서비스센터';
-        case 'SSANGYONG':
-        case '쌍용':
-            return '쌍용자동차 서비스센터';
+// =============================
+// 2. 카테고리 → 검색 키워드 매핑
+// =============================
+function getKeywordByCategory(code) {
+    switch (code) {
+        case 'CAR':
+            return '자동차 정비소';
+        case 'BIKE':
+            return '오토바이 정비소';
+        case 'TRUCK':
+            return '트럭 정비소';
+        case 'EV':
+            return '전기차 정비소';   // 필요하면 '전기차 충전소' 로 바꿔도 됨
+        case 'ALL':
         default:
             return '자동차 정비소';
     }
 }
 
+// =============================
+// 3. 반경 ↔ 지도 레벨 매핑
+//    (대략적인 값이라 이 정도만 맞으면 충분)
+// =============================
+function getLevelFromRadius(radius) {
+    if (radius <= 3000) return 5;
+    if (radius <= 5000) return 6;
+    if (radius <= 10000) return 7;
+    return 8;
+}
+
+function getRadiusFromLevel(level) {
+    // 지도 줌을 줄였을 때, 자동 검색 반경을 넓혀 주는 용도
+    switch (level) {
+        case 5: return 3000;
+        case 6: return 5000;
+        case 7: return 10000;
+        case 8: return 15000;
+        default: return 20000;
+    }
+}
+
+// =============================
+// 4. 마커 / 리스트 정리
+// =============================
 function clearMarkers() {
     markers.forEach(m => m.setMap(null));
     markers = [];
@@ -45,36 +79,112 @@ function clearListActive() {
     listItems.forEach(el => el.classList.remove('active'));
 }
 
-function searchNearbyCenters(lat, lng) {
-    const manufacturer = document.getElementById('manufacturerSelect').value;
-    const radius = parseInt(document.getElementById('radiusSelect').value, 10);
-    const keyword = getSearchKeyword(manufacturer);
+// =============================
+// 5. 실제 검색 실행 (지도 중심 + 반경 + 키워드)
+// =============================
+function runKeywordSearch(centerLatLng, radius) {
+    if (!lastKeyword) return;
 
-    const center = new kakao.maps.LatLng(lat, lng);
-    map.setCenter(center);
-
-    if (myMarker) myMarker.setMap(null);
-    myMarker = new kakao.maps.Marker({ map: map, position: center });
+    const listEl = document.getElementById('centerList');
+    listEl.innerHTML = '검색 중입니다...';
 
     clearMarkers();
 
     const searchOptions = {
-        location: center,
+        location: centerLatLng,
         radius: radius
     };
 
-    places.keywordSearch(keyword, function(data, status, pagination) {
+    places.keywordSearch(lastKeyword, function (data, status) {
         if (status === kakao.maps.services.Status.OK) {
             renderCenterList(data);
             data.forEach((place, idx) => addMarker(place, idx));
         } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
-            document.getElementById('centerList').innerHTML = '주변에 검색되는 센터가 없습니다.';
+            listEl.innerHTML = '주변에 검색되는 센터가 없습니다.';
         } else {
-            document.getElementById('centerList').innerHTML = '검색 중 오류가 발생했습니다.';
+            listEl.innerHTML = '검색 중 오류가 발생했습니다.';
         }
     }, searchOptions);
 }
 
+
+// 6. 내 위치 기준 검색
+function searchByMyLocation() {
+    const category = document.getElementById('categorySelect').value;
+    const radius = parseInt(document.getElementById('radiusSelect').value, 10);
+
+	// 카테고리 기준 키워드 저장
+    lastKeyword = getKeywordByCategory(category);
+
+    if (!navigator.geolocation) {
+        alert('이 브라우저에서는 위치 정보를 지원하지 않습니다.');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(function (pos) {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const center = new kakao.maps.LatLng(lat, lng);
+
+        // 내 위치 마커
+        if (myMarker) myMarker.setMap(null);
+        myMarker = new kakao.maps.Marker({
+            map: map,
+            position: center
+        });
+
+        // 선택한 반경에 맞춰 지도 축소/확대
+        const level = getLevelFromRadius(radius);
+        map.setLevel(level);
+        map.setCenter(center);
+
+        runKeywordSearch(center, radius);
+    }, function () {
+        alert('위치 정보를 가져올 수 없습니다. 브라우저 권한을 확인해 주세요.');
+    });
+}
+
+
+// =============================
+// 7. 현재 지도 중심 기준으로 검색 (버튼 없이도 사용)
+// =============================
+function searchByCurrentCenterWithSelectedRadius() {
+    const category = document.getElementById('categorySelect').value;
+    const radius = parseInt(document.getElementById('radiusSelect').value, 10);
+
+    // 항상 현재 카테고리로 lastKeyword 갱신
+    lastKeyword = getKeywordByCategory(category);
+
+    const center = map.getCenter();
+    const level = getLevelFromRadius(radius);
+
+    map.setLevel(level);
+    map.setCenter(center);
+
+    runKeywordSearch(center, radius);
+}
+
+// =============================
+// 8. 지도 이동/축소 후 자동 재검색
+//    - lastKeyword만 있으면 "현재 화면 중심" 기준 재검색
+// =============================
+function onMapIdle() {
+    if (!lastKeyword) return; // 아직 검색 한 번도 안 했으면 무시
+
+    if (idleSearchTimeout) clearTimeout(idleSearchTimeout);
+
+    idleSearchTimeout = setTimeout(function () {
+        const center = map.getCenter();
+        const level = map.getLevel();
+        const radius = getRadiusFromLevel(level);
+
+        runKeywordSearch(center, radius);
+    }, 400); // 드래그 끝난 뒤 0.4초 대기 후 검색 (디바운스)
+}
+
+// =============================
+// 9. 마커 추가 (카카오맵 길찾기 목적지 세팅 포함)
+// =============================
 function addMarker(place, index) {
     const position = new kakao.maps.LatLng(place.y, place.x);
     const marker = new kakao.maps.Marker({
@@ -83,27 +193,52 @@ function addMarker(place, index) {
     });
 
     kakao.maps.event.addListener(marker, 'click', function () {
-        const content =
-            '<div style="padding:8px 12px;font-size:13px;">' +
-            '<strong>' + place.place_name + '</strong><br>' +
-            (place.road_address_name ? place.road_address_name + '<br>' : place.address_name + '<br>') +
-            (place.phone ? 'TEL: ' + place.phone + '<br>' : '') +
-            '<a href="https://map.kakao.com/link/to/' + place.id + '" target="_blank">카카오맵 길찾기</a>' +
-            '</div>';
-        infowindow.setContent(content);
-        infowindow.open(map, marker);
-
-        clearListActive();
-        const listItem = listItems[index];
-        if (listItem) {
-            listItem.classList.add('active');
-            listItem.scrollIntoView({behavior: 'smooth', block: 'center'});
-        }
+        openInfoWindow(place, marker, index);
     });
 
     markers.push(marker);
 }
 
+// 말풍선 내용 생성 + 리스트 활성화
+function openInfoWindow(place, marker, index) {
+    const addr = place.road_address_name || place.address_name || '';
+    const phone = place.phone || '';
+
+    // 현재 클릭한 장소를 목적지로 넣기
+    const link =
+        'https://map.kakao.com/link/to/' +
+        encodeURIComponent(place.place_name) + ',' +
+        place.y + ',' + place.x;
+
+    const content =
+        '<div style="padding:8px 12px;font-size:13px;line-height:1.4;max-width:220px;">' +
+        '<div style="font-weight:600;margin-bottom:4px;">' + place.place_name + '</div>' +
+        (addr ? '<div style="color:#555;margin-bottom:3px;">' + addr + '</div>' : '') +
+        (phone ? '<div style="color:#666;margin-bottom:6px;">TEL: ' + phone + '</div>' : '') +
+        '<a href="' + link + '" target="_blank" ' +
+        'style="display:inline-block;padding:4px 8px;border-radius:4px;' +
+        'border:1px solid #2563eb;font-size:12px;text-decoration:none;">' +
+        '카카오맵 길찾기</a>' +
+        '</div>';
+
+    infowindow.setContent(content);
+    if (marker) {
+        infowindow.open(map, marker);
+    } else {
+        infowindow.open(map);
+    }
+
+    clearListActive();
+    const listItem = listItems[index];
+    if (listItem) {
+        listItem.classList.add('active');
+        listItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+// =============================
+// 10. 리스트 렌더링
+// =============================
 function renderCenterList(data) {
     const listEl = document.getElementById('centerList');
     listEl.innerHTML = '';
@@ -127,16 +262,14 @@ function renderCenterList(data) {
             map.setCenter(pos);
             map.setLevel(4);
 
-            const content =
-                '<div style="padding:8px 12px;font-size:13px;">' +
-                '<strong>' + place.place_name + '</strong><br>' +
-                (place.road_address_name ? place.road_address_name + '<br>' : place.address_name + '<br>') +
-                (place.phone ? 'TEL: ' + place.phone + '<br>' : '') +
-                '<a href="https://map.kakao.com/link/to/' + place.id + '" target="_blank">카카오맵 길찾기</a>' +
-                '</div>';
-            infowindow.setContent(content);
-            infowindow.setPosition(pos);
-            infowindow.open(map);
+            const marker = markers[index];
+            if (marker) {
+                kakao.maps.event.trigger(marker, 'click');
+            } else {
+                // 혹시 마커가 없으면 직접 말풍선만 띄움
+                openInfoWindow(place, null, index);
+                infowindow.setPosition(pos);
+            }
         });
 
         listEl.appendChild(item);
@@ -144,25 +277,28 @@ function renderCenterList(data) {
     });
 }
 
-// 초기화
+// =============================
+// 11. 초기 바인딩
+// =============================
 document.addEventListener('DOMContentLoaded', function () {
     initMap();
 
-    // 리콜정보 상세에서 manufacturer 파라미터로 넘어온 경우
-    if (selectedManufacturerFromServer) {
-        const sel = document.getElementById('manufacturerSelect');
-        sel.value = selectedManufacturerFromServer;
-    }
+    // 내 위치 기준 검색 버튼
+    document.getElementById('btnMyLocation')
+        .addEventListener('click', searchByMyLocation);
 
-    document.getElementById('btnMyLocation').addEventListener('click', function () {
-        if (!navigator.geolocation) {
-            alert('이 브라우저에서는 위치 정보를 지원하지 않습니다.');
-            return;
-        }
-        navigator.geolocation.getCurrentPosition(function (pos) {
-            searchNearbyCenters(pos.coords.latitude, pos.coords.longitude);
-        }, function () {
-            alert('위치 정보를 가져올 수 없습니다. 브라우저 권한을 확인해 주세요.');
+    // 반경 변경 → 현재 화면 중심 기준으로 다시 검색
+    document.getElementById('radiusSelect')
+        .addEventListener('change', function () {
+            searchByCurrentCenterWithSelectedRadius();
         });
-    });
+
+    // 카테고리 변경 → 현재 화면 중심 기준으로 다시 검색
+    document.getElementById('categorySelect')
+        .addEventListener('change', function () {
+            searchByCurrentCenterWithSelectedRadius();
+        });
+
+    // 필요하면 페이지 진입 시 기본 카테고리로 자동 검색하고 싶을 때:
+    // searchByCurrentCenterWithSelectedRadius();
 });
