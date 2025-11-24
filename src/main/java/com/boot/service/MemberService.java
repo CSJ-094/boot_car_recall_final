@@ -1,32 +1,68 @@
 package com.boot.service;
 
+import com.boot.dao.AdminMapper;
 import com.boot.dao.MemberDao;
 import com.boot.dto.MemberDto;
+import com.boot.dto.UserDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberService implements UserDetailsService {
 
     private final MemberDao memberDao;
+    private final AdminMapper adminMapper; // AdminMapper 주입
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    // In-memory map to store verification tokens. In a real app, use a database with expiry.
     private final ConcurrentHashMap<String, String> emailVerificationTokens = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, String> passwordResetTokens = new ConcurrentHashMap<>();
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // 1. admin_account 테이블에서 관리자 계정 조회
+        UserDto adminUser = adminMapper.findByAdminId(username);
+        if (adminUser != null) {
+            adminUser.setRole("ROLE_ADMIN");
+            return adminUser;
+        }
+
+        // 2. member 테이블에서 일반 사용자 계정 조회
+        MemberDto member = memberDao.findByUsername(username);
+        if (member == null) {
+            throw new UsernameNotFoundException("User not found with username: " + username);
+        }
+
+        // boolean enabled = member.isEmailVerified(); // 이메일 인증 여부 확인 로직 비활성화
+        boolean enabled = true; // 테스트를 위해 항상 true로 설정
+
+        return new User(
+            member.getUsername(),
+            member.getPassword(),
+            enabled,
+            true,
+            true,
+            true,
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+    }
 
     @Transactional
     public void save(MemberDto memberDto) {
-        // Check if username or email already exists
         if (memberDao.findByUsername(memberDto.getUsername()) != null) {
             throw new IllegalArgumentException("Username already exists.");
         }
@@ -35,14 +71,13 @@ public class MemberService {
         }
 
         memberDto.setPassword(passwordEncoder.encode(memberDto.getPassword()));
-        memberDto.setEmailVerified(false); // Initially not verified
+        memberDto.setEmailVerified(false);
         memberDao.save(memberDto);
 
-        // Generate verification token and send email
         String verificationToken = UUID.randomUUID().toString();
-        emailVerificationTokens.put(verificationToken, memberDto.getUsername()); // Store token with username
+        emailVerificationTokens.put(verificationToken, memberDto.getUsername());
 
-        String verificationLink = "http://localhost:8484/verify-email?token=" + verificationToken; // Adjust port if needed
+        String verificationLink = "http://localhost:8484/verify-email?token=" + verificationToken;
         String emailContent = "안녕하세요, " + memberDto.getUsername() + "님!<br>"
                             + "회원가입을 완료하시려면 다음 링크를 클릭하여 이메일 인증을 해주세요:<br>"
                             + "<a href=\"" + verificationLink + "\">이메일 인증하기</a>";
@@ -54,7 +89,7 @@ public class MemberService {
         String username = emailVerificationTokens.get(token);
         if (username != null) {
             memberDao.updateEmailVerified(username, true);
-            emailVerificationTokens.remove(token); // Remove token after use
+            emailVerificationTokens.remove(token);
             return true;
         }
         return false;
@@ -64,8 +99,8 @@ public class MemberService {
         MemberDto member = memberDao.findByEmail(email);
         if (member != null) {
             String emailContent = "요청하신 아이디는 <b>" + member.getUsername() + "</b> 입니다.";
-            emailService.sendEmail(member.getEmail(), "자동차 리콜 통합센터 - 아이디 찾기", emailContent); // member.getEmail() 사용
-            return member.getUsername(); // Return username for confirmation message
+            emailService.sendEmail(member.getEmail(), "자동차 리콜 통합센터 - 아이디 찾기", emailContent);
+            return member.getUsername();
         }
         return null;
     }
@@ -75,7 +110,7 @@ public class MemberService {
         MemberDto member = memberDao.findByUsername(username);
         if (member != null && member.getEmail().equals(email)) {
             String resetToken = UUID.randomUUID().toString();
-            passwordResetTokens.put(resetToken, username); // Store token with username
+            passwordResetTokens.put(resetToken, username);
 
             String resetLink = "http://localhost:8484/reset-password-form?token=" + resetToken;
             String emailContent = "안녕하세요, " + username + "님!<br>"
@@ -93,18 +128,16 @@ public class MemberService {
         String username = passwordResetTokens.get(token);
         if (username != null) {
             memberDao.updatePassword(username, passwordEncoder.encode(newPassword));
-            passwordResetTokens.remove(token); // Remove token after use
+            passwordResetTokens.remove(token);
             return true;
         }
         return false;
     }
 
-    // Add a method to check if a username already exists (for signup validation)
     public boolean isUsernameTaken(String username) {
         return memberDao.findByUsername(username) != null;
     }
 
-    // Add a method to check if an email already exists (for signup validation)
     public boolean isEmailTaken(String email) {
         return memberDao.findByEmail(email) != null;
     }

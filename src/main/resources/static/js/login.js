@@ -9,13 +9,12 @@ document.addEventListener('DOMContentLoaded', function () {
             userBtn.classList.add('active');
             adminBtn.classList.remove('active');
             loginTypeInput.value = 'user';
-            loginForm.action = '/login'; // 사용자 로그인 처리 URL
         } else {
             adminBtn.classList.add('active');
             userBtn.classList.remove('active');
             loginTypeInput.value = 'admin';
-            loginForm.action = '/admin/login'; // 관리자 로그인 처리 URL
         }
+        loginForm.action = '/login';
     }
 
     userBtn.addEventListener('click', () => switchRole('user'));

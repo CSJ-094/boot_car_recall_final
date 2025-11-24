@@ -177,15 +177,14 @@ public class DefectReportServiceImpl implements DefectReportService {
     public void updateReportStatus(Long id, String status) {
         DefectReportDTO report = defectReportDAO.selectById(id);
         if (report != null) {
-            report.setStatus(status); // DTO에 status 필드가 있다고 가정
-            defectReportDAO.updateReport(report); // 상태 업데이트
+            defectReportDAO.updateStatus(id, status); // 상태만 업데이트
 
             // 알림 발송
-            String username = report.getUsername(); // DefectReportDTO에 username 필드가 있다고 가정
+            String username = report.getUsername();
             if (username != null) {
                 String title = "결함 신고 처리 상태 변경 알림";
-                String message = String.format("회원님의 결함 신고 (ID: %d) 상태가 '%s' (으)로 변경되었습니다.", id, status);
-                String link = "/defect-report/detail?id=" + id; // 결함 신고 상세 페이지 링크
+                String message = String.format("회원님의 결함 신고 (ID: %d) 상태가 '%s'(으)로 변경되었습니다.", id, status);
+                String link = "/defect-report/detail?id=" + id;
 
                 notificationService.createAndSendNotification(
                     username,

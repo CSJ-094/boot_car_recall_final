@@ -14,6 +14,7 @@ public interface DefectReportDAO {
     int count(@Param("keyword") String keyword);
     DefectReportDTO selectById(Long id);
     void updateReport(DefectReportDTO report); // username과 status 필드도 업데이트에 포함
+    void updateStatus(@Param("id") Long id, @Param("status") String status);
     void deleteReport(Long id);
     String selectPasswordById(Long id);
 }

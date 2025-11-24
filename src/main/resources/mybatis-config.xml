@@ -8,6 +8,7 @@
     </settings>
 
     <mappers>
+        <!-- 기존 매퍼들 -->
         <mapper resource="mybatis/mappers/board.xml"/>
         <mapper resource="mybatis/mappers/recall.xml"/>
         <mapper resource="mybatis/mappers/page.xml"/>
@@ -16,12 +17,13 @@
         <mapper resource="mybatis/mappers/faq.xml"/>
         <mapper resource="mybatis/mappers/notice.xml"/>
         <mapper resource="mybatis/mappers/stats.xml"/>
-        <!-- 결함 신고 및 이미지 관련 매퍼 -->
         <mapper resource="mybatis/mappers/defect_report.xml"/>
         <mapper resource="mybatis/mappers/defect_image.xml"/>
         <mapper resource="mybatis/mappers/upload.xml"/>
-        <mapper resource="mybatis/mappers/memberMapper.xml"/>
         <mapper resource="mybatis/mappers/userVehicleMapper.xml"/>
         <mapper resource="mybatis/mappers/notificationMapper.xml"/>
+        <!-- AdminMapper.xml 및 MemberMapper.xml 경로 수정 -->
+        <mapper resource="mybatis/mappers/AdminMapper.xml"/>
+        <mapper resource="mybatis/mappers/MemberMapper.xml"/>
     </mappers>
 </configuration>

@@ -18,47 +18,76 @@
 
         <nav id="global-nav" class="nav" aria-label="주 메뉴">
             <ul class="menu">
-                <!-- 결함신고 -->
-                <li class="menu-item has-sub">
-                    <a href="/report/write" class="menu-link">결함신고</a>
-                    <ul class="submenu">
-                        <li><a href="/report/write">신고</a></li>
-                        <li><a href="/report/history">신고내역</a></li>
-                    </ul>
-                </li>
+                <sec:authorize access="hasRole('ADMIN')">
+                    <!-- 관리자 메뉴 -->
+                    <li class="menu-item has-sub">
+                        <a href="/admin/main" class="menu-link">관리자 홈</a>
+                        <ul class="submenu">
+                            <li><a href="/admin/defect_reports">결함 신고 관리</a></li>
+                            <li><a href="/admin/notice/list">공지사항 관리</a></li>
+                            <li><a href="/admin/faq/list">FAQ 관리</a></li>
+                            <li><a href="/admin/press/list">보도자료 관리</a></li>
+                            <li><a href="/admin/complain/list">고객 문의 관리</a></li>
+                        </ul>
+                    </li>
+                </sec:authorize>
 
-                <!-- 리콜정보 -->
-                <li class="menu-item has-sub">
-                    <a href="/recall-status" class="menu-link">리콜정보</a>
-                    <ul class="submenu">
-                        <li><a href="/recall-status">리콜현황</a></li>
-                        <li><a href="/board/list">리콜 보도자료</a></li>
-                    </ul>
-                </li>
+                <sec:authorize access="!hasRole('ADMIN')">
+                    <!-- 일반 사용자 메뉴 -->
+                    <!-- 결함신고 -->
+                    <li class="menu-item has-sub">
+                        <a href="/report/write" class="menu-link">결함신고</a>
+                        <ul class="submenu">
+                            <li><a href="/report/write">신고</a></li>
+                            <li><a href="/report/history">신고내역</a></li>
+                        </ul>
+                    </li>
 
-                <!-- 리콜센터 (공지사항 리스트를 메인으로) -->
-                <li class="menu-item has-sub">
-                    <a href="/notice/list" class="menu-link">리콜센터</a>
-                    <ul class="submenu">
-                        <li><a href="/notice/list">공지사항</a></li>
-                        <li><a href="/faq/list">FAQ</a></li>
-                        <li><a href="/centers/about">리콜센터 소개</a></li>
-                        <li><a href="/centers/map">주변 리콜센터 찾기</a></li>
-                    </ul>
-                </li>
+                    <!-- 리콜정보 -->
+                    <li class="menu-item has-sub">
+                        <a href="/recall-status" class="menu-link">리콜정보</a>
+                        <ul class="submenu">
+                            <li><a href="/recall-status">리콜현황</a></li>
+                            <li><a href="/board/list">리콜 보도자료</a></li>
+                        </ul>
+                    </li>
 
-                <!-- 로그인/로그아웃 -->
-                <li class="menu-item has-sub">
+                    <!-- 리콜센터 (공지사항 리스트를 메인으로) -->
+                    <li class="menu-item has-sub">
+                        <a href="/notice/list" class="menu-link">리콜센터</a>
+                        <ul class="submenu">
+                            <li><a href="/notice/list">공지사항</a></li>
+                            <li><a href="/faq/list">FAQ</a></li>
+                            <li><a href="/centers/about">리콜센터 소개</a></li>
+                            <li><a href="/centers/map">주변 리콜센터 찾기</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- 내 차량 관리 (로그인 시에만 표시) -->
                     <sec:authorize access="isAuthenticated()">
+                        <li class="menu-item">
+                            <a href="/my-vehicles" class="menu-link">내 차량 관리</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="/my-notifications" class="menu-link">내 알림</a>
+                        </li>
+                    </sec:authorize>
+                </sec:authorize>
+
+                <!-- 로그인/로그아웃 (관리자/사용자 공통) -->
+                <sec:authorize access="isAuthenticated()">
+                    <li class="menu-item">
                         <form action="/logout" method="post" style="display: inline;">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                             <button type="submit" class="menu-link" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0;">로그아웃</button>
                         </form>
-                    </sec:authorize>
-                    <sec:authorize access="isAnonymous()">
+                    </li>
+                </sec:authorize>
+                <sec:authorize access="isAnonymous()">
+                    <li class="menu-item">
                         <a href="/login" class="menu-link">로그인</a>
-                    </sec:authorize>
-                </li>
+                    </li>
+                </sec:authorize>
             </ul>
         </nav>
     </div>

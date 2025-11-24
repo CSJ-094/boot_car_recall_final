@@ -1,8 +1,13 @@
 package com.boot.controller;
 
 import com.boot.dto.MemberDto;
+import com.boot.dto.NotificationDto;
+import com.boot.dto.UserVehicleDto;
 import com.boot.service.MemberService;
+import com.boot.service.NotificationService;
+import com.boot.service.UserVehicleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,16 +15,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
+import java.util.List;
+
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
+    private final UserVehicleService userVehicleService;
+    private final NotificationService notificationService; // NotificationService 주입
 
     @GetMapping("/login")
     public String login() {
         return "login";
     }
+
+    // @PostMapping("/login") 메서드는 Spring Security가 처리하므로 제거합니다.
+    // 이전의 커스텀 로그인 로직은 MemberService의 loadUserByUsername으로 이동했습니다.
 
     @GetMapping("/signup")
     public String signup() {
@@ -86,8 +100,6 @@ public class MemberController {
 
     @GetMapping("/reset-password-form")
     public String resetPasswordForm(@RequestParam String token, Model model, RedirectAttributes redirectAttributes) {
-        // 토큰 유효성 검사는 MemberService에서 처리
-        // 여기서는 단순히 폼을 보여줌
         model.addAttribute("token", token);
         return "resetPasswordForm";
     }
@@ -109,5 +121,72 @@ public class MemberController {
             model.addAttribute("message", message);
         }
         return "accountResult";
+    }
+
+    // 사용자 차량 관리 페이지
+    @GetMapping("/my-vehicles")
+    public String myVehicles(Principal principal, Model model) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        String username = principal.getName();
+        List<UserVehicleDto> userVehicles = userVehicleService.getUserVehicles(username);
+        model.addAttribute("userVehicles", userVehicles);
+        return "myVehicles";
+    }
+
+    // 사용자 차량 추가
+    @PostMapping("/my-vehicles/add")
+    public String addMyVehicle(Principal principal, UserVehicleDto userVehicleDto, RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        String username = principal.getName();
+        userVehicleDto.setUsername(username);
+        userVehicleService.addUserVehicle(userVehicleDto);
+        redirectAttributes.addFlashAttribute("message", "차량이 성공적으로 등록되었습니다.");
+        return "redirect:/my-vehicles";
+    }
+
+    // 사용자 차량 삭제
+    @PostMapping("/my-vehicles/delete")
+    public String deleteMyVehicle(Principal principal, @RequestParam Long id, RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        userVehicleService.removeUserVehicle(id);
+        redirectAttributes.addFlashAttribute("message", "차량이 성공적으로 삭제되었습니다.");
+        return "redirect:/my-vehicles";
+    }
+
+    // 사용자 알림 목록 페이지
+    @GetMapping("/my-notifications")
+    public String myNotifications(Principal principal, Model model) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        String username = principal.getName();
+        log.info("Fetching notifications for user: {}", username);
+        List<NotificationDto> notifications = notificationService.getNotificationsByUsername(username);
+        log.info("Found {} notifications for user: {}", notifications.size(), username);
+        model.addAttribute("notifications", notifications);
+        return "myNotifications"; // myNotifications.jsp 뷰 반환
+    }
+
+    // 알림 읽음 처리
+    @PostMapping("/my-notifications/mark-as-read")
+    public String markNotificationAsRead(Principal principal, @RequestParam Long id, RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        // 알림 소유권 확인 로직 추가 (선택 사항)
+        // NotificationDto notification = notificationService.getNotificationById(id);
+        // if (!notification.getUsername().equals(principal.getName())) {
+        //     redirectAttributes.addFlashAttribute("errorMessage", "권한이 없습니다.");
+        //     return "redirect:/my-notifications";
+        // }
+        notificationService.markNotificationAsRead(id);
+        redirectAttributes.addFlashAttribute("message", "알림을 읽음 처리했습니다.");
+        return "redirect:/my-notifications";
     }
 }

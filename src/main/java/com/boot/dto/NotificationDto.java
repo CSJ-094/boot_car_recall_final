@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -16,4 +17,11 @@ public class NotificationDto {
     private String link;
     private boolean isRead;
     private LocalDateTime createdAt;
+
+    public String getFormattedCreatedAt() {
+        if (createdAt == null) {
+            return "";
+        }
+        return createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    }
 }

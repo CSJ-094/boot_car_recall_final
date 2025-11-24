@@ -84,6 +84,12 @@
         WHERE ID = #{id}
     </update>
 
+    <update id="updateStatus">
+        UPDATE DEFECT_REPORT
+        SET STATUS = #{status}
+        WHERE ID = #{id}
+    </update>
+
     <!-- 결함 신고 삭제 -->
     <delete id="deleteReport" parameterType="long">
         DELETE FROM DEFECT_REPORT WHERE ID = #{id}

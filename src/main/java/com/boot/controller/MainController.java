@@ -26,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -120,8 +121,11 @@ public class MainController {
     // URL: /defect-report (POST)
     // -------------------------------------------------------------------
     @PostMapping("/defect-report")
-    public String defectReportSubmit(DefectReportDTO report, @RequestParam(value = "defectImages", required = false) List<MultipartFile> files, RedirectAttributes rttr) {
+    public String defectReportSubmit(DefectReportDTO report, @RequestParam(value = "defectImages", required = false) List<MultipartFile> files, RedirectAttributes rttr, Principal principal) {
         try {
+            if (principal != null) {
+                report.setUsername(principal.getName());
+            }
             defectReportService.saveReport(report, files);
             rttr.addFlashAttribute("message", "결함 신고가 성공적으로 접수되었습니다. 신고 내역에서 확인해 주세요.");
         } catch (Exception e) {
