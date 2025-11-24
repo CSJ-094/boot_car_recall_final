@@ -20,6 +20,7 @@
     <h3>공지사항 수정</h3>
     <hr>
     <form action="${pageContext.request.contextPath}/admin/notice/modify" method="post">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <input type="hidden" name="notice_id" value="<c:out value='${notice.notice_id}'/>">
         <input type="hidden" name="pageNum" value="<c:out value='${cri.pageNum}'/>">
         <input type="hidden" name="amount" value="<c:out value='${cri.amount}'/>">

@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DefectImageDTO {
-    private Long imageId;
+    private Long id; // imageId 대신 id로 변경
     private Long reportId;
     private String fileName;
 }

@@ -44,6 +44,7 @@
         </c:if>
         <c:if test="${not empty report}">
             <form action="/report/edit" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <input type="hidden" name="id" value="${report.id}">
                 <input type="hidden" name="password" value="${report.password}"> <!-- 비밀번호는 hidden으로 전달 -->
                 <div class="form-group">

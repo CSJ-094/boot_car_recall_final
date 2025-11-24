@@ -3,9 +3,10 @@ package com.boot.service;
 import com.boot.dao.RecallDAO;
 import com.boot.dto.Criteria;
 import com.boot.dto.RecallDTO;
+import com.boot.dto.UserVehicleDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // 트랜잭션 관리를 위해 추가
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,17 +15,19 @@ import java.util.List;
 public class RecallServiceImpl implements RecallService {
 
     private final RecallDAO recallDAO;
+    private final UserVehicleService userVehicleService; // UserVehicleService 주입
+    private final NotificationService notificationService; // NotificationService 주입
 
     // -------------------------------------------------------------------
     // 1. 데이터 로드/저장 기능 (MainController에서 JSON 로드 후 호출)
     // -------------------------------------------------------------------
     @Override
-    @Transactional // 대량의 데이터를 삽입하므로 트랜잭션을 적용합니다.
+    @Transactional
     public void saveRecallData(List<RecallDTO> recallList) {
-        // 이 메서드는 외부 리스트를 받아 저장하는 역할입니다.
-        // 각 리콜 항목을 개별적으로 삽입하도록 변경합니다.
         for (RecallDTO recallDTO : recallList) {
             recallDAO.insertRecall(recallDTO);
+            // 새로운 리콜 데이터 저장 후 알림 로직 추가
+            checkAndSendRecallNotification(recallDTO);
         }
     }
 
@@ -32,11 +35,12 @@ public class RecallServiceImpl implements RecallService {
     // 2. 리스트 배치 삽입 (Init.java의 컴파일 오류 해결 및 효율적인 삽입)
     // -------------------------------------------------------------------
     @Override
-    @Transactional // 트랜잭션을 명확히 적용합니다.
+    @Transactional
     public void insertRecallList(List<RecallDTO> recallList) {
-        // 각 리콜 항목을 개별적으로 삽입하도록 변경합니다.
         for (RecallDTO recallDTO : recallList) {
             recallDAO.insertRecall(recallDTO);
+            // 새로운 리콜 데이터 저장 후 알림 로직 추가
+            checkAndSendRecallNotification(recallDTO);
         }
     }
 
@@ -45,7 +49,6 @@ public class RecallServiceImpl implements RecallService {
     // -------------------------------------------------------------------
     @Override
     public List<RecallDTO> getAllRecalls(Criteria cri) {
-        // Criteria 객체를 DAO에 직접 전달
         return recallDAO.selectAll(cri);
     }
 
@@ -54,7 +57,6 @@ public class RecallServiceImpl implements RecallService {
     // -------------------------------------------------------------------
     @Override
     public int getRecallCount(Criteria cri) {
-        // Criteria 객체를 DAO에 직접 전달
         return recallDAO.count(cri);
     }
 
@@ -71,7 +73,35 @@ public class RecallServiceImpl implements RecallService {
     // -------------------------------------------------------------------
     @Override
     public int countAllRecalls() {
-        // 빈 Criteria 객체를 전달
         return recallDAO.count(new Criteria());
+    }
+
+    // 리콜 알림을 확인하고 발송하는 내부 메서드
+    private void checkAndSendRecallNotification(RecallDTO newRecall) {
+        List<UserVehicleDto> userVehicles = userVehicleService.getAllUserVehicles();
+        for (UserVehicleDto userVehicle : userVehicles) {
+            // 제조사와 모델명이 일치하는지 확인
+            if (userVehicle.getMaker().equalsIgnoreCase(newRecall.getMaker()) &&
+                userVehicle.getModelName().equalsIgnoreCase(newRecall.getModelName())) {
+
+                String title = "새로운 리콜 정보 알림: " + newRecall.getMaker() + " " + newRecall.getModelName();
+                String message = String.format(
+                    "등록하신 차량 '%s %s'에 대한 새로운 리콜 정보가 발표되었습니다.<br>" +
+                    "리콜 사유: %s<br>" +
+                    "리콜 날짜: %s",
+                    newRecall.getMaker(), newRecall.getModelName(),
+                    newRecall.getRecallReason(), newRecall.getRecallDate()
+                );
+                String link = "/recall-status"; // 리콜 현황 페이지 링크
+
+                notificationService.createAndSendNotification(
+                    userVehicle.getUsername(),
+                    "RECALL",
+                    title,
+                    message,
+                    link
+                );
+            }
+        }
     }
 }
