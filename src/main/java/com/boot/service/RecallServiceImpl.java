@@ -74,4 +74,12 @@ public class RecallServiceImpl implements RecallService {
         // 빈 Criteria 객체를 전달
         return recallDAO.count(new Criteria());
     }
+
+    // -------------------------------------------------------------------
+    // 7. 전체 목록 조회 (페이징 없이, CSV 다운로드용)
+    // -------------------------------------------------------------------
+    @Override
+    public List<RecallDTO> getAllRecallsWithoutPaging() {
+        return recallDAO.selectAllWithoutPaging();
+    }
 }

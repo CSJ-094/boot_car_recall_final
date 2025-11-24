@@ -71,6 +71,26 @@
         .col-maker { width: 12%; }
         .col-model { width: 18%; }
         .col-date { width: 12%; }
+        
+        .csv-download-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.95em;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .csv-download-btn:hover {
+            background-color: #218838;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 10px;
+        }
 
     </style>
 </head>
@@ -89,6 +109,10 @@
                 <input type="text" id="searchInput" name="keyword" placeholder="제조사 또는 차종으로 검색..." value="${pageMaker.cri.keyword}">
                 <button type="submit">검색</button>
             </form>
+        </div>
+        
+        <div class="button-container">
+            <a href="/recall/download/csv" class="csv-download-btn">📥 리콜 내역 CSV 다운로드</a>
         </div>
 
         <c:choose>

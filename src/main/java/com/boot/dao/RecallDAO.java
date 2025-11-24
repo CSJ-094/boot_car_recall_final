@@ -21,4 +21,7 @@ public interface RecallDAO {
 
     // 4. 모델명으로 검색
     List<RecallDTO> searchByModelName(@Param("modelName") String modelName);
+
+    // 5. 전체 목록 조회 (페이징 없이, CSV 다운로드용)
+    List<RecallDTO> selectAllWithoutPaging();
 }

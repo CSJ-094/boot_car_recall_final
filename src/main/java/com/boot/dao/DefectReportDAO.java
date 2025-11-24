@@ -11,6 +11,7 @@ import java.util.List;
 public interface DefectReportDAO {
     void insertReport(DefectReportDTO report);
     List<DefectReportDTO> selectAll(Criteria cri);
+    List<DefectReportDTO> selectAllWithoutPaging(); // CSV 다운로드를 위한 전체 목록 조회
     int count(@Param("keyword") String keyword);
     DefectReportDTO selectById(Long id);
     void updateReport(DefectReportDTO report);

@@ -25,4 +25,7 @@ public interface RecallService {
 
     // 6. 전체 리콜 데이터 수 조회 (Init 클래스에서 사용)
     int countAllRecalls();
+
+    // 7. 전체 목록 조회 (페이징 없이, CSV 다운로드용)
+    List<RecallDTO> getAllRecallsWithoutPaging();
 }

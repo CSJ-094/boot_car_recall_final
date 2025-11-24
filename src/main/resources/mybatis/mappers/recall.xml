@@ -80,4 +80,11 @@
         ORDER BY RECALL_DATE DESC
     </select>
 
+    <select id="selectAllWithoutPaging" resultMap="recallResultMap">
+        SELECT
+        ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        FROM RECALL
+        ORDER BY ID DESC
+    </select>
+
 </mapper>

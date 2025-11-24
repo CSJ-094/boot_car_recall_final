@@ -67,6 +67,25 @@
             font-size: 0.9em;
         }
         .detail-btn:hover { background-color: #1565c0; }
+        .csv-download-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.95em;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .csv-download-btn:hover {
+            background-color: #218838;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +97,10 @@
                 <input type="text" id="searchInput" name="keyword" placeholder="신고인, 차량 모델, VIN으로 검색..." value="${pageMaker.cri.keyword}">
                 <button type="submit">검색</button>
             </form>
+        </div>
+        
+        <div class="button-container">
+            <a href="/report/download/csv" class="csv-download-btn">📥 리콜 신청 내역 CSV 다운로드</a>
         </div>
 
         <table id="reportTable">
