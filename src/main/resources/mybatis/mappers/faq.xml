@@ -13,18 +13,10 @@
     </resultMap>
 
     <select id="listWithPaging" resultMap="faqResultMap">
-        SELECT faqNo, faqCategory, faqTitle, faqContent, TO_CHAR(faqDate, 'YYYY-MM-DD') as created_at
-        FROM (
-            SELECT faqNo, faqCategory, faqTitle, faqContent, faqDate, ROWNUM as rnum,
-                   TO_CHAR(faqDate, 'YYYY-MM-DD') as created_at
-            FROM (
-                SELECT faqNo, faqCategory, faqTitle, faqContent, faqDate
-                FROM tbl_faq
-                ORDER BY faqNo DESC
-            )
-            WHERE ROWNUM &lt;= #{pageNum} * #{amount}
-        )
-        WHERE rnum > (#{pageNum} - 1) * #{amount}
+        SELECT faqNo, faqCategory, faqTitle, faqContent, DATE_FORMAT(faqDate, '%Y-%m-%d') as created_at
+        FROM tbl_faq
+        ORDER BY faqNo DESC
+        LIMIT #{amount} OFFSET #{offset}
     </select>
 
     <select id="getTotalCount" resultType="int">
@@ -32,19 +24,16 @@
     </select>
 
     <select id="getFaq" resultMap="faqResultMap">
-        SELECT faqNo, faqCategory, faqTitle, faqContent, TO_CHAR(faqDate, 'YYYY-MM-DD HH24:MI') as created_at FROM tbl_faq WHERE faqNo = #{faq_id}
+        SELECT faqNo, faqCategory, faqTitle, faqContent, DATE_FORMAT(faqDate, '%Y-%m-%d %H:%i') as created_at FROM tbl_faq WHERE faqNo = #{faq_id}
     </select>
 
-    <insert id="write">
-        <selectKey keyProperty="faq_id" resultType="long" order="BEFORE">
-            SELECT faq_seq.NEXTVAL FROM DUAL
-        </selectKey>
-        INSERT INTO tbl_faq (faqNo, faqCategory, faqTitle, faqContent)
-        VALUES (#{faq_id}, #{category}, #{question}, #{answer})
+    <insert id="write" useGeneratedKeys="true" keyProperty="faq_id">
+        INSERT INTO tbl_faq (faqCategory, faqTitle, faqContent)
+        VALUES (#{category}, #{question}, #{answer})
     </insert>
 
     <update id="modify">
-        UPDATE tbl_faq SET faqCategory = #{category}, faqTitle = #{question}, faqContent = #{answer}, faqDate = SYSDATE WHERE faqNo = #{faq_id}
+        UPDATE tbl_faq SET faqCategory = #{category}, faqTitle = #{question}, faqContent = #{answer}, faqDate = CURRENT_TIMESTAMP WHERE faqNo = #{faq_id}
     </update>
 
     <delete id="delete">

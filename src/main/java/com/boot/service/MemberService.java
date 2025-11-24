@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,7 +64,7 @@ public class MemberService {
         MemberDto member = memberDao.findByEmail(email);
         if (member != null) {
             String emailContent = "요청하신 아이디는 <b>" + member.getUsername() + "</b> 입니다.";
-            emailService.sendEmail(email, "자동차 리콜 통합센터 - 아이디 찾기", emailContent);
+            emailService.sendEmail(member.getEmail(), "자동차 리콜 통합센터 - 아이디 찾기", emailContent); // member.getEmail() 사용
             return member.getUsername(); // Return username for confirmation message
         }
         return null;
@@ -106,5 +107,9 @@ public class MemberService {
     // Add a method to check if an email already exists (for signup validation)
     public boolean isEmailTaken(String email) {
         return memberDao.findByEmail(email) != null;
+    }
+
+    public Optional<MemberDto> getMemberByUsername(String username) {
+        return Optional.ofNullable(memberDao.findByUsername(username));
     }
 }

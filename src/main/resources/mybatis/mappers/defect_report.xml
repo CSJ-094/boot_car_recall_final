@@ -6,20 +6,23 @@
 
     <insert id="insertReport" parameterType="com.boot.dto.DefectReportDTO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO DEFECT_REPORT (
-            REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+            USERNAME, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD, STATUS
         ) VALUES (
+            #{username},
             #{reporterName},
             #{contact},
             #{carModel},
             #{vin},
             #{defectDetails},
-            NOW(),
-            #{password}
+            CURRENT_TIMESTAMP,
+            #{password},
+            #{status}
         )
     </insert>
 
     <resultMap id="defectReportResultMap" type="com.boot.dto.DefectReportDTO">
         <result property="id" column="ID"/>
+        <result property="username" column="USERNAME"/>
         <result property="reporterName" column="REPORTER_NAME"/>
         <result property="contact" column="CONTACT"/>
         <result property="carModel" column="CAR_MODEL"/>
@@ -27,11 +30,13 @@
         <result property="defectDetails" column="DEFECT_DETAILS"/>
         <result property="reportDate" column="REPORT_DATE"/>
         <result property="password" column="PASSWORD"/>
+        <result property="status" column="STATUS"/>
     </resultMap>
 
-    <!-- 페이징 및 검색 처리를 위한 selectAll 쿼리 수정 -->
+    <!-- 페이징 및 검색 처리를 위한 selectAll 쿼리 수정 (MySQL용) -->
     <select id="selectAll" resultMap="defectReportResultMap">
-        SELECT ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+        SELECT
+            ID, USERNAME, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD, STATUS
         FROM DEFECT_REPORT
         <where>
             <if test="keyword != null and keyword != ''">
@@ -41,7 +46,7 @@
             </if>
         </where>
         ORDER BY ID DESC
-        LIMIT #{amount} OFFSET ${(pageNum - 1) * amount}
+        LIMIT #{amount} OFFSET #{offset}
     </select>
 
 
@@ -60,7 +65,7 @@
     <!-- ID로 단일 결함 신고 조회 -->
     <select id="selectById" parameterType="long" resultMap="defectReportResultMap">
         SELECT
-            ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+            ID, USERNAME, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD, STATUS
         FROM DEFECT_REPORT
         WHERE ID = #{id}
     </select>
@@ -69,11 +74,13 @@
     <update id="updateReport" parameterType="com.boot.dto.DefectReportDTO">
         UPDATE DEFECT_REPORT
         SET
+            USERNAME = #{username},
             REPORTER_NAME = #{reporterName},
             CONTACT = #{contact},
             CAR_MODEL = #{carModel},
             VIN = #{vin},
-            DEFECT_DETAILS = #{defectDetails}
+            DEFECT_DETAILS = #{defectDetails},
+            STATUS = #{status}
         WHERE ID = #{id}
     </update>
 
