@@ -20,5 +20,6 @@
         <mapper resource="mybatis/mappers/defect_report.xml"/>
         <mapper resource="mybatis/mappers/defect_image.xml"/>
         <mapper resource="mybatis/mappers/upload.xml"/>
+        <mapper resource="mybatis/mappers/memberMapper.xml"/>
     </mappers>
 </configuration>
