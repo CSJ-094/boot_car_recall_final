@@ -1,0 +1,41 @@
+- 리콜 기본 정보 테이블 RECALL --
+
+CREATE TABLE RECALL (
+    ID NUMBER PRIMARY KEY,
+    MAKER VARCHAR2(100),
+    MODEL_NAME VARCHAR2(100),
+    MAKE_START VARCHAR2(20),
+    MAKE_END VARCHAR2(20),
+    RECALL_DATE VARCHAR2(20),
+    RECALL_REASON CLOB
+);
+
+CREATE SEQUENCE RECALL_SEQ START WITH 1 INCREMENT BY 1;
+
+ - 차량 정보 테이블 VEHICLE -
+CREATE TABLE VEHICLE (
+    VIN VARCHAR2(50) PRIMARY KEY, -- 차량 식별 번호 (Vehicle Identification Number)
+    MAKER VARCHAR2(100) NOT NULL, -- 제조사
+    MODEL_NAME VARCHAR2(100) NOT NULL, -- 모델 이름
+    MANUFACTURE_DATE DATE -- 실제 생산 날짜
+);
+
+ - 리콜 대상 매핑 테이블 --
+ CREATE TABLE RECALL_TARGET (
+     RECALL_ID NUMBER NOT NULL, -- RECALL 테이블의 ID (외래 키)
+     VEHICLE_VIN VARCHAR2(50) NOT NULL, -- VEHICLE 테이블의 VIN (외래 키)
+     IS_REPAIRED CHAR(1) DEFAULT 'N' NOT NULL, -- 수리 완료 여부 ('Y' 또는 'N')
+
+     -- 두 칼럼을 합쳐 복합 기본 키 (Composite Primary Key)로 지정
+     PRIMARY KEY (RECALL_ID, VEHICLE_VIN),
+
+     -- 외래 키 설정: RECALL 테이블 참조
+     CONSTRAINT FK_TARGET_RECALL
+         FOREIGN KEY (RECALL_ID)
+         REFERENCES RECALL (ID),
+
+     -- 외래 키 설정: VEHICLE 테이블 참조
+     CONSTRAINT FK_TARGET_VEHICLE
+         FOREIGN KEY (VEHICLE_VIN)
+         REFERENCES VEHICLE (VIN)
+ );

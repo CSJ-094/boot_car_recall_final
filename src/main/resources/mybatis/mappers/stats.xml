@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.dao.StatsDAO">
+    <resultMap id="dailyStatsResultMap" type="com.boot.dto.DailyStatsDTO">
+        <result property="report_day" column="REPORT_DAY"/>
+        <result property="count" column="count"/>
+    </resultMap>
+
+    <select id="getDailyReportStats" resultMap="dailyStatsResultMap">
+        SELECT TO_CHAR(REPORT_DATE, 'YYYY-MM-DD') AS REPORT_DAY, COUNT(*) AS count
+        FROM DEFECT_REPORT
+        WHERE REPORT_DATE >= TRUNC(SYSDATE) - 6 AND REPORT_DATE &lt; TRUNC(SYSDATE) + 1
+        GROUP BY TO_CHAR(REPORT_DATE, 'YYYY-MM-DD')
+        ORDER BY REPORT_DAY ASC
+    </select>
+
+    <resultMap id="defectReportResultMap" type="com.boot.dto.DefectReportDTO">
+        <result property="id" column="ID"/>
+        <result property="reporterName" column="REPORTER_NAME"/>
+        <result property="carModel" column="CAR_MODEL"/>
+        <result property="vin" column="VIN"/>
+        <result property="reportDate" column="REPORT_DATE"/>
+    </resultMap>
+
+    <select id="getRecentReports" resultMap="defectReportResultMap">
+        SELECT * FROM (
+            SELECT ID, REPORTER_NAME, CAR_MODEL, VIN, REPORT_DATE
+            FROM DEFECT_REPORT
+            WHERE REPORT_DATE >= SYSDATE - 7
+            ORDER BY REPORT_DATE DESC
+        ) WHERE ROWNUM &lt;= 5
+    </select>
+</mapper>
