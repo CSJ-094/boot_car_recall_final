@@ -68,7 +68,9 @@ public class SecurityConfig {
                     "/", "/home", "/signup", "/login", "/css/**", "/js/**", "/img/**", "/video/**",
                     "/notice/**", "/faq/**", "/recall-status", "/report/**", "/complain/**",
                     "/verify-email", "/reset-password-form", "/reset-password-confirm",
-                    "/email-sent", "/account-result", "/find-account", "/find-id"
+                    "/email-sent", "/account-result", "/find-account", "/find-id",
+                    "/report/write", // 기존 신고 접수 페이지 접근 허용
+                    "/defect-report/**" // /defect-report로 시작하는 모든 경로 접근 허용
                 ).permitAll()
                 .anyRequest().authenticated()
             )

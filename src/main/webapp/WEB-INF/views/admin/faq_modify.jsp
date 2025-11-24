@@ -21,6 +21,7 @@
         <h3>FAQ 수정</h3>
     </div>
     <form action="${pageContext.request.contextPath}/admin/faq/modify" method="post">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <input type="hidden" name="faq_id" value="${faq.faq_id}">
         <div class="form-group">
             <label for="category">카테고리</label>

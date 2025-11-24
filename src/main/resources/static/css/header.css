@@ -55,6 +55,8 @@
   font-weight: 500;
   border-radius: 8px;
   position: relative;
+  font-family: "Noto Sans KR", sans-serif; /* 폰트 통일 */
+  font-size: 1rem; /* 폰트 크기 명시 */
 }
 .menu-link:hover,
 .menu > li > a:hover{ background: rgba(255,255,255,.12); }
@@ -93,6 +95,8 @@
   text-decoration: none;
   font-weight: 500;
   white-space: nowrap;
+  font-family: "Noto Sans KR", sans-serif; /* 폰트 통일 */
+  font-size: 1rem; /* 폰트 크기 명시 */
 }
 .submenu a:hover{ background: #f2f6ff; }
 
@@ -194,5 +198,3 @@ body.nav-open{ overflow: hidden; }
 .brand-text {
   display: inline-block;
 }
-
-

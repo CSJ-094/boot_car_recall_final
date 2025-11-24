@@ -51,6 +51,7 @@
 </div>
 
 <form id="deleteForm" action="${pageContext.request.contextPath}/admin/notice/delete" method="post" style="display: none;">
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     <input type="hidden" name="notice_id" value="<c:out value='${notice.notice_id}'/>">
     <input type="hidden" name="pageNum" value="<c:out value='${cri.pageNum}'/>">
     <input type="hidden" name="amount" value="<c:out value='${cri.amount}'/>">

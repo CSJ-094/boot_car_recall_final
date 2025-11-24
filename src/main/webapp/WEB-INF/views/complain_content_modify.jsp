@@ -122,6 +122,7 @@
 
             <c:forEach var="m" items="${m_param}">
                 <form action="complain_modify" method="post">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 					<input type="hidden" name="report_id" value="${m.report_id}" />
                     <table>
                         <tr>

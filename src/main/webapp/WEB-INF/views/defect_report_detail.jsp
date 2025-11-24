@@ -151,6 +151,7 @@
 
     <!-- 삭제 폼 (숨김) -->
     <form id="deleteForm" action="/report/delete" method="post" style="display:none;">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <input type="hidden" name="id" value="${report.id}">
         <input type="hidden" name="password" id="deletePassword">
     </form>
