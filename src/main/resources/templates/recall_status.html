@@ -139,7 +139,7 @@
                     <tr th:each="recall : ${recallList}">
                         <td th:text="${recall.maker}"></td>
                         <td><a th:href="@{/recall/detail/{id}(id=${recall.id})}" th:text="${recall.modelName}"></a></td>
-                        <td th:text="${recall.recallDate}"></td>
+                        <td th:text="${#dates.format(recall.recallDate, 'yyyy-MM-dd')}"></td>
                         <td th:text="${recall.vin}"></td>
                         <td th:text="${recall.registrationNumber}"></td>
                         <td th:text="${recall.recallReason}"></td>

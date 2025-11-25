@@ -131,7 +131,7 @@
                     <td th:text="${report.carModel}"></td>
                     <td th:text="${report.vin}"></td>
                     <td th:text="${report.defectDetails}"></td>
-                    <td th:text="${#temporals.format(report.reportDate, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${#dates.format(report.reportDate, 'yyyy-MM-dd HH:mm')}"></td>
                     <td class="col-action"><a th:href="@{/report/detail(id=${report.id})}" class="detail-btn">상세보기</a></td>
                 </tr>
             </tbody>
