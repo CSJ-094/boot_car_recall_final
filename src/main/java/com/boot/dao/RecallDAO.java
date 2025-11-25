@@ -2,6 +2,9 @@ package com.boot.dao;
 
 import com.boot.dto.Criteria;
 import com.boot.dto.RecallDTO;
+import com.boot.dto.RecallStatsFilterDTO;
+import com.boot.dto.RecallStatsRowDTO;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -32,6 +35,8 @@ public interface RecallDAO {
 
     // ID로 리콜 상세 조회
     RecallDTO selectById(Long id);
+    
+    List<RecallStatsRowDTO> selectRecallStats(RecallStatsFilterDTO filter);
 
     // VIN으로 검색
     List<RecallDTO> searchByVin(@Param("vin") String vin);

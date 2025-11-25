@@ -44,6 +44,10 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'com.opencsv:opencsv:5.9'
 	// runtimeOnly 'com.oracle.database.jdbc:ojdbc11' // Oracle JDBC 주석 처리
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'com.google.code.gson:gson:2.10.1'
 }
 
 tasks.named('test') {
