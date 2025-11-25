@@ -2,6 +2,8 @@ package com.boot.service;
 
 import com.boot.dto.Criteria;
 import com.boot.dto.RecallDTO;
+import com.boot.dto.RecallStatsFilterDTO;
+import com.boot.dto.RecallStatsRowDTO;
 
 import java.util.List;
 
@@ -37,4 +39,13 @@ public interface RecallService {
 
     // 9. ID로 리콜 상세 조회
     RecallDTO getRecallById(Long id);
+    
+    // 10. 리콜 통계 조회
+    List<RecallStatsRowDTO> getRecallStats(RecallStatsFilterDTO filter);
+
+    // 11. VIN으로 리콜 검색
+    List<RecallDTO> searchByVin(String vin);
+
+    // 12. 등록번호로 리콜 검색
+    List<RecallDTO> searchByRegistrationNumber(String registrationNumber);
 }

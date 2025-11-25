@@ -3,6 +3,9 @@ package com.boot.service;
 import com.boot.dao.RecallDAO;
 import com.boot.dto.Criteria;
 import com.boot.dto.RecallDTO;
+import com.boot.dto.RecallStatsFilterDTO;
+import com.boot.dto.RecallStatsRowDTO;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +63,7 @@ public class RecallServiceImpl implements RecallService {
     // -------------------------------------------------------------------
     @Override
     public List<RecallDTO> getAllRecallsWithoutPaging() {
-        return recallDAO.selectAllWithoutPaging();
+        return recallDAO.selectAllWithoutPagings();
     }
     @Override
     public List<String> getMakerList() {
@@ -99,5 +102,28 @@ public class RecallServiceImpl implements RecallService {
     @Override
     public RecallDTO getRecallById(Long id) {
         return recallDAO.selectById(id);
+    }
+    
+    @Override
+    public List<RecallStatsRowDTO> getRecallStats(RecallStatsFilterDTO filter) {
+        // 기본값 세팅 (groupBy/timeUnit/기간 등)
+        if (filter.getGroupBy() == null || filter.getGroupBy().isEmpty()) {
+            filter.setGroupBy("MANUFACTURER");
+        }
+        if (filter.getTimeUnit() == null || filter.getTimeUnit().isEmpty()) {
+            filter.setTimeUnit("MONTH");
+        }
+        // startDate/endDate 기본값은 프론트에서 넣어도 되고, 여기서도 세팅 가능 (지금은 생략)
+
+        return recallDAO.selectRecallStats(filter);
+
+    @Override
+    public List<RecallDTO> searchByVin(String vin) {
+        return recallDAO.searchByVin(vin);
+    }
+
+    @Override
+    public List<RecallDTO> searchByRegistrationNumber(String registrationNumber) {
+        return recallDAO.searchByRegistrationNumber(registrationNumber);
     }
 }

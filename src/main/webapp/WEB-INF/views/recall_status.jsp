@@ -10,54 +10,54 @@
     <link rel="stylesheet" href="/css/footer.css" />
     <style>
         /* 이 페이지에만 적용될 추가적인 스타일 */
-        .container { 
-            padding-top: 50px; 
-            padding-bottom: 50px; 
+        .container {
+            padding-top: 50px;
+            padding-bottom: 50px;
         }
-        .search-container { 
-            padding: 20px; 
-            background: #fff; 
-            margin-top: 20px; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        .search-container {
+            padding: 20px;
+            background: #fff;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: center; /* 폼 자체를 중앙 정렬하기 위함 */
         }
-        .search-container form { 
+        .search-container form {
             display: flex; /* flexbox를 사용하여 내부 요소 정렬 */
             justify-content: center; /* 가로 중앙 정렬 */
             align-items: center; /* 세로 중앙 정렬 */
             max-width: 500px; /* 폼의 최대 너비 제한 */
             margin: 0 auto; /* 폼 자체를 부모 요소 내에서 중앙 정렬 */
         }
-        .search-container input[type="text"] { 
+        .search-container input[type="text"] {
             flex-grow: 1; /* 남은 공간을 채우도록 설정 */
-            padding: 10px; 
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             margin-right: 10px; /* 입력 필드와 버튼 사이 간격 */
             min-width: 150px; /* 최소 너비 지정 */
         }
-        .search-container button { 
-            padding: 10px 20px; 
-            background: #0d47a1; 
-            color: white; 
-            border: none; 
-            cursor: pointer; 
-            border-radius: 4px; 
+        .search-container button {
+            padding: 10px 20px;
+            background: #0d47a1;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
         }
-        table { 
-            width: 100%; 
-            margin-top: 20px; 
-            border-collapse: collapse; 
-            background: #fff; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             table-layout: fixed; /* 테이블 레이아웃 고정 */
         }
-        th, td { 
-            padding: 8px; 
-            border-bottom: 1px solid #ddd; 
-            text-align: left; 
-            vertical-align: middle; 
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: middle;
             word-wrap: break-word; /* 긴 텍스트 자동 줄바꿈 */
         }
         th { background-color: #1e88e5; color: white; }
@@ -66,11 +66,15 @@
         .pagination { text-align: center; margin-top: 20px; }
         .pagination a, .pagination strong { display: inline-block; padding: 5px 10px; margin: 0 2px; border: 1px solid #ddd; background-color: #fff; text-decoration: none; color: #337ab7; }
         .pagination strong { background-color: #337ab7; color: white; border-color: #337ab7; }
-        
+
         /* 컬럼 너비 설정 */
-        .col-maker { width: 12%; }
-        .col-model { width: 18%; }
-        .col-date { width: 12%; }
+        .col-maker { width: 10%; }
+        .col-model { width: 15%; }
+        .col-date { width: 10%; }
+        .col-vin { width: 15%; } /* VIN 컬럼 너비 추가 */
+        .col-regNum { width: 10%; } /* 등록번호 컬럼 너비 추가 */
+        .col-reason { width: auto; } /* 리콜 사유는 남은 공간 활용 */
+        .col-detail { width: 8%; } /* 상세 버튼 컬럼 너비 추가 */
         
         .csv-download-btn {
             display: inline-block;
@@ -133,7 +137,10 @@
                             <th class="col-maker">제조사</th>
                             <th class="col-model">차종</th>
                             <th class="col-date">리콜 날짜</th>
-                            <th>리콜 사유</th>
+                            <th class="col-vin">VIN</th>
+                            <th class="col-regNum">등록번호</th>
+                            <th class="col-reason">리콜 사유</th>
+                            <th class="col-detail">상세</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -142,7 +149,10 @@
                                 <td>${recall.maker}</td>
                                 <td><a href="/recall/detail/${recall.id}">${recall.modelName}</a></td>
                                 <td>${recall.recallDate}</td>
+                                <td>${recall.vin}</td>
+                                <td>${recall.registrationNumber}</td>
                                 <td>${recall.recallReason}</td>
+                                <td><a href="/recall/detail/${recall.id}">보기</a></td>
                             </tr>
                         </c:forEach>
                     </tbody>
@@ -181,7 +191,5 @@
 
     <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
 
-    <script>
-    </script>
 </body>
 </html>
