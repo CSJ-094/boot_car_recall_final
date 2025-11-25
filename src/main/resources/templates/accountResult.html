@@ -1,25 +1,24 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>요청 처리 결과 - 자동차 리콜 통합센터</title>
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/login.css" />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/login.css}" />
 </head>
 <body>
-    <jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
+    <div th:replace="~{fragment/header :: headerFragment}"></div>
 
     <main class="login-container">
         <div class="login-card">
             <h1 class="login-title">요청 처리 완료</h1>
-            <p class="result-message">${message}</p>
-            <a href="/login" class="login-btn" style="text-decoration: none; display: block; margin-top: 1.5rem;">로그인으로 돌아가기</a>
+            <p class="result-message" th:text="${message}">요청이 성공적으로 처리되었습니다.</p>
+            <a th:href="@{/login}" class="login-btn" style="text-decoration: none; display: block; margin-top: 1.5rem;">로그인으로 돌아가기</a>
         </div>
     </main>
 
-    <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
+    <div th:replace="~{fragment/footer :: footerFragment}"></div>
     <style>
         .result-message {
             font-size: 1.1rem;

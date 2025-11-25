@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>차량 리콜 조회 시스템</title>
+
+  <link rel="stylesheet" th:href="@{/css/header.css}" />
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/css/footer.css}" />
+</head>
+<body>
+  <header th:fragment="headerFragment">
+    <h1><a th:href="@{/}">차량 리콜 조회</a></h1>
+    <nav>
+      <a th:href="@{/}">홈</a>
+      <a th:href="@{/report_recallInfo}">리콜 보도자료</a>
+      <a th:href="@{/recall-status}">리콜 현황</a>
+      <a th:href="@{/notice/list}">고객 지원</a>
+      <a th:href="@{/complain_list}">문의하기</a>
+    </nav>
+    <div class="auth-links">
+        <!-- 로그인/로그아웃 링크 추가 (예시) -->
+    </div>
+  </header>
+</body>
+</html>
