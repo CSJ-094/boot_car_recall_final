@@ -1,13 +1,11 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>차량 리콜 현황</title>
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/header.css" />
-    <link rel="stylesheet" href="/css/footer.css" />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
     <style>
         /* 이 페이지에만 적용될 추가적인 스타일 */
         .container { 
@@ -75,77 +73,58 @@
     </style>
 </head>
 <body>
-    <jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
+    <div th:replace="~{fragment/header :: headerFragment}"></div>
 
     <div class="container">
-        <c:if test="${not empty errorMessage}">
-            <div class="error-message">
-                <p>${errorMessage}</p>
-            </div>
-        </c:if>
+        <div th:if="${errorMessage != null}" class="error-message">
+            <p th:text="${errorMessage}"></p>
+        </div>
 
         <div class="search-container">
-            <form action="/recall-status" method="get">
-                <input type="text" id="searchInput" name="keyword" placeholder="제조사 또는 차종으로 검색..." value="${pageMaker.cri.keyword}">
+            <form th:action="@{/recall-status}" method="get">
+                <input type="text" id="searchInput" name="keyword" placeholder="제조사 또는 차종으로 검색..." th:value="${pageMaker.cri.keyword}">
                 <button type="submit">검색</button>
             </form>
         </div>
 
-        <c:choose>
-            <c:when test="${not empty recallList}">
-                <table id="recallTable">
-                    <thead>
-                        <tr>
-                            <th class="col-maker">제조사</th>
-                            <th class="col-model">차종</th>
-                            <th class="col-date">리콜 날짜</th>
-                            <th>리콜 사유</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach items="${recallList}" var="recall">
-                            <tr>
-                                <td>${recall.maker}</td>
-                                <td>${recall.modelName}</td>
-                                <td>${recall.recallDate}</td>
-                                <td>${recall.recallReason}</td>
-                            </tr>
-                        </c:forEach>
-                    </tbody>
-                </table>
+        <div th:if="${not recallList.isEmpty()}">
+            <table id="recallTable">
+                <thead>
+                    <tr>
+                        <th class="col-maker">제조사</th>
+                        <th class="col-model">차종</th>
+                        <th class="col-date">리콜 날짜</th>
+                        <th>리콜 사유</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="recall : ${recallList}">
+                        <td th:text="${recall.maker}"></td>
+                        <td th:text="${recall.modelName}"></td>
+                        <td th:text="${recall.recallDate}"></td>
+                        <td th:text="${recall.recallReason}"></td>
+                    </tr>
+                </tbody>
+            </table>
 
-                <!-- Pagination -->
-                <div class="pagination">
-                    <c:if test="${pageMaker.prev}">
-                        <a href="/recall-status?pageNum=${pageMaker.startPage - 1}&keyword=${pageMaker.cri.keyword}">&laquo;</a>
-                    </c:if>
+            <!-- Pagination -->
+            <div class="pagination">
+                <a th:if="${pageMaker.prev}" th:href="@{/recall-status(pageNum=${pageMaker.startPage - 1}, keyword=${pageMaker.cri.keyword})}">&laquo;</a>
 
-                    <c:forEach begin="${pageMaker.startPage}" end="${pageMaker.endPage}" var="num">
-                        <c:choose>
-                            <c:when test="${pageMaker.cri.pageNum == num}">
-                                <strong>${num}</strong>
-                            </c:when>
-                            <c:otherwise>
-                                <a href="/recall-status?pageNum=${num}&keyword=${pageMaker.cri.keyword}">${num}</a>
-                            </c:otherwise>
-                        </c:choose>
-                    </c:forEach>
+                <th:block th:each="num : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}">
+                    <strong th:if="${pageMaker.cri.pageNum == num}" th:text="${num}"></strong>
+                    <a th:unless="${pageMaker.cri.pageNum == num}" th:href="@{/recall-status(pageNum=${num}, keyword=${pageMaker.cri.keyword})}" th:text="${num}"></a>
+                </th:block>
 
-                    <c:if test="${pageMaker.next}">
-                        <a href="/recall-status?pageNum=${pageMaker.endPage + 1}&keyword=${pageMaker.cri.keyword}">&raquo;</a>
-                    </c:if>
-                </div>
-
-            </c:when>
-            <c:otherwise>
-                <c:if test="${empty errorMessage}">
-                    <p style="text-align:center; padding-top: 20px;">표시할 리콜 데이터가 없습니다.</p>
-                </c:if>
-            </c:otherwise>
-        </c:choose>
+                <a th:if="${pageMaker.next}" th:href="@{/recall-status(pageNum=${pageMaker.endPage + 1}, keyword=${pageMaker.cri.keyword})}">&raquo;</a>
+            </div>
+        </div>
+        <div th:if="${recallList.isEmpty() and errorMessage == null}">
+            <p style="text-align:center; padding-top: 20px;">표시할 리콜 데이터가 없습니다.</p>
+        </div>
     </div>
 
-    <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
+    <div th:replace="~{fragment/footer :: footerFragment}"></div>
 
     <script>
     </script>

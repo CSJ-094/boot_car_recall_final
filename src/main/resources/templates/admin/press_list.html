@@ -117,79 +117,61 @@
 </head>
 
 <body>
-<jsp:include page="/WEB-INF/views/fragment/adminheader.jsp"/>
+<div th:replace="~{fragment/adminheader :: adminHeaderFragment}"></div>
 
 <div class="container">
     <h2>리콜 보도자료</h2>
 
     <!-- 게시글 리스트 -->
-    <c:forEach var="dto" items="${list}">
-        <div class="post-card">
-            <div class="post-title">
-                <a class="move_link" href="${dto.boardNo}">${dto.boardTitle}</a>
-            </div>
-            <div class="post-content">
-                    ${dto.boardContent}
-            </div>
-            <div class="post-info">
-                    ${dto.boardName} | ${dto.boardDate} | 조회수 ${dto.boardHit}
-            </div>
+    <div th:if="${list.isEmpty()}">
+        <p style="text-align: center; padding: 40px; color: #777;">등록된 보도자료가 없습니다.</p>
+    </div>
+    <div class="post-card" th:each="dto : ${list}">
+        <div class="post-title">
+            <a class="move_link" th:href="${dto.boardNo}" th:text="${dto.boardTitle}"></a>
         </div>
-    </c:forEach>
-    <%----%>
-    <a href="/admin/press/write" class="write-btn">글쓰기</a>
+        <div class="post-content" th:text="${dto.boardContent}"></div>
+        <div class="post-info" th:text="|${dto.boardName} | ${dto.boardDate} | 조회수 ${dto.boardHit}|"></div>
+    </div>
+    <a th:href="@{/admin/press/write}" class="write-btn">글쓰기</a>
 
     <!-- 페이징 -->
     <ul class="pagination">
-        <c:if test="${pageMaker.prev}">
-            <li class="paginate_button">
-                <a href="${pageMaker.startPage - 1}">
-                    [Previous]
-                </a>
-            </li>
-        </c:if>
-        <c:forEach var="num" begin="${pageMaker.startPage}" end="${pageMaker.endPage}">
-            <li class="paginate_button" ${pageMaker.cri.pageNum == num ? "style='color: red'" : ""}>
-                <a href="${num}">
-                    [${num}]
-                </a>
-            </li>
-        </c:forEach>
-        <c:if test="${pageMaker.next}">
-            <li class="paginate_button">
-                <a href="${pageMaker.endPage + 1}">
-                    [Next]
-                </a>
-            </li>
-        </c:if>
+        <li class="paginate_button" th:if="${pageMaker.prev}">
+            <a th:href="${pageMaker.startPage - 1}">[Previous]</a>
+        </li>
+        <li th:each="num : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}"
+            class="paginate_button" th:classappend="${pageMaker.cri.pageNum == num} ? 'active-page'">
+            <a th:href="${num}" th:text="'[' + ${num} + ']'"></a>
+        </li>
+        <li class="paginate_button" th:if="${pageMaker.next}">
+            <a th:href="${pageMaker.endPage + 1}">[Next]</a>
+        </li>
     </ul>
 
     <form method="get" id="actionForm">
-        <input type="hidden" name="pageNum" value="${pageMaker.cri.pageNum}">
-        <input type="hidden" name="amount" value="${pageMaker.cri.amount}">
+        <input type="hidden" name="pageNum" th:value="${pageMaker.cri.pageNum}">
+        <input type="hidden" name="amount" th:value="${pageMaker.cri.amount}">
     </form>
 </div>
+<div th:replace="~{fragment/footer :: footerFragment}"></div>
 </body>
 </html>
-<script src="${pageContext.request.contextPath}/js/jquery.js"></script>
-<script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
     var actionForm = $("#actionForm");
 
     //페이지 번호 처리
     $(".paginate_button a").on("click", function (e){
         e.preventDefault();
-        console.log("click~!!!");
-        console.log("@# href=>"+$(this).attr("href"));
 
         actionForm.find("input[name='pageNum']").val($(this).attr("href"));
-        actionForm.attr("action","/admin/press/list").submit();
+        actionForm.attr("action", /*[[@{/admin/press/list}]]*/).submit();
     }); //end of paginate_button click
 
     //게시글 처리
     $(".move_link").on("click", function (e){
         e.preventDefault();
-        console.log("move_link click~!!!");
-        console.log("@# href=>"+$(this).attr("href"));
 
         var targetBno = $(this).attr("href");
 
@@ -199,12 +181,9 @@
             actionForm.find("input[name='boardNo']").remove();
         }
 
-
-
         actionForm.append("<input type='hidden' name='boardNo' value='"+targetBno+"'>");
-        //컨트롤러에 content_view 로 찾아감
-        //버그 처리(게시글 클릭 후 뒤로가기 누른 후 다른페이지 클릭할 때 content_view로 가는걸 해결)
-        actionForm.attr("action","/admin/press/detail").submit();
+        actionForm.attr("action", /*[[@{/admin/press/detail}]]*/).submit();
 
     }); //end of paginate_button click
+    /*]]>*/
 </script>

@@ -1,14 +1,11 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>결함 신고 목록</title>
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/header.css" />
-    <link rel="stylesheet" href="/css/footer.css" />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
     <style>
         /* 이 페이지에만 적용될 추가적인 스타일 */
         .container { 
@@ -70,16 +67,16 @@
     </style>
 </head>
 <body>
-    <jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
+    <div th:replace="~{fragment/header :: headerFragment}"></div>
 
     <div class="container">
         <div class="search-container">
-            <form action="/report/history" method="get">
-                <input type="text" id="searchInput" name="keyword" placeholder="신고인, 차량 모델, VIN으로 검색..." value="${pageMaker.cri.keyword}">
+            <form th:action="@{/report/history}" method="get">
+                <input type="text" id="searchInput" name="keyword" placeholder="신고인, 차량 모델, VIN으로 검색..." th:value="${pageMaker.cri.keyword}">
                 <button type="submit">검색</button>
             </form>
         </div>
-
+        
         <table id="reportTable">
             <thead>
                 <tr>
@@ -93,43 +90,34 @@
                 </tr>
             </thead>
             <tbody>
-                <c:forEach items="${reportList}" var="report">
-                    <tr>
-                        <td class="col-id">${report.id}</td>
-                        <td>${report.reporterName}</td>
-                        <td>${report.carModel}</td>
-                        <td>${report.vin}</td>
-                        <td>${report.defectDetails}</td>
-                        <td><fmt:formatDate value="${report.reportDate}" pattern="yyyy-MM-dd HH:mm"/></td>
-                        <td class="col-action"><a href="/report/detail?id=${report.id}" class="detail-btn">상세보기</a></td>
-                    </tr>
-                </c:forEach>
+                <tr th:if="${reportList.isEmpty()}">
+                    <td colspan="7" style="text-align: center; padding: 20px;">검색 결과가 없습니다.</td>
+                </tr>
+                <tr th:each="report : ${reportList}">
+                    <td class="col-id" th:text="${report.id}"></td>
+                    <td th:text="${report.reporterName}"></td>
+                    <td th:text="${report.carModel}"></td>
+                    <td th:text="${report.vin}"></td>
+                    <td th:text="${report.defectDetails}"></td>
+                    <td th:text="${#temporals.format(report.reportDate, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td class="col-action"><a th:href="@{/report/detail(id=${report.id})}" class="detail-btn">상세보기</a></td>
+                </tr>
             </tbody>
         </table>
 
         <!-- Pagination -->
         <div class="pagination">
-            <c:if test="${pageMaker.prev}">
-                <a href="/report/history?pageNum=${pageMaker.startPage - 1}&keyword=${pageMaker.cri.keyword}">&laquo;</a>
-            </c:if>
+            <a th:if="${pageMaker.prev}" th:href="@{/report/history(pageNum=${pageMaker.startPage - 1}, keyword=${pageMaker.cri.keyword})}">&laquo;</a>
 
-            <c:forEach begin="${pageMaker.startPage}" end="${pageMaker.endPage}" var="num">
-                <c:choose>
-                    <c:when test="${pageMaker.cri.pageNum == num}">
-                        <strong>${num}</strong>
-                    </c:when>
-                    <c:otherwise>
-                        <a href="/report/history?pageNum=${num}&keyword=${pageMaker.cri.keyword}">${num}</a>
-                    </c:otherwise>
-                </c:choose>
-            </c:forEach>
+            <th:block th:each="num : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}">
+                <strong th:if="${pageMaker.cri.pageNum == num}" th:text="${num}"></strong>
+                <a th:unless="${pageMaker.cri.pageNum == num}" th:href="@{/report/history(pageNum=${num}, keyword=${pageMaker.cri.keyword})}" th:text="${num}"></a>
+            </th:block>
 
-            <c:if test="${pageMaker.next}">
-                <a href="/report/history?pageNum=${pageMaker.endPage + 1}&keyword=${pageMaker.cri.keyword}">&raquo;</a>
-            </c:if>
+            <a th:if="${pageMaker.next}" th:href="@{/report/history(pageNum=${pageMaker.endPage + 1}, keyword=${pageMaker.cri.keyword})}">&raquo;</a>
         </div>
     </div>
 
-    <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
+    <div th:replace="~{fragment/footer :: footerFragment}"></div>
 </body>
 </html>

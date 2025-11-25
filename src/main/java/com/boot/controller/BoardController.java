@@ -34,7 +34,7 @@ public class BoardController {
 
         model.addAttribute("list", list);
         model.addAttribute("pageMaker", new PageDTO(cri, total));
-        return "report_recallInfo";
+        return "report_recallInfo"; // 확장자 없음 - OK
     }
 
     @PostMapping("/write")
@@ -50,7 +50,7 @@ public class BoardController {
     @GetMapping("/write_view")
     public String write_view() {
         log.info("@# write_view()");
-        return "report_write_view";
+        return "report_write_view"; // 확장자 없음 - OK
     }
 
     @GetMapping("/report_content_view")
@@ -65,7 +65,7 @@ public class BoardController {
         model.addAttribute("content_view", dto);
         model.addAttribute("pageNum", pageNum);
         model.addAttribute("amount", amount);
-        return "report_content_view";
+        return "report_content_view"; // 확장자 없음 - OK
     }
 
     @GetMapping("/report_modify_view")
@@ -77,8 +77,8 @@ public class BoardController {
         BoardDTO dto = service.contentView(boardNo);
         model.addAttribute("content_view", dto);
         model.addAttribute("pageNum", pageNum);
-        model.addAttribute("amount", amount);
-        return "report_modify_view"; // 수정 JSP로 이동
+        model.addAttribute("amount", amount); // 확장자 없음 - OK
+        return "report_modify_view";
     }
 
     @PostMapping("/report_modify")

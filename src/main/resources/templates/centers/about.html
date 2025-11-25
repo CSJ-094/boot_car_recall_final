@@ -1,22 +1,25 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>리콜센터 소개</title>
+    <!-- 페이지 전용 CSS -->
+    <link rel="stylesheet" th:href="@{/css/centers-about.css}" />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+</head>
+<body>
 
 <!-- 공통 헤더 -->
-<jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
-
-<!-- 페이지 전용 CSS -->
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/centers-about.css" />
-<link rel="stylesheet" href="/css/main.css" />
-<link rel="stylesheet" href="/css/header.css" />
-<link rel="stylesheet" href="/css/footer.css" />
+<div th:replace="~{fragment/header :: headerFragment}"></div>
 
 <main class="center-intro">
 	<!-- 1) 풀-블리드 히어로(영상) -->
 	<section class="ci-hero-full" aria-labelledby="heroTitle">
 	  <video class="ci-hero-full__video" autoplay muted loop playsinline preload="metadata"
-	         poster="${ctx}/assets/centers/center_poster.jpg">
-	    <source src="${ctx}/video/about.mp4" type="video/mp4"/>
+	         th:poster="@{/assets/centers/center_poster.jpg}">
+	    <source th:src="@{/video/about.mp4}" type="video/mp4"/>
 	  </video>
 	  <div class="ci-hero-full__scrim"></div>
 	  <div class="ci-hero-full__inner">
@@ -119,8 +122,10 @@
 		</main>
 
 <!-- 공통 푸터 -->
-<jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
+<div th:replace="~{fragment/footer :: footerFragment}"></div>
 
 <!-- 페이지 전용 JS -->
-<script src="${ctx}/resources/js/centers-about.js"></script>
+<script th:src="@{/js/centers-about.js}"></script>
 
+</body>
+</html>

@@ -1,43 +1,51 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="|공지사항 - ${notice.title}|">공지사항 상세</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/notice_user.css}" />
+</head>
+<body>
 
-<jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
-<link rel="stylesheet" href="/css/notice_user.css" />
+<div th:replace="~{fragment/header :: headerFragment}"></div>
 
 <main class="nu">
   <section class="nu-wrap">
     <nav class="nu-breadcrumb" aria-label="경로">
-      <a href="${ctx}/" class="nu-crumb">홈</a>
+      <a th:href="@{/}" class="nu-crumb">홈</a>
       <span class="nu-crumb-sep">/</span>
-      <a href="${ctx}/notice/list" class="nu-crumb">공지사항</a>
+      <a th:href="@{/notice/list}" class="nu-crumb">공지사항</a>
     </nav>
 
-    <article class="nu-card">
+    <article class="nu-card" th:if="${notice != null}" th:object="${notice}">
       <header class="nu-card-head">
         <div class="nu-card-top">
           <h1 class="nu-card-title">
-            <c:if test="${notice.is_urgent == 'Y'}">
-              <span class="nu-chip nu-chip--danger">긴급</span>
-            </c:if>
-            ${notice.title}
+            <span class="nu-chip nu-chip--danger" th:if="*{is_urgent == 'Y'}">긴급</span>
+            <span th:text="*{title}"></span>
           </h1>
         </div>
         <ul class="nu-meta">
-          <li><strong>작성일</strong> <span>${notice.created_at}</span></li>
-          <li><strong>조회수</strong> <span>${notice.views}</span></li>
+          <li><strong>작성일</strong> <span th:text="*{created_at}"></span></li>
+          <li><strong>조회수</strong> <span th:text="*{views}"></span></li>
         </ul>
       </header>
 
-      <div class="nu-content">
-        ${notice.content}
+      <div class="nu-content" th:utext="*{content}">
+        <!-- 공지 내용이 여기에 렌더링됩니다. -->
       </div>
 
       <footer class="nu-card-foot">
-        <a href="${ctx}/notice/list" class="nu-btn">목록으로</a>
+        <a th:href="@{/notice/list}" class="nu-btn">목록으로</a>
       </footer>
     </article>
   </section>
 </main>
 
-<jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
+<div th:replace="~{fragment/footer :: footerFragment}"></div>
+
+</body>
+</html>

@@ -1,13 +1,16 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>자주 묻는 질문 (FAQ)</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/faq.css}" />
+</head>
+<body>
 
-<jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
-
-<link rel="stylesheet" href="/css/faq.css" />
-<link rel="stylesheet" href="/css/main.css" />
-<link rel="stylesheet" href="/css/header.css" />
-<link rel="stylesheet" href="/css/footer.css" />
+<div th:replace="~{fragment/header :: headerFragment}"></div>
 
 <main class="fq">
   <section class="fq-wrap">
@@ -20,25 +23,21 @@
 
     <!-- 아코디언 목록 -->
     <div class="fq-accordion" id="faqList">
-      <c:if test="${empty list}">
-        <div class="fq-empty">등록된 FAQ가 없습니다.</div>
-      </c:if>
+      <div class="fq-empty" th:if="${list.isEmpty()}">등록된 FAQ가 없습니다.</div>
 
-      <c:forEach var="item" items="${list}">
-        <article class="fq-item" data-id="${item.faq_id}">
-          <button type="button" class="fq-q" aria-expanded="false" aria-controls="fq-a-${item.faq_id}">
-            <span class="fq-chip">${item.category}</span>
-            <span class="fq-q-text">${item.question}</span>
+      <article class="fq-item" th:each="item : ${list}" th:data-id="${item.faq_id}">
+          <button type="button" class="fq-q" aria-expanded="false" th:aria-controls="|fq-a-${item.faq_id}|">
+            <span class="fq-chip" th:text="${item.category}"></span>
+            <span class="fq-q-text" th:text="${item.question}"></span>
             <span class="fq-arrow" aria-hidden="true">▾</span>
           </button>
-          <div id="fq-a-${item.faq_id}" class="fq-a" role="region" aria-hidden="true">
+          <div th:id="|fq-a-${item.faq_id}|" class="fq-a" role="region" aria-hidden="true">
             <div class="fq-a-inner">
-              <pre class="fq-a-text"><c:out value="${item.answer}"/></pre>
-              <div class="fq-meta"><strong>작성일</strong> <span>${item.created_at}</span></div>
+              <pre class="fq-a-text" th:text="${item.answer}"></pre>
+              <div class="fq-meta"><strong>작성일</strong> <span th:text="${item.created_at}"></span></div>
             </div>
           </div>
         </article>
-      </c:forEach>
     </div>
 
     <!-- 하단 영역: 페이지네이션 및 문의하기 버튼 -->
@@ -46,29 +45,28 @@
       <!-- 페이지네이션 -->
       <nav class="fq-paging" aria-label="FAQ 페이지 이동">
         <ul>
-          <c:if test="${pageMaker.prev}">
-            <li><a class="fq-page" href="${ctx}/faq/list?pageNum=${pageMaker.startPage - 1}">이전</a></li>
-          </c:if>
-          <c:forEach var="num" begin="${pageMaker.startPage}" end="${pageMaker.endPage}">
-            <li>
-              <a class="fq-page ${pageMaker.cri.pageNum == num ? 'is-active' : ''}"
-                 href="${ctx}/faq/list?pageNum=${num}">${num}</a>
-            </li>
-          </c:forEach>
-          <c:if test="${pageMaker.next}">
-            <li><a class="fq-page" href="${ctx}/faq/list?pageNum=${pageMaker.endPage + 1}">다음</a></li>
-          </c:if>
+          <li th:if="${pageMaker.prev}">
+            <a class="fq-page" th:href="@{/faq/list(pageNum=${pageMaker.startPage - 1})}">이전</a>
+          </li>
+          <li th:each="num : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}">
+              <a class="fq-page"
+                 th:classappend="${pageMaker.cri.pageNum == num} ? 'is-active'"
+                 th:href="@{/faq/list(pageNum=${num})}" th:text="${num}"></a>
+          </li>
+          <li th:if="${pageMaker.next}">
+            <a class="fq-page" th:href="@{/faq/list(pageNum=${pageMaker.endPage + 1})}">다음</a>
+          </li>
         </ul>
       </nav>
       <!-- 문의하기 버튼 -->
       <div class="fq-footer-action">
-        <a href="${ctx}/complain_list" class="fq-btn">문의하기</a>
+        <a th:href="@{/complain_list}" class="fq-btn">문의하기</a>
       </div>
     </div>
   </section>
 </main>
 
-<jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
+<div th:replace="~{fragment/footer :: footerFragment}"></div>
 
 <script>
   // 접근성 고려한 순수 JS 아코디언
@@ -84,3 +82,6 @@
     });
   });
 </script>
+
+</body>
+</html>

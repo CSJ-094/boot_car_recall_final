@@ -1,13 +1,11 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>결함 신고 수정</title>
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/header.css" />
-    <link rel="stylesheet" href="/css/footer.css" />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
     <style>
         /* 이 페이지에만 적용될 추가적인 스타일 */
         .container { 
@@ -35,67 +33,65 @@
     </style>
 </head>
 <body>
-    <jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
+    <div th:replace="~{fragment/header :: headerFragment}"></div>
 
     <div class="container">
         <h2>결함 신고 수정</h2>
-        <c:if test="${empty report}">
+        <div th:if="${report == null}">
             <p style="text-align:center; color: red;">수정할 신고를 찾을 수 없습니다.</p>
-        </c:if>
-        <c:if test="${not empty report}">
-            <form action="/report/edit" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                <input type="hidden" name="id" value="${report.id}">
-                <input type="hidden" name="password" value="${report.password}"> <!-- 비밀번호는 hidden으로 전달 -->
+        </div>
+        <div th:if="${report != null}">
+            <form th:action="@{/report/edit}" th:object="${report}" method="post" enctype="multipart/form-data">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" th:field="*{id}">
+                <input type="hidden" th:field="*{password}"> <!-- 비밀번호는 hidden으로 전달 -->
                 <div class="form-group">
                     <label for="reporterName">신고인 성명</label>
-                    <input type="text" id="reporterName" name="reporterName" value="${report.reporterName}" required>
+                    <input type="text" id="reporterName" th:field="*{reporterName}" required>
                 </div>
                 <div class="form-group">
                     <label for="contact">연락처</label>
-                    <input type="text" id="contact" name="contact" value="${report.contact}" required>
+                    <input type="text" id="contact" th:field="*{contact}" required>
                 </div>
                 <div class="form-group">
                     <label for="carModel">차량 모델</label>
-                    <input type="text" id="carModel" name="carModel" value="${report.carModel}" required>
+                    <input type="text" id="carModel" th:field="*{carModel}" required>
                 </div>
                 <div class="form-group">
                     <label for="vin">차대번호 (VIN)</label>
-                    <input type="text" id="vin" name="vin" value="${report.vin}">
+                    <input type="text" id="vin" th:field="*{vin}">
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group" th:if="${not #lists.isEmpty(report.images)}">
                     <label>현재 첨부 이미지:</label>
                     <div class="image-preview-container" id="existingImagePreviewContainer">
-                        <c:forEach items="${report.images}" var="image">
-                            <div class="existing-image-item">
-                                <img src="/defect_images/${image.fileName}" alt="${image.fileName}">
-                                <button type="button" class="delete-image-btn" data-filename="${image.fileName}" onclick="removeExistingImage(this)">X</button>
-                                <input type="hidden" name="existingImageFileNames" value="${image.fileName}">
-                            </div>
-                        </c:forEach>
+                        <div th:each="image : *{images}" class="existing-image-item">
+                            <img th:src="@{/defect_images/{fileName}(fileName=${image.fileName})}" th:alt="${image.fileName}">
+                            <button type="button" class="delete-image-btn" th:data-filename="${image.fileName}" onclick="removeExistingImage(this)">X</button>
+                            <input type="hidden" name="existingImageFileNames" th:value="${image.fileName}">
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="defectImages">새로운 결함 이미지 (여러 개 선택 가능)</label>
-                    <input type="file" id="defectImages" name="newDefectImages" accept="image/*" multiple onchange="previewNewImages(event)">
+                    <input type="file" id="defectImages" name="newImages" accept="image/*" multiple onchange="previewNewImages(event)">
                     <div class="image-preview-container" id="newImagePreviewContainer"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="defectDetails">결함 내용</label>
-                    <textarea id="defectDetails" name="defectDetails" required>${report.defectDetails}</textarea>
+                    <textarea id="defectDetails" th:field="*{defectDetails}" required></textarea>
                 </div>
                 <div class="btn-group">
                     <button type="submit" class="submit-btn">수정 완료</button>
-                    <a href="/report/detail?id=${report.id}" class="cancel-btn">취소</a>
+                    <a th:href="@{/report/detail(id=*{id})}" class="cancel-btn">취소</a>
                 </div>
             </form>
-        </c:if>
+        </div>
     </div>
 
-    <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
+    <div th:replace="~{fragment/footer :: footerFragment}"></div>
 
     <script>
         function previewNewImages(event) {

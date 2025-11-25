@@ -1,39 +1,48 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="|FAQ - ${faq.question}|">FAQ 상세</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/faq.css}" />
+</head>
+<body>
 
-<jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
-
-<link rel="stylesheet" href="/css/faq.css" />
+<div th:replace="~{fragment/header :: headerFragment}"></div>
 
 <main class="fq">
   <section class="fq-wrap">
     <nav class="fq-breadcrumb" aria-label="경로">
-      <a href="${ctx}/" class="fq-crumb">홈</a>
+      <a th:href="@{/}" class="fq-crumb">홈</a>
       <span class="fq-crumb-sep">/</span>
-      <a href="${ctx}/faq/list" class="fq-crumb">FAQ</a>
+      <a th:href="@{/faq/list}" class="fq-crumb">FAQ</a>
     </nav>
 
-    <article class="fq-card">
+    <article class="fq-card" th:if="${faq != null}" th:object="${faq}">
       <header class="fq-card-head">
         <h1 class="fq-card-title">
-          <span class="fq-chip">${faq.category}</span>
-          ${faq.question}
+          <span class="fq-chip" th:text="*{category}"></span>
+          <span th:text="*{question}"></span>
         </h1>
         <ul class="fq-meta">
-          <li><strong>작성일</strong> <span>${faq.created_at}</span></li>
+          <li><strong>작성일</strong> <span th:text="*{created_at}"></span></li>
         </ul>
       </header>
 
       <div class="fq-content">
-        <pre class="fq-a-text"><c:out value="${faq.answer}"/></pre>
+        <pre class="fq-a-text" th:text="*{answer}"></pre>
       </div>
 
       <footer class="fq-card-foot">
-        <a href="${ctx}/faq/list" class="fq-btn">목록으로</a>
+        <a th:href="@{/faq/list}" class="fq-btn">목록으로</a>
       </footer>
     </article>
   </section>
 </main>
 
-<jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
+<div th:replace="~{fragment/footer :: footerFragment}"></div>
+
+</body>
+</html>

@@ -1,14 +1,11 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
 	<title>리콜 보도자료 수정</title>
 
-	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.css" />
-	<script src="${pageContext.request.contextPath}/js/jquery.js"></script>
+	<link rel="stylesheet" th:href="@{/css/main.css}" />
+	<script th:src="@{/js/jquery.js}"></script>
 
 	<style>
 		body {
@@ -110,20 +107,21 @@
 </head>
 
 <body>
-<jsp:include page="/WEB-INF/views/fragment/adminheader.jsp"/>
+<div th:replace="~{fragment/adminheader :: adminHeaderFragment}"></div>
 
-<div class="container">
+<div class="container" th:if="${board != null}">
 	<h2>리콜 보도자료 수정</h2>
 	<hr>
 
-	<form method="post" action="/admin/press/modify">
-		<input type="hidden" name="boardNo" value="${board.boardNo}">
-		<input type="hidden" name="pageNum" value="${cri.pageNum}">
-		<input type="hidden" name="amount" value="${cri.amount}">
+	<form method="post" th:action="@{/admin/press/modify}" th:object="${board}">
+		<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+		<input type="hidden" th:field="*{boardNo}">
+		<input type="hidden" name="pageNum" th:value="${cri.pageNum}">
+		<input type="hidden" name="amount" th:value="${cri.amount}">
 
 		<div class="form-group">
 			<label>작성자</label>
-			<input type="text" name="boardName" value="${board.boardName}" readonly>
+			<input type="text" th:field="*{boardName}" readonly>
 		</div>
 
 		<hr>
@@ -144,29 +142,30 @@
 
 		<div class="form-group">
 			<label>제목</label>
-			<input type="text" name="boardTitle" value="${board.boardTitle}">
+			<input type="text" th:field="*{boardTitle}">
 		</div>
 
 		<hr>
 
 		<div class="form-group">
 			<label>내용</label>
-			<textarea name="boardContent">${board.boardContent}</textarea>
+			<textarea th:field="*{boardContent}"></textarea>
 		</div>
 
 		<hr>
 
 		<div class="btn-area">
 			<input type="submit" value="수정완료" class="btn-primary">
-			<a href="/admin/press/detail?boardNo=${board.boardNo}&pageNum=${cri.pageNum}&amount=${cri.amount}" class="btn-secondary">취소</a>
+			<a th:href="@{/admin/press/detail(boardNo=*{boardNo}, pageNum=${cri.pageNum}, amount=${cri.amount})}" class="btn-secondary">취소</a>
 		</div>
 	</form>
 </div>
+<div th:replace="~{fragment/footer :: footerFragment}"></div>
 </body>
 </html>
-<script>
+<script th:inline="javascript">
 	$(document).ready(function() {
-		const boardNo = "${board.boardNo}";
+		const boardNo = /*[[${board.boardNo}]]*/ '';
 
 		$.getJSON("/getFileList", { boardNo: boardNo }, function(arr) {
 			let str = "";
@@ -177,7 +176,7 @@
 				if (obj.image) {
 					str += "<img src='/display?fileName=" + path + "' width='60'>";
 				} else {
-					str += "<img src='${pageContext.request.contextPath}/img/attach.png' width='20'>";
+					str += "<img src='" + /*[[@{/img/attach.png}]]*/ '' + "' width='20'>";
 				}
 				str += " <button type='button' class='delete-old' data-uuid='" + obj.uuid + "'>삭제</button>";
 				str += "</li>";
@@ -229,15 +228,3 @@
 		});
 	});
 </script>
-
-
-
-
-
-
-
-
-
-
-
-

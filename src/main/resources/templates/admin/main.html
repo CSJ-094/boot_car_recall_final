@@ -1,13 +1,9 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>관리자 대시보드</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css}">
     <style>
         .admin-container {
             max-width: 1200px;
@@ -23,8 +19,7 @@
     </style>
 </head>
 <body>
-<%@ include file="../fragment/adminheader.jsp" %>
-<div class="container admin-container">
+<div th:replace="~{fragment/adminheader :: adminHeaderFragment}"></div>
     <div class="admin-container">
 
         <div class="chart-container text-center">
@@ -45,48 +40,29 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:choose>
-                    <c:when test="${not empty recentReports}">
-                        <c:forEach var="report" items="${recentReports}">
-                            <tr onclick="location.href='${pageContext.request.contextPath}/admin/report_detail/${report.id}'">
-                                <td><c:out value="${report.id}"/></td>
-                                <td><c:out value="${report.reporterName}"/></td>
-                                <td><c:out value="${report.carModel}"/></td>
-                                <td><c:out value="${report.vin}"/></td>
-                                <td>
-                                    <%-- reportDate가 Date 객체일 경우와 String일 경우 모두 처리 --%>
-                                    <c:set var="dateStr" value="${report.reportDate}"/>
-                                    <c:out value="${fn:substring(dateStr, 0, 10)}"/>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                    </c:when>
-                    <c:otherwise>
-                        <tr>
-                            <td colspan="5" class="text-center">최근 7일간 접수된 결함 신고가 없습니다.</td>
-                        </tr>
-                    </c:otherwise>
-                </c:choose>
+                <tr th:if="${#lists.isEmpty(recentReports)}">
+                    <td colspan="5" class="text-center">최근 7일간 접수된 결함 신고가 없습니다.</td>
+                </tr>
+                <tr th:each="report : ${recentReports}" th:onclick="|location.href='@{/admin/report_detail/{id}(id=${report.id})}'|">
+                    <td th:text="${report.id}"></td>
+                    <td th:text="${report.reporterName}"></td>
+                    <td th:text="${report.carModel}"></td>
+                    <td th:text="${report.vin}"></td>
+                    <td th:text="${#temporals.format(report.reportDate, 'yyyy-MM-dd')}"></td>
+                </tr>
                 </tbody>
             </table>
         </div>
     </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/cdn.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-<script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
     document.addEventListener("DOMContentLoaded", function() {
         // 서버로부터 받은 일별 통계 데이터
-        let dailyStatsData = [];
-        <c:if test="${not empty dailyStats}">
-            dailyStatsData = [
-                <c:forEach var="stat" items="${dailyStats}" varStatus="status">
-                { report_day: "${stat.report_day}", count: ${stat.count} }<c:if test="${not status.last}">,</c:if>
-                </c:forEach>
-            ];
-        </c:if>
+        const dailyStatsData = /*[[${dailyStats}]]*/ [];
         console.log("서버에서 받은 원본 데이터 (dailyStatsData):", dailyStatsData);
 
         // 1. 최근 7일 날짜 라벨 생성 (YYYY-MM-DD 형식)
@@ -169,7 +145,8 @@
             }
         });
     });
-</script> 
-<%@ include file="../fragment/footer.jsp" %>
+    /*]]>*/
+</script>
+<div th:replace="~{fragment/footer :: footerFragment}"></div>
 </body>
 </html>

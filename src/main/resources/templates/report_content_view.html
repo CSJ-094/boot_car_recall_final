@@ -1,14 +1,11 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>${content_view.boardTitle}</title>
+    <title th:text="${content_view.boardTitle}">보도자료 상세</title>
 
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.css"/>
-    <script src="${pageContext.request.contextPath}/js/jquery.js"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+    <script th:src="@{/js/jquery.js}"></script>
 
     <style>
         body {
@@ -122,29 +119,30 @@
 </head>
 
 <body>
-<jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
+<div th:replace="~{fragment/header :: headerFragment}"></div>
 
-<div class="container">
-    <h2>${content_view.boardTitle}</h2>
+<div class="container" th:if="${content_view != null}" th:object="${content_view}">
+    <h2 th:text="*{boardTitle}"></h2>
 
     <hr>
 
     <div class="info-line">
-        <div><strong>작성자</strong> | ${content_view.boardName}</div>
-        <div><strong>조회수</strong> | ${content_view.boardHit}</div>
+        <div><strong>작성자</strong> | <span th:text="*{boardName}"></span></div>
+        <div><strong>조회수</strong> | <span th:text="*{boardHit}"></span></div>
     </div>
 
     <hr>
 
     <div class="info-line">
-        <div><strong>작성일</strong> | ${content_view.boardDate}</div>
+        <div><strong>작성일</strong> | <span th:text="*{boardDate}"></span></div>
     </div>
 
     <hr>
 
     <div class="uploadResult">
         <ul></ul>
-        <div class="file-check" style="display:none; color:#666; text-align:left; font-size:15px;">
+        <div class="file-check" style="display:none; color:#666; text-align:left; font-size:15px;"
+             th:if="${#lists.isEmpty(content_view.attachList)}">
             첨부된 파일이 없습니다.
         </div>
     </div>
@@ -156,24 +154,26 @@
     <hr>
 
     <div class="content">
-        ${content_view.boardContent}
+        <p th:utext="*{boardContent}"></p>
     </div>
 
 
     <div class="actions">
-		<a href="list?pageNum=${pageNum}&amount=${amount}">목록으로</a>
+		<a th:href="@{/board/report_recallInfo(pageNum=${pageNum}, amount=${amount})}">목록으로</a>
     </div>
 
-    <%--    BoardController에 report_delete 메소드 호출용--%>
-	<form method="get" id="actionForm">		<input type="hidden" name="pageNum" value="${pageNum}">
-        <input type="hidden" name="amount" value="${amount}">
-        <input type="hidden" name="boardNo" value="${content_view.boardNo}">
+	<form method="get" id="actionForm" th:action="@{/board/report_recallInfo}">
+        <input type="hidden" name="pageNum" th:value="${pageNum}">
+        <input type="hidden" name="amount" th:value="${amount}">
+        <input type="hidden" name="boardNo" th:value="*{boardNo}">
     </form>
 </div>
 
-<script>
+<div th:replace="~{fragment/footer :: footerFragment}"></div>
+
+<script th:inline="javascript">
     $(document).ready(function () {
-        const boardNo = "${content_view.boardNo}";
+        const boardNo = /*[[${content_view.boardNo}]]*/ '';
 
         $.getJSON("/getFileList", {boardNo: boardNo}, function (arr) {
             let str = "";
@@ -185,7 +185,7 @@
                 if (obj.image) {
                     str += "<img src='/display?fileName=" + path + "' width='80'>";
                 } else {
-                    str += "<img src='${pageContext.request.contextPath}/img/attach.png' width='25'>";
+                    str += "<img src='" + /*[[@{/img/attach.png}]]*/ '' + "' width='25'>";
                 }
 
                 str += "</li>";
@@ -226,5 +226,4 @@
     });
 </script>
 
-</body>
 </html>

@@ -65,7 +65,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authorize -> authorize
                 .antMatchers(
-                    "/", "/home", "/signup", "/login", "/css/**", "/js/**", "/img/**", "/video/**",
+                    "/", "/home", "/signup", "/login", "/css/**", "/js/**", "/img/**", "/video/**", "/assets/**",
                     "/notice/**", "/faq/**", "/recall-status", "/report/**", "/complain/**",
                     "/verify-email", "/reset-password-form", "/reset-password-confirm",
                     "/email-sent", "/account-result", "/find-account", "/find-id",
