@@ -71,6 +71,12 @@
     	WHERE MAKER IS NOT NULL
       		AND TRIM(MAKER) != ''
     	ORDER BY MAKER
-</select>
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="recallResultMap">
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        FROM RECALL
+        WHERE ID = #{id}
+    </select>
 
 </mapper>

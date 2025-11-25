@@ -26,4 +26,7 @@ public interface RecallDAO {
     
     // 제조사 목록 조회 추가
     List<String> selectDistinctMaker();
+
+    // ID로 리콜 상세 조회
+    RecallDTO selectById(Long id);
 }

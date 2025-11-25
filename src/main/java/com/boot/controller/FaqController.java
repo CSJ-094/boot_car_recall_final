@@ -1,6 +1,6 @@
 package com.boot.controller;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,7 +30,7 @@ public class FaqController {
         log.info("@# User Faq list requested: {}", cri);
         
         // **[Service 호출]**: FaqService의 목록 조회 및 전체 개수 메서드 재사용
-        ArrayList<FaqDTO> list = faqService.getFaqList(cri);
+        List<FaqDTO> list = faqService.getFaqList(cri);
         int total = faqService.getTotal();
 
         model.addAttribute("list", list);

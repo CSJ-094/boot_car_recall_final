@@ -1,92 +1,69 @@
 package com.boot.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import com.boot.dao.UploadDAO;
-import com.boot.dto.BoardAttachDTO;
 import com.boot.dao.BoardDAO;
 import com.boot.dto.BoardDTO;
 import com.boot.dto.Criteria;
-import org.apache.ibatis.session.SqlSession;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService {
 
-    @Autowired
-    private SqlSession sqlSession;
-    @Autowired
-    private UploadService uploadService;
+    private final BoardDAO boardDAO;
+    private final UploadService uploadService; // UploadService는 파일 처리를 위해 필요할 수 있음
 
     @Override
-    public ArrayList<BoardDTO> list() {
-        BoardDAO dao = sqlSession.getMapper(BoardDAO.class);
-        ArrayList<BoardDTO> list = dao.list();
-        return list;
+    public List<BoardDTO> list() {
+        return boardDAO.list();
     }
 
     @Override
-    public ArrayList<BoardDTO> listWithPaging(Criteria cri) {
-        BoardDAO dao = sqlSession.getMapper(BoardDAO.class);
-        return dao.listWithPaging(cri);
+    public List<BoardDTO> listWithPaging(Criteria cri) {
+        return boardDAO.listWithPaging(cri);
     }
 
     @Override
     public int getTotalCount(Criteria cri) {
-        BoardDAO dao = sqlSession.getMapper(BoardDAO.class);
-        return dao.getTotalCount(cri);
+        return boardDAO.getTotalCount(cri);
     }
 
     @Override
+    @Transactional
     public void write(HashMap<String, String> param) {
-        BoardDAO dao = sqlSession.getMapper(BoardDAO.class);
-        dao.write(param);
+        boardDAO.write(param);
     }
 
     @Override
-    public BoardDTO contentView(HashMap<String, String> param) {
-        BoardDAO dao = sqlSession.getMapper(BoardDAO.class);
-        // HashMap에서 "boardNo" 키의 값을 int로 변환하여 전달
-        int boardNo = Integer.parseInt(param.get("boardNo"));
-        BoardDTO dto = dao.contentView(boardNo);
-
-        return dto;
-    }
-
-    @Override
+    @Transactional
     public BoardDTO contentView(int boardNo) {
-        BoardDAO dao = sqlSession.getMapper(BoardDAO.class);
-        BoardDTO dto = dao.contentView(boardNo);
-
-        return dto;
+        boardDAO.hitUp(boardNo);
+        return boardDAO.contentView(boardNo);
     }
 
     @Override
+    @Transactional
     public void modify(HashMap<String, String> param) {
-        BoardDAO dao = sqlSession.getMapper(BoardDAO.class);
-        dao.modify(param);
+        boardDAO.modify(param);
     }
 
     @Override
+    @Transactional
     public void delete(HashMap<String, String> param) {
-
-
-        BoardDAO dao = sqlSession.getMapper(BoardDAO.class);
-        UploadDAO uploadDao = sqlSession.getMapper(UploadDAO.class);
-        int boardNo = Integer.parseInt(param.get("boardNo"));
-        List<BoardAttachDTO> filePath = uploadDao.getFileList(boardNo);
-        uploadService.deleteFile(filePath);
-
-        uploadDao.deleteFile(boardNo);
-        dao.delete(param);
+        // 파일 삭제 로직은 UploadService 등으로 위임하는 것이 좋으나, 일단 유지
+        // int boardNo = Integer.parseInt(param.get("boardNo"));
+        // List<BoardAttachDTO> filePath = uploadDao.getFileList(boardNo);
+        // uploadService.deleteFile(filePath);
+        // uploadDao.deleteFile(boardNo);
+        boardDAO.delete(param);
     }
 
     @Override
-    public void hitUp(int boardNo) {
-        BoardDAO dao = sqlSession.getMapper(BoardDAO.class);
-        dao.hitUp(boardNo);
+    public List<BoardDTO> searchByKeyword(String keyword) {
+        return boardDAO.searchByKeyword(keyword);
     }
 }

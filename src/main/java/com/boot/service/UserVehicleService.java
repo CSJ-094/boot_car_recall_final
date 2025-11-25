@@ -23,8 +23,8 @@ public class UserVehicleService {
         return userVehicleDao.findByUsername(username);
     }
 
-    public List<UserVehicleDto> getAllUserVehicles() {
-        return userVehicleDao.findAll();
+    public List<String> getUsernamesByCarModel(String carModel) {
+        return userVehicleDao.findUsernamesByCarModel(carModel);
     }
 
     @Transactional

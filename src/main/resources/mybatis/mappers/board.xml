@@ -28,7 +28,7 @@
         <result property="boardContent" column="BOARD_CONTENT"/>
         <result property="boardName" column="BOARD_NAME"/>
         <result property="boardDate" column="BOARD_DATE"/>
-        <result property="hit" column="BOARD_HIT"/>
+        <result property="hit" column="HIT"/>
     </resultMap>
 
     <select id="list" resultMap="boardResultMap">
@@ -76,4 +76,10 @@
         DELETE FROM RECALL_BOARD WHERE BOARD_NO = #{boardNo}
     </delete>
 
+    <select id="searchByKeyword" parameterType="String" resultMap="boardResultMap">
+        SELECT BOARD_NO, BOARD_TITLE, BOARD_CONTENT, BOARD_NAME, BOARD_DATE, HIT
+        FROM RECALL_BOARD
+        WHERE BOARD_TITLE LIKE CONCAT('%', #{keyword}, '%') OR BOARD_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY BOARD_NO DESC
+    </select>
 </mapper>

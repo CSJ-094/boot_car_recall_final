@@ -6,7 +6,7 @@ import com.boot.dto.FaqDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -14,7 +14,7 @@ public class FaqServiceImpl implements FaqService {
     private final FaqDAO faqDAO;
 
     @Override
-    public ArrayList<FaqDTO> getFaqList(Criteria cri) {
+    public List<FaqDTO> getFaqList(Criteria cri) {
         return faqDAO.listWithPaging(cri);
     }
 
@@ -41,5 +41,10 @@ public class FaqServiceImpl implements FaqService {
     @Override
     public void deleteFaq(long faq_id) {
         faqDAO.delete(faq_id);
+    }
+
+    @Override
+    public List<FaqDTO> searchByKeyword(String keyword) {
+        return faqDAO.searchByKeyword(keyword);
     }
 }

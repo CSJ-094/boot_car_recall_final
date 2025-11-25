@@ -1,16 +1,7 @@
 package com.boot.controller;
 
-import com.boot.dto.Criteria;
-import com.boot.dto.NoticeDTO;
-import com.boot.dto.BoardDTO;
-import com.boot.dto.DefectReportDTO;
-import com.boot.dto.PageDTO;
-import com.boot.dto.RecallDTO;
-import com.boot.dto.SearchResultsDTO;
-import com.boot.service.DefectReportService;
-import com.boot.service.NoticeService;
-import com.boot.service.BoardService;
-import com.boot.service.RecallService;
+import com.boot.dto.*;
+import com.boot.service.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +10,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable; // PathVariable 임포트
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,29 +30,32 @@ public class MainController {
     private final DefectReportService defectReportService;
     private final NoticeService noticeService;
     private final BoardService boardService;
+    private final SearchService searchService;
 
     // -------------------------------------------------------------------
-    // 1. 메인 페이지 (리콜 검색 기능 포함)
+    // 1. 메인 페이지
     // -------------------------------------------------------------------
     @GetMapping("/")
-    public String main(Model model, @RequestParam(value = "query", required = false) String query) {
-        // 최근 공지사항 5개 조회
+    public String main(Model model) {
         Criteria noticeCri = new Criteria(1, 5);
         List<NoticeDTO> noticeList = noticeService.listWithPaging(noticeCri);
         model.addAttribute("noticeList", noticeList);
 
-        // 최근 보도자료 5개 조회
         Criteria pressCri = new Criteria(1, 5);
         List<BoardDTO> pressList = boardService.listWithPaging(pressCri);
         model.addAttribute("pressList", pressList);
 
-
-        if (query != null && !query.trim().isEmpty()) {
-            List<RecallDTO> searchResults = recallService.searchRecallsByModelName(query.trim());
-            model.addAttribute("searchQuery", query);
-            model.addAttribute("searchResults", new SearchResultsDTO(query, searchResults));
-        }
         return "main";
+    }
+
+    // -------------------------------------------------------------------
+    // 통합 검색 처리
+    // -------------------------------------------------------------------
+    @GetMapping("/search")
+    public String search(@RequestParam(value = "query") String query, Model model) {
+        SearchResultsDTO results = searchService.searchAll(query);
+        model.addAttribute("results", results);
+        return "search_results";
     }
 
     // -------------------------------------------------------------------
@@ -96,7 +91,6 @@ public class MainController {
 
             recallService.saveRecallData(recallList);
 
-            // 데이터 로드 후 전체 카운트 재확인
             int count = recallService.getRecallCount(new Criteria());
             model.addAttribute("message", "성공적으로 " + count + "개의 리콜 데이터를 데이터베이스에 저장했습니다.");
 
@@ -132,7 +126,6 @@ public class MainController {
             e.printStackTrace();
             rttr.addFlashAttribute("errorMessage", "오류가 발생하여 신고가 접수되지 않았습니다: " + e.getMessage());
         }
-        // 리다이렉션 경로 수정: /defect_report_list -> /report/history
         return "redirect:/report/history";
     }
 
@@ -214,7 +207,17 @@ public class MainController {
             e.printStackTrace();
             rttr.addFlashAttribute("errorMessage", "오류가 발생하여 신고 삭제에 실패했습니다: " + e.getMessage());
         }
-        // 리다이렉션 경로 수정: /defect-report-list -> /report/history
         return "redirect:/report/history";
+    }
+
+    // -------------------------------------------------------------------
+    // 11. 리콜 상세 조회
+    // URL: /recall/detail/{id}
+    // -------------------------------------------------------------------
+    @GetMapping("/recall/detail/{id}")
+    public String recallDetail(@PathVariable("id") Long id, Model model) {
+        RecallDTO recall = recallService.getRecallById(id);
+        model.addAttribute("recall", recall);
+        return "recall_detail"; // recall_detail.jsp 뷰 반환
     }
 }
