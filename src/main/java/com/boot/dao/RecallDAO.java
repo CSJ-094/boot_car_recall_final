@@ -32,4 +32,10 @@ public interface RecallDAO {
 
     // ID로 리콜 상세 조회
     RecallDTO selectById(Long id);
+
+    // VIN으로 검색
+    List<RecallDTO> searchByVin(@Param("vin") String vin);
+
+    // 등록번호로 검색
+    List<RecallDTO> searchByRegistrationNumber(@Param("registrationNumber") String registrationNumber);
 }

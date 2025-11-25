@@ -100,4 +100,14 @@ public class RecallServiceImpl implements RecallService {
     public RecallDTO getRecallById(Long id) {
         return recallDAO.selectById(id);
     }
+
+    @Override
+    public List<RecallDTO> searchByVin(String vin) {
+        return recallDAO.searchByVin(vin);
+    }
+
+    @Override
+    public List<RecallDTO> searchByRegistrationNumber(String registrationNumber) {
+        return recallDAO.searchByRegistrationNumber(registrationNumber);
+    }
 }

@@ -99,6 +99,14 @@
                     <span class="detail-content">${recall.recallDate}</span>
                 </div>
                 <div class="detail-item">
+                    <span class="detail-label">VIN:</span>
+                    <span class="detail-content">${recall.vin}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">등록번호:</span>
+                    <span class="detail-content">${recall.registrationNumber}</span>
+                </div>
+                <div class="detail-item">
                     <span class="detail-label">리콜 사유:</span>
                     <span class="detail-content reason">${recall.recallReason}</span>
                 </div>
