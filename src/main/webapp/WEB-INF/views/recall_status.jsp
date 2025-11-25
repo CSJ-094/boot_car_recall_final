@@ -68,9 +68,13 @@
         .pagination strong { background-color: #337ab7; color: white; border-color: #337ab7; }
         
         /* 컬럼 너비 설정 */
-        .col-maker { width: 12%; }
-        .col-model { width: 18%; }
-        .col-date { width: 12%; }
+        .col-maker { width: 10%; }
+        .col-model { width: 15%; }
+        .col-date { width: 10%; }
+        .col-vin { width: 15%; } /* VIN 컬럼 너비 추가 */
+        .col-regNum { width: 10%; } /* 등록번호 컬럼 너비 추가 */
+        .col-reason { width: auto; } /* 리콜 사유는 남은 공간 활용 */
+        .col-detail { width: 8%; } /* 상세 버튼 컬럼 너비 추가 */
         
         .csv-download-btn {
             display: inline-block;
@@ -133,7 +137,10 @@
                             <th class="col-maker">제조사</th>
                             <th class="col-model">차종</th>
                             <th class="col-date">리콜 날짜</th>
-                            <th>리콜 사유</th>
+                            <th class="col-vin">VIN</th>
+                            <th class="col-regNum">등록번호</th>
+                            <th class="col-reason">리콜 사유</th>
+                            <th class="col-detail">상세</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -142,7 +149,10 @@
                                 <td>${recall.maker}</td>
                                 <td><a href="/recall/detail/${recall.id}">${recall.modelName}</a></td>
                                 <td>${recall.recallDate}</td>
+                                <td>${recall.vin}</td>
+                                <td>${recall.registrationNumber}</td>
                                 <td>${recall.recallReason}</td>
+                                <td><a href="/recall/detail/${recall.id}">보기</a></td>
                             </tr>
                         </c:forEach>
                     </tbody>

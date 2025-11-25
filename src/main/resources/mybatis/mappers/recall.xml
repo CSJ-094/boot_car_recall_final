@@ -8,18 +8,18 @@
     <insert id="insertRecall" parameterType="com.boot.dto.RecallDTO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO RECALL (
         MAKER, MODEL_NAME, MAKE_START, MAKE_END,
-        RECALL_DATE, RECALL_REASON
+        RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
         ) VALUES (
         #{maker}, #{modelName}, #{makeStart}, #{makeEnd},
-        #{recallDate}, #{recallReason}
+        #{recallDate}, #{recallReason}, #{vin}, #{registrationNumber}
         )
     </insert>
 
     <insert id="insertRecallList" parameterType="java.util.List">
-        INSERT INTO RECALL (MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON)
+        INSERT INTO RECALL (MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER)
         VALUES
         <foreach collection="list" item="recall">
-            (#{recall.maker}, #{recall.modelName}, #{recall.makeStart}, #{recall.makeEnd}, #{recall.recallDate}, #{recall.recallReason})
+            (#{recall.maker}, #{recall.modelName}, #{recall.makeStart}, #{recall.makeEnd}, #{recall.recallDate}, #{recall.recallReason}, #{recall.vin}, #{recall.registrationNumber})
         </foreach>
     </insert>
 
@@ -31,16 +31,20 @@
         <result property="makeEnd" column="MAKE_END" />
         <result property="recallDate" column="RECALL_DATE" />
         <result property="recallReason" column="RECALL_REASON" />
+        <result property="vin" column="VIN" />
+        <result property="registrationNumber" column="REGISTRATION_NUMBER" />
     </resultMap>
 
 
     <select id="selectAll" parameterType="com.boot.dto.Criteria" resultMap="recallResultMap">
-        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
         FROM RECALL
         <where>
             <if test="keyword != null and keyword != ''">
                 UPPER(MAKER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
                 OR UPPER(MODEL_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(REGISTRATION_NUMBER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
             </if>
         </where>
         ORDER BY ID DESC
@@ -53,13 +57,15 @@
             <if test="keyword != null and keyword != ''">
                 UPPER(MAKER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
                 OR UPPER(MODEL_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(REGISTRATION_NUMBER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
             </if>
         </where>
     </select>
 
     <select id="searchByModelName" parameterType="string" resultMap="recallResultMap">
         SELECT
-        ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
         FROM RECALL
         WHERE UPPER(MODEL_NAME) LIKE CONCAT('%', UPPER(#{modelName}), '%')
         ORDER BY RECALL_DATE DESC
@@ -81,9 +87,23 @@
     </select>
 
     <select id="selectById" parameterType="long" resultMap="recallResultMap">
-        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
         FROM RECALL
         WHERE ID = #{id}
+    </select>
+
+    <select id="searchByVin" parameterType="string" resultMap="recallResultMap">
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
+        FROM RECALL
+        WHERE UPPER(VIN) LIKE CONCAT('%', UPPER(#{vin}), '%')
+        ORDER BY RECALL_DATE DESC
+    </select>
+
+    <select id="searchByRegistrationNumber" parameterType="string" resultMap="recallResultMap">
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
+        FROM RECALL
+        WHERE UPPER(REGISTRATION_NUMBER) LIKE CONCAT('%', UPPER(#{registrationNumber}), '%')
+        ORDER BY RECALL_DATE DESC
     </select>
 
 </mapper>

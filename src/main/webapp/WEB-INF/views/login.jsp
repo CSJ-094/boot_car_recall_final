@@ -51,6 +51,41 @@
 
     <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
 
-    <script src="/js/login.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userBtn = document.getElementById('user-btn');
+            const adminBtn = document.getElementById('admin-btn');
+            const loginForm = document.getElementById('login-form');
+            const loginTypeInput = document.getElementById('login-type');
+
+            function setLoginMode(role) {
+                if (role === 'user') {
+                    userBtn.classList.add('active');
+                    adminBtn.classList.remove('active');
+                    loginForm.action = '/login';
+                    loginTypeInput.value = 'user';
+                } else { // admin
+                    adminBtn.classList.add('active');
+                    userBtn.classList.remove('active');
+                    loginForm.action = '/admin/login';
+                    loginTypeInput.value = 'admin';
+                }
+            }
+
+            userBtn.addEventListener('click', function() {
+                setLoginMode('user');
+            });
+
+            adminBtn.addEventListener('click', function() {
+                setLoginMode('admin');
+            });
+
+            // 초기 로드 시 URL 파라미터에 따라 모드 설정 (예: /login?admin=true)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('admin')) {
+                setLoginMode('admin');
+            }
+        });
+    </script>
 </body>
 </html>

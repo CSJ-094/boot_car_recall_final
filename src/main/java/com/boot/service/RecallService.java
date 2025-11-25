@@ -37,4 +37,10 @@ public interface RecallService {
 
     // 9. ID로 리콜 상세 조회
     RecallDTO getRecallById(Long id);
+
+    // 10. VIN으로 리콜 검색
+    List<RecallDTO> searchByVin(String vin);
+
+    // 11. 등록번호로 리콜 검색
+    List<RecallDTO> searchByRegistrationNumber(String registrationNumber);
 }
