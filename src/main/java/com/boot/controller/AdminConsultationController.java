@@ -68,6 +68,10 @@ public class AdminConsultationController {
                 .flatMap(session -> {
                     session.connectAgent(agentId, agentName);
                     sessionManager.connectCustomerToAgent(customerSessionId, agentId);
+
+                    // 고객에게 상담사 연결 완료 이벤트 전송 (WebSocket)
+                    sessionManager.sendEventToCustomer(customerSessionId, "AGENT_CONNECTED", "상담사가 연결되었습니다");
+
                     return consultationSessionRepository.save(session)
                             .then(Mono.just(ResponseEntity.ok("고객 상담이 연결되었습니다")));
                 })

@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let customerSessionId = null;
     let webSocket = null;
     let chatMode = "gpt";
+    let isConsultationEnded = false;  // 상담 종료 상태 추적
     
     const PRIMARY_COLOR = "#8ECFFB"; // pastel sky blue
     const SECONDARY_COLOR = "#BEE7FF"; // lighter sky tone
@@ -74,8 +75,14 @@ document.addEventListener("DOMContentLoaded", function () {
     titleSpan.style.fontWeight = "600";
     titleSpan.style.fontSize = "16px";
 
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.display = "flex";
+    buttonContainer.style.gap = "8px";
+    buttonContainer.style.alignItems = "center";
+
     const agentButton = document.createElement("button");
     agentButton.innerText = "상담사 연결";
+    agentButton.id = "agent-request-btn";
     agentButton.style.background = "rgba(255,255,255,0.2)";
     agentButton.style.border = "1px solid rgba(255,255,255,0.4)";
     agentButton.style.color = "white";
@@ -92,6 +99,26 @@ document.addEventListener("DOMContentLoaded", function () {
         agentButton.style.background = "rgba(255,255,255,0.2)";
     });
 
+    const endChatButton = document.createElement("button");
+    endChatButton.innerText = "상담 종료";
+    endChatButton.id = "end-chat-btn";
+    endChatButton.style.background = "rgba(239, 68, 68, 0.3)";
+    endChatButton.style.border = "1px solid rgba(239, 68, 68, 0.5)";
+    endChatButton.style.color = "white";
+    endChatButton.style.padding = "6px 12px";
+    endChatButton.style.cursor = "pointer";
+    endChatButton.style.borderRadius = "6px";
+    endChatButton.style.fontSize = "12px";
+    endChatButton.style.transition = "all 0.3s ease";
+    endChatButton.style.fontFamily = '"Noto Sans KR", sans-serif';
+    endChatButton.style.display = "none";
+    endChatButton.addEventListener("mouseenter", () => {
+        endChatButton.style.background = "rgba(239, 68, 68, 0.4)";
+    });
+    endChatButton.addEventListener("mouseleave", () => {
+        endChatButton.style.background = "rgba(239, 68, 68, 0.3)";
+    });
+
     const closeBtn = document.createElement("button");
     closeBtn.innerText = "✕";
     closeBtn.style.background = "none";
@@ -104,7 +131,9 @@ document.addEventListener("DOMContentLoaded", function () {
     closeBtn.style.height = "24px";
 
     header.appendChild(titleSpan);
-    header.appendChild(agentButton);
+    buttonContainer.appendChild(agentButton);
+    buttonContainer.appendChild(endChatButton);
+    header.appendChild(buttonContainer);
     header.appendChild(closeBtn);
     chatWindow.appendChild(header);
 
@@ -244,9 +273,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else if (message.type === "AGENT_CONNECTED") {
                     chatMode = "agent";
                     titleSpan.innerText = "상담사 채팅";
-                    agentButton.disabled = true;
-                    agentButton.style.opacity = "0.5";
+                    agentButton.style.display = "none";
+                    endChatButton.style.display = "block";
                     appendMessage("system", "상담사가 연결되었습니다!");
+                } else if (message.type === "CONSULTATION_ENDED") {
+                    // 상담 종료 상태 설정: 상담사는 더 이상 메시지 전송 불가
+                    isConsultationEnded = true;
+                    // 고객은 GPT와 계속 대화할 수 있도록 chatMode를 GPT로 전환하고 입력은 유지
+                    chatMode = "gpt";
+                    titleSpan.innerText = "실시간 상담 채팅";
+                    agentButton.style.display = "block";
+                    endChatButton.style.display = "none";
+                    // 고객 입력은 허용(입력 비활성화 제거)
+                    if (typeof inputField !== 'undefined') {
+                        inputField.disabled = false;
+                        inputField.style.opacity = "1";
+                        inputField.style.cursor = "text";
+                    }
+                    if (typeof sendBtn !== 'undefined') {
+                        sendBtn.disabled = false;
+                        sendBtn.style.opacity = "1";
+                        sendBtn.style.cursor = "pointer";
+                    }
+                    appendMessage("system", "상담사가 상담을 종료했습니다. 다시 상담을 요청할 수 있습니다.");
                 }
             };
             
@@ -259,8 +308,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log("WebSocket 연결 해제");
                 chatMode = "gpt";
                 titleSpan.innerText = "실시간 상담 채팅";
-                agentButton.disabled = false;
-                agentButton.style.opacity = "1";
+                agentButton.style.display = "block";
+                endChatButton.style.display = "none";
             };
         } catch (e) {
             console.error("WebSocket 연결 실패:", e);
@@ -272,6 +321,10 @@ document.addEventListener("DOMContentLoaded", function () {
     async function sendMessage() {
         const msg = inputField.value.trim();
         if (!msg) return;
+        if (isConsultationEnded && chatMode === "agent") {
+            appendMessage("system", "상담이 종료되었습니다. 메시지를 전송할 수 없습니다.");
+            return;
+        }
 
         appendMessage("user", msg);
         inputField.value = "";
@@ -313,8 +366,31 @@ document.addEventListener("DOMContentLoaded", function () {
             };
             webSocket.send(JSON.stringify(message));
             agentButton.disabled = true;
+            isConsultationEnded = false;  // 새 상담 시작 시 상태 초기화
+            inputField.disabled = false;  // 입력창 활성화
+            sendBtn.disabled = false;
+            inputField.style.opacity = "1";
+            inputField.style.cursor = "text";
+            sendBtn.style.opacity = "1";
+            sendBtn.style.cursor = "pointer";
         }
     });
+
+    // --- 상담 종료 ---
+    endChatButton.addEventListener("click", () => {
+        if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+            const message = {
+                type: "END_CONSULTATION",
+                sessionId: customerSessionId
+            };
+            webSocket.send(JSON.stringify(message));
+        }
+        chatMode = "gpt";
+        titleSpan.innerText = "실시간 상담 채팅";
+        agentButton.style.display = "block";
+        agentButton.disabled = false;
+        endChatButton.style.display = "none";
+    })
 
     // --- 채팅 창 열기 ---
     chatButton.addEventListener("click", () => {

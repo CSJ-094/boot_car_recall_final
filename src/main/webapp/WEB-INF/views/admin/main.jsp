@@ -171,5 +171,6 @@
     });
 </script> 
 <%@ include file="../fragment/footer.jsp" %>
+<script type="text/javascript" src="/js/admin-consultation-dashboard.js"></script>
 </body>
 </html>

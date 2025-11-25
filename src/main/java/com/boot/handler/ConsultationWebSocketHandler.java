@@ -69,6 +69,9 @@ public class ConsultationWebSocketHandler extends TextWebSocketHandler {
             } else if ("MESSAGE".equals(messageDto.getType())) {
                 // 메시지 전송
                 handleCustomerMessage(sessionId, messageDto.getMessage(), session);
+            } else if ("END_CONSULTATION".equals(messageDto.getType())) {
+                // 상담 종료
+                handleEndConsultation(sessionId, session);
             } else if ("DISCONNECT".equals(messageDto.getType())) {
                 // 연결 종료
                 handleDisconnect(sessionId, session);
@@ -125,6 +128,40 @@ public class ConsultationWebSocketHandler extends TextWebSocketHandler {
         if (sessionDTO != null) {
             sessionDTO.close();
             consultationSessionRepository.save(sessionDTO).subscribe();
+        }
+    }
+    
+    private void handleEndConsultation(String sessionId, WebSocketSession session) throws Exception {
+        log.info("고객이 상담 종료 요청: sessionId={}", sessionId);
+        
+        // 고객 세션에서 상담사 연결 정보 가져오기
+        CustomerSession customerSession = sessionManager.getCustomerSession(sessionId);
+        String agentId = null;
+        if (customerSession != null) {
+            agentId = customerSession.getAgentId();
+        }
+        
+        // 상담 세션 상태 업데이트
+        ConsultationSessionDTO sessionDTO = consultationSessionRepository.findBySessionId(sessionId).block();
+        if (sessionDTO != null) {
+            sessionDTO.close();
+            consultationSessionRepository.save(sessionDTO).subscribe();
+        }
+        
+        // 고객 세션에서 상담사 연결 해제
+        if (customerSession != null) {
+            if (agentId != null) {
+                sessionManager.disconnectCustomerFromAgent(sessionId);
+                // 상담사에게 상담 종료 알림 전송
+                sessionManager.sendMessageToAgent(agentId, sessionId, "SYSTEM", "고객이 상담을 종료했습니다.");
+            }
+            customerSession.setStatus("ACTIVE");
+            
+            // 고객에게 상담 종료 알림 전송
+            WebSocketMessageDTO response = new WebSocketMessageDTO();
+            response.setType("CONSULTATION_ENDED");
+            response.setSessionId(sessionId);
+            session.sendMessage(new TextMessage(gson.toJson(response)));
         }
     }
     

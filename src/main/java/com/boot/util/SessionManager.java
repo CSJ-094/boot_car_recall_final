@@ -1,6 +1,7 @@
 package com.boot.util;
 
 import com.boot.dto.MessageNotificationDTO;
+import com.boot.dto.WebSocketMessageDTO;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -137,20 +138,34 @@ public class SessionManager {
     }
     
     /**
-     * 고객에게 메시지 전송
+     * 고객에게 메시지 전송 (상담사 -> 고객)
+     * 보내는 메시지는 고객측 chat.js에서 처리할 수 있도록 WebSocketMessageDTO 형식(type="MESSAGE")으로 전송합니다.
      */
     public void sendMessageToCustomer(String customerSessionId, String senderType, String message) {
         CustomerSession customerSession = customerSessions.get(customerSessionId);
         if (customerSession != null && customerSession.getWebSocketSession().isOpen()) {
             try {
-                MessageNotificationDTO notification = new MessageNotificationDTO(
-                        customerSessionId, senderType, message
-                );
+                WebSocketMessageDTO notification = new WebSocketMessageDTO("MESSAGE", customerSessionId, message, null);
                 customerSession.getWebSocketSession().sendMessage(
                         new TextMessage(gson.toJson(notification))
                 );
             } catch (IOException e) {
                 log.error("고객 메시지 전송 오류: sessionId={}", customerSessionId, e);
+            }
+        }
+    }
+
+    /**
+     * 고객에게 제어 이벤트 전송 (예: AGENT_CONNECTED, AGENT_WAITING 등)
+     */
+    public void sendEventToCustomer(String customerSessionId, String eventType, String message) {
+        CustomerSession customerSession = customerSessions.get(customerSessionId);
+        if (customerSession != null && customerSession.getWebSocketSession().isOpen()) {
+            try {
+                WebSocketMessageDTO event = new WebSocketMessageDTO(eventType, customerSessionId, message, null);
+                customerSession.getWebSocketSession().sendMessage(new TextMessage(gson.toJson(event)));
+            } catch (IOException e) {
+                log.error("고객 이벤트 전송 오류: sessionId={}, eventType={}", customerSessionId, eventType, e);
             }
         }
     }
