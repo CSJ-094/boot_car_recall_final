@@ -2,6 +2,8 @@ package com.boot.service;
 
 import com.boot.dto.Criteria;
 import com.boot.dto.DefectReportDTO;
+import com.boot.dto.RecallDTO;
+import com.boot.dto.RecallSimilarDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -16,4 +18,7 @@ public interface DefectReportService {
     void deleteReport(Long id);
     boolean checkPassword(Long id, String password);
     void updateReportStatus(Long id, String status); // 결함 신고 상태 업데이트 메서드 추가
+    List<RecallSimilarDTO> findSimilarRecalls(String carModel,
+                                              String defectText,
+                                              List<RecallDTO> recallList);
 }

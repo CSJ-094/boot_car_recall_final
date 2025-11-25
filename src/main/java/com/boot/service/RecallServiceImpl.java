@@ -63,7 +63,7 @@ public class RecallServiceImpl implements RecallService {
     // -------------------------------------------------------------------
     @Override
     public List<RecallDTO> getAllRecallsWithoutPaging() {
-        return recallDAO.selectAllWithoutPaging();
+        return recallDAO.selectAllWithoutPagings();
     }
     @Override
     public List<String> getMakerList() {
@@ -116,5 +116,14 @@ public class RecallServiceImpl implements RecallService {
         // startDate/endDate 기본값은 프론트에서 넣어도 되고, 여기서도 세팅 가능 (지금은 생략)
 
         return recallDAO.selectRecallStats(filter);
+
+    @Override
+    public List<RecallDTO> searchByVin(String vin) {
+        return recallDAO.searchByVin(vin);
+    }
+
+    @Override
+    public List<RecallDTO> searchByRegistrationNumber(String registrationNumber) {
+        return recallDAO.searchByRegistrationNumber(registrationNumber);
     }
 }
