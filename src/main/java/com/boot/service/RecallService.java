@@ -28,4 +28,6 @@ public interface RecallService {
     
     // 7. 제조사 목록 조회 (지도 페이지용)
     List<String> getMakerList();
+
+    List<RecallDTO> getAllRecallsWithoutPaging();
 }

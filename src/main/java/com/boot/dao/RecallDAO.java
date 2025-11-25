@@ -26,4 +26,6 @@ public interface RecallDAO {
     
     // 제조사 목록 조회 추가
     List<String> selectDistinctMaker();
+
+    List<RecallDTO> selectAllWithoutPaging();
 }

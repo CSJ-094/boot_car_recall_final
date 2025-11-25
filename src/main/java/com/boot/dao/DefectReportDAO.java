@@ -2,6 +2,7 @@ package com.boot.dao;
 
 import com.boot.dto.Criteria;
 import com.boot.dto.DefectReportDTO;
+import com.boot.dto.RecallDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -17,4 +18,5 @@ public interface DefectReportDAO {
     void updateStatus(@Param("id") Long id, @Param("status") String status);
     void deleteReport(Long id);
     String selectPasswordById(Long id);
+    List<RecallDTO> selectAllWithoutPaging();
 }

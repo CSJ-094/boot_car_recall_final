@@ -33,6 +33,11 @@
         <result property="recallReason" column="RECALL_REASON" />
     </resultMap>
 
+    <select id="selectAllWithoutPaging" resultMap="recallResultMap">
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        FROM RECALL
+        ORDER BY ID DESC
+    </select>
 
     <select id="selectAll" parameterType="com.boot.dto.Criteria" resultMap="recallResultMap">
         SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON

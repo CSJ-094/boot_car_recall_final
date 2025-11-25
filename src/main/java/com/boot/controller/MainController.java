@@ -1,12 +1,6 @@
 package com.boot.controller;
 
-import com.boot.dto.Criteria;
-import com.boot.dto.NoticeDTO;
-import com.boot.dto.BoardDTO;
-import com.boot.dto.DefectReportDTO;
-import com.boot.dto.PageDTO;
-import com.boot.dto.RecallDTO;
-import com.boot.dto.SearchResultsDTO;
+import com.boot.dto.*;
 import com.boot.service.DefectReportService;
 import com.boot.service.NoticeService;
 import com.boot.service.BoardService;
@@ -92,7 +86,8 @@ public class MainController {
         try {
             Resource resource = resourceLoader.getResource("classpath:integrated_recall_data.json");
             InputStream inputStream = resource.getInputStream();
-            List<RecallDTO> recallList = objectMapper.readValue(inputStream, new TypeReference<List<RecallDTO>>() {});
+            List<RecallDTO> recallList = objectMapper.readValue(inputStream, new TypeReference<List<RecallDTO>>() {
+            });
 
             recallService.saveRecallData(recallList);
 
@@ -216,5 +211,29 @@ public class MainController {
         }
         // 리다이렉션 경로 수정: /defect-report-list -> /report/history
         return "redirect:/report/history";
+    }
+
+    @GetMapping("/report/similar-recalls")
+    public String getSimilarRecalls(@RequestParam("id") Long id, Model model, Criteria cri) {
+        DefectReportDTO report = defectReportService.getReportById(id);
+        System.out.println("Report: " + report);
+        if(report == null) {
+            model.addAttribute("errorMessage","정보를 찾을 수 없습니다.");
+            return "defect_report_detail";
+        }
+        List<RecallDTO> recallList = recallService.getAllRecallsWithoutPaging();
+        System.out.println("Recall List Size: " + recallList.size());
+
+        List<RecallSimilarDTO> similarRecalls = defectReportService.findSimilarRecalls(
+                report.getCarModel(),
+                report.getDefectDetails(),
+                recallList
+        );
+        System.out.println("Similar Recalls Size: " + similarRecalls.size());
+
+        model.addAttribute("report", report);
+        model.addAttribute("similarRecalls", similarRecalls);
+
+        return "recall_similar_status";
     }
 }

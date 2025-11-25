@@ -82,6 +82,11 @@ public class RecallServiceImpl implements RecallService {
         return recallDAO.selectDistinctMaker();
     }
 
+    @Override
+    public List<RecallDTO> getAllRecallsWithoutPaging() {
+        return recallDAO.selectAllWithoutPaging();
+    }
+
     // 리콜 알림을 확인하고 발송하는 내부 메서드
     private void checkAndSendRecallNotification(RecallDTO newRecall) {
         List<UserVehicleDto> userVehicles = userVehicleService.getAllUserVehicles();

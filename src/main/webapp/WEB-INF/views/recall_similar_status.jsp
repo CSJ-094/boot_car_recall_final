@@ -1,10 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>차량 리콜 현황</title>
+    <title>유사 리콜 사례</title>
     <link rel="stylesheet" href="/css/main.css" />
     <link rel="stylesheet" href="/css/header.css" />
     <link rel="stylesheet" href="/css/footer.css" />
@@ -75,77 +76,47 @@
     </style>
 </head>
 <body>
-    <jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
+<jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
 
-    <div class="container">
-        <c:if test="${not empty errorMessage}">
-            <div class="error-message">
-                <p>${errorMessage}</p>
-            </div>
-        </c:if>
-
-        <div class="search-container">
-            <form action="/recall-status" method="get">
-                <input type="text" id="searchInput" name="keyword" placeholder="제조사 또는 차종으로 검색..." value="${pageMaker.cri.keyword}">
-                <button type="submit">검색</button>
-            </form>
+<div class="container">
+    <c:if test="${not empty errorMessage}">
+        <div class="error-message">
+            <p>${errorMessage}</p>
         </div>
+    </c:if>
 
-        <c:choose>
-            <c:when test="${not empty recallList}">
-                <table id="recallTable">
-                    <thead>
-                        <tr>
-                            <th class="col-maker">제조사</th>
-                            <th class="col-model">차종</th>
-                            <th class="col-date">리콜 날짜</th>
-                            <th>리콜 사유</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach items="${recallList}" var="recall">
-                            <tr>
-                                <td>${recall.maker}</td>
-                                <td>${recall.modelName}</td>
-                                <td>${recall.recallDate}</td>
-                                <td>${recall.recallReason}</td>
-                            </tr>
-                        </c:forEach>
-                    </tbody>
-                </table>
+    <h2>유사 리콜 사례</h2>
 
-                <!-- Pagination -->
-                <div class="pagination">
-                    <c:if test="${pageMaker.prev}">
-                        <a href="/recall-status?pageNum=${pageMaker.startPage - 1}&keyword=${pageMaker.cri.keyword}">&laquo;</a>
-                    </c:if>
+    <c:if test="${not empty similarRecalls}">
+        <table id="recallTable">
+            <thead>
+            <tr>
+                <th class="col-maker">제조사</th>
+                <th class="col-model">차종</th>
+                <th class="col-date">리콜 날짜</th>
+                <th>리콜 사유</th>
+<%--                <th>유사도 점수</th>--%>
+            </tr>
+            </thead>
+            <tbody>
+            <c:forEach items="${similarRecalls}" var="item">
+                <tr>
+                    <td>${item.recall.maker}</td>
+                    <td>${item.recall.modelName}</td>
+                    <td>${item.recall.recallDate}</td>
+                    <td>${item.recall.recallReason}</td>
+<%--                    <td style="text-align: center"><fmt:formatNumber value="${item.similarity * 100}" maxFractionDigits="0" />%</td>--%>
+                </tr>
+            </c:forEach>
+            </tbody>
+        </table>
+    </c:if>
 
-                    <c:forEach begin="${pageMaker.startPage}" end="${pageMaker.endPage}" var="num">
-                        <c:choose>
-                            <c:when test="${pageMaker.cri.pageNum == num}">
-                                <strong>${num}</strong>
-                            </c:when>
-                            <c:otherwise>
-                                <a href="/recall-status?pageNum=${num}&keyword=${pageMaker.cri.keyword}">${num}</a>
-                            </c:otherwise>
-                        </c:choose>
-                    </c:forEach>
+    <c:if test="${empty similarRecalls}">
+        <p style="text-align:center; padding-top: 20px;">유사 리콜 사례가 없습니다.</p>
+    </c:if>
+</div>
 
-                    <c:if test="${pageMaker.next}">
-                        <a href="/recall-status?pageNum=${pageMaker.endPage + 1}&keyword=${pageMaker.cri.keyword}">&raquo;</a>
-                    </c:if>
-                </div>
-
-            </c:when>
-            <c:otherwise>
-                <c:if test="${empty errorMessage}">
-                    <p style="text-align:center; padding-top: 20px;">표시할 리콜 데이터가 없습니다.</p>
-                </c:if>
-            </c:otherwise>
-        </c:choose>
-    </div>
-
-    <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
-
+<jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
 </body>
 </html>

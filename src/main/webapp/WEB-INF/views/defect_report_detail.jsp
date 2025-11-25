@@ -28,6 +28,8 @@
         .btn-group .delete-btn:hover { background-color: #c82333; }
         .btn-group .back-btn { background-color: #6c757d; color: white; }
         .btn-group .back-btn:hover { background-color: #5a6268; }
+        .btn-group .similar-btn { background-color: #115dd3; color: white; }
+        .btn-group .similar-btn:hover { background-color: #0d47a1; }
 
         /* 비밀번호 입력 모달 스타일 */
         .password-modal { 
@@ -127,6 +129,9 @@
                 <button type="button" class="edit-btn" onclick="showPasswordModal('edit')">수정</button>
                 <button type="button" class="delete-btn" onclick="showPasswordModal('delete')">삭제</button>
                 <a href="/report/history" class="back-btn">목록으로</a>
+                <a href="/report/similar-recalls?id=${report.id}" class="similar-btn">
+                    유사 리콜 사례
+                </a>
             </div>
         </c:if>
     </div>
