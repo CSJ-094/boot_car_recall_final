@@ -448,7 +448,7 @@ public class MainController {
         // 뒤 네 자리 숫자
         regNum.append(String.format("%04d", random.nextInt(10000))); // 0000-9999
         return regNum.toString();
-    }
+    }//
 
     @GetMapping("/report/similar-recalls")
     public String getSimilarRecalls2(@RequestParam("id") Long id, Model model) {
