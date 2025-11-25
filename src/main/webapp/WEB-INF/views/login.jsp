@@ -57,6 +57,8 @@
             const adminBtn = document.getElementById('admin-btn');
             const loginForm = document.getElementById('login-form');
             const loginTypeInput = document.getElementById('login-type');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
 
             function setLoginMode(role) {
                 if (role === 'user') {
@@ -64,11 +66,17 @@
                     adminBtn.classList.remove('active');
                     loginForm.action = '/login';
                     loginTypeInput.value = 'user';
+                    usernameInput.name = 'username';
+                    passwordInput.name = 'password';
+                    usernameInput.placeholder = '아이디';
                 } else { // admin
                     adminBtn.classList.add('active');
                     userBtn.classList.remove('active');
                     loginForm.action = '/admin/login';
                     loginTypeInput.value = 'admin';
+                    usernameInput.name = 'admin_id';
+                    passwordInput.name = 'admin_pw';
+                    usernameInput.placeholder = '관리자 아이디';
                 }
             }
 
@@ -84,6 +92,9 @@
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('admin')) {
                 setLoginMode('admin');
+            } else {
+                // 페이지 로드 시 기본 모드 설정 (사용자)
+                setLoginMode('user');
             }
         });
     </script>
