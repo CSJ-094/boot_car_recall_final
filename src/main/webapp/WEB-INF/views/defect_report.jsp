@@ -31,7 +31,8 @@
 
     <div class="container">
         <h2>결함 신고 접수</h2>
-        <form action="/defect-report" method="post" enctype="multipart/form-data"> <!-- enctype 추가 -->
+        <form action="/defect-report" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <div class="form-group">
                 <label for="reporterName">신고인 성명</label>
                 <input type="text" id="reporterName" name="reporterName" required>

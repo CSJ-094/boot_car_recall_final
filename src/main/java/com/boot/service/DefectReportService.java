@@ -15,4 +15,5 @@ public interface DefectReportService {
     void updateReport(DefectReportDTO report, List<MultipartFile> newFiles, List<String> existingFileNames);
     void deleteReport(Long id);
     boolean checkPassword(Long id, String password);
+    void updateReportStatus(Long id, String status); // 결함 신고 상태 업데이트 메서드 추가
 }

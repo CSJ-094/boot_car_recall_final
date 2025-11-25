@@ -2,7 +2,9 @@ package com.boot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
+@EnableAsync
 @SpringBootApplication
 public class BootCarRecallApplication {
 
@@ -10,4 +12,3 @@ public class BootCarRecallApplication {
 		SpringApplication.run(BootCarRecallApplication.class, args);
 	}
 }
-

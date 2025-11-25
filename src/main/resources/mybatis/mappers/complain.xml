@@ -19,25 +19,25 @@
     </resultMap>
 
     <select id="complain_list" resultMap="Map">
-        select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, TO_CHAR(COMPLAINDATE, 'YYYY-MM-DD HH24:MI') AS COMPLAINDATE
+        select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, DATE_FORMAT(COMPLAINDATE, '%Y-%m-%d %H:%i') AS COMPLAINDATE
         from ONLINE_COMPLAIN
         order by REPORT_ID desc
     </select>
    
     <select id="find_modify_content" parameterType="hashmap" resultMap="Map">
-        select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, TO_CHAR(COMPLAINDATE, 'YYYY-MM-DD HH24:MI') AS COMPLAINDATE
+        select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, DATE_FORMAT(COMPLAINDATE, '%Y-%m-%d %H:%i') AS COMPLAINDATE
         from ONLINE_COMPLAIN
         where REPORT_ID = #{report_id}
     </select>
     
-     <insert id="complain_write">
-    	insert into online_complain(report_id, reporter_name, password, phone, title, COMPLAIN_TYPE, carNum, is_public, content) 
-    	values(REPORT_ID.NEXTVAL, #{reporter_name, jdbcType=VARCHAR}, #{password, jdbcType=VARCHAR}, #{phone, jdbcType=VARCHAR}, #{title, jdbcType=VARCHAR}, 
+     <insert id="complain_write" useGeneratedKeys="true" keyProperty="report_id">
+    	insert into online_complain(reporter_name, password, phone, title, COMPLAIN_TYPE, carNum, is_public, content)
+    	values(#{reporter_name, jdbcType=VARCHAR}, #{password, jdbcType=VARCHAR}, #{phone, jdbcType=VARCHAR}, #{title, jdbcType=VARCHAR},
     	#{complain_type, jdbcType=VARCHAR}, #{carNum, jdbcType=VARCHAR}, #{is_public, jdbcType=VARCHAR}, #{content, jdbcType=VARCHAR})
     </insert>
     
       <select id="contentView" parameterType="hashmap" resultMap="Map">
-    	select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, TO_CHAR(COMPLAINDATE, 'YYYY-MM-DD HH24:MI') AS COMPLAINDATE
+    	select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, DATE_FORMAT(COMPLAINDATE, '%Y-%m-%d %H:%i') AS COMPLAINDATE
         from ONLINE_COMPLAIN
         where REPORT_ID = #{report_id}
     </select>

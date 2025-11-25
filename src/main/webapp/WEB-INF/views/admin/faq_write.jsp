@@ -20,6 +20,7 @@
         <h3>FAQ 작성</h3>
     </div>
     <form action="${pageContext.request.contextPath}/admin/faq/write" method="post">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <div class="form-group">
             <label for="category">카테고리</label>
             <select class="form-control" id="category" name="category" required>

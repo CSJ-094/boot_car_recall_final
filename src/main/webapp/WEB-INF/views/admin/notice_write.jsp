@@ -22,6 +22,7 @@
     </div>
     <hr>
     <form action="${pageContext.request.contextPath}/admin/notice/write" method="post">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <input type="hidden" name="writer" value="${adminId}">
         <div class="form-group">
             <label for="title">제목</label>

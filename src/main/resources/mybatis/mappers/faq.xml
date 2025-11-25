@@ -9,45 +9,45 @@
         <result property="category" column="faqCategory"/>
         <result property="question" column="faqTitle"/>
         <result property="answer" column="faqContent"/>
-        <result property="created_at" column="created_at"/>
+        <result property="created_at" column="faqDate"/>
     </resultMap>
 
     <select id="listWithPaging" resultMap="faqResultMap">
-        SELECT faqNo, faqCategory, faqTitle, faqContent, TO_CHAR(faqDate, 'YYYY-MM-DD') as created_at
-        FROM (
-            SELECT faqNo, faqCategory, faqTitle, faqContent, faqDate, ROWNUM as rnum,
-                   TO_CHAR(faqDate, 'YYYY-MM-DD') as created_at
-            FROM (
-                SELECT faqNo, faqCategory, faqTitle, faqContent, faqDate
-                FROM tbl_faq
-                ORDER BY faqNo DESC
-            )
-            WHERE ROWNUM &lt;= #{pageNum} * #{amount}
-        )
-        WHERE rnum > (#{pageNum} - 1) * #{amount}
+        SELECT faqNo, faqCategory, faqTitle, faqContent, DATE_FORMAT(faqDate, '%Y-%m-%d') as faqDate
+        FROM tbl_faq
+        ORDER BY faqNo DESC
+        LIMIT #{amount} OFFSET ${(pageNum - 1) * amount}
     </select>
 
     <select id="getTotalCount" resultType="int">
         SELECT count(*) FROM tbl_faq
     </select>
 
-    <select id="getFaq" resultMap="faqResultMap">
-        SELECT faqNo, faqCategory, faqTitle, faqContent, TO_CHAR(faqDate, 'YYYY-MM-DD HH24:MI') as created_at FROM tbl_faq WHERE faqNo = #{faq_id}
+    <select id="getFaq" parameterType="long" resultMap="faqResultMap">
+        SELECT faqNo, faqCategory, faqTitle, faqContent, DATE_FORMAT(faqDate, '%Y-%m-%d %H:%i') as faqDate 
+        FROM tbl_faq 
+        WHERE faqNo = #{faq_id}
     </select>
 
-    <insert id="write">
-        <selectKey keyProperty="faq_id" resultType="long" order="BEFORE">
-            SELECT faq_seq.NEXTVAL FROM DUAL
-        </selectKey>
-        INSERT INTO tbl_faq (faqNo, faqCategory, faqTitle, faqContent)
-        VALUES (#{faq_id}, #{category}, #{question}, #{answer})
+    <insert id="write" parameterType="com.boot.dto.FaqDTO" useGeneratedKeys="true" keyProperty="faq_id">
+        INSERT INTO tbl_faq (faqCategory, faqTitle, faqContent, faqDate)
+        VALUES (#{category}, #{question}, #{answer}, NOW())
     </insert>
 
-    <update id="modify">
-        UPDATE tbl_faq SET faqCategory = #{category}, faqTitle = #{question}, faqContent = #{answer}, faqDate = SYSDATE WHERE faqNo = #{faq_id}
+    <update id="modify" parameterType="com.boot.dto.FaqDTO">
+        UPDATE tbl_faq 
+        SET faqCategory = #{category}, faqTitle = #{question}, faqContent = #{answer}, faqDate = NOW() 
+        WHERE faqNo = #{faq_id}
     </update>
 
-    <delete id="delete">
+    <delete id="delete" parameterType="long">
         DELETE FROM tbl_faq WHERE faqNo = #{faq_id}
     </delete>
+
+    <select id="searchByKeyword" parameterType="String" resultMap="faqResultMap">
+        SELECT faqNo, faqCategory, faqTitle, faqContent, DATE_FORMAT(faqDate, '%Y-%m-%d') as faqDate
+        FROM tbl_faq
+        WHERE faqTitle LIKE CONCAT('%', #{keyword}, '%') OR faqContent LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY faqNo DESC
+    </select>
 </mapper>

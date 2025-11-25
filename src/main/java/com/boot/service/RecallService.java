@@ -28,4 +28,13 @@ public interface RecallService {
 
     // 7. 전체 목록 조회 (페이징 없이, CSV 다운로드용)
     List<RecallDTO> getAllRecallsWithoutPaging();
+    
+    // 7. 제조사 목록 조회 (지도 페이지용)
+    List<String> getMakerList();
+
+    // 8. 새로운 리콜에 대한 알림 발송
+    void checkAndSendRecallNotifications(RecallDTO newRecall);
+
+    // 9. ID로 리콜 상세 조회
+    RecallDTO getRecallById(Long id);
 }

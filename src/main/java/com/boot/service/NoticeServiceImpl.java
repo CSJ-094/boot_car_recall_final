@@ -53,4 +53,9 @@ public class NoticeServiceImpl implements NoticeService {
     public void delete(Long notice_id) {
         noticeDAO.delete(notice_id);
     }
+
+    @Override
+    public List<NoticeDTO> searchByKeyword(String keyword) {
+        return noticeDAO.searchByKeyword(keyword);
+    }
 }

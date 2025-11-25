@@ -4,26 +4,25 @@
 
 <mapper namespace="com.boot.dao.DefectReportDAO">
 
-    <insert id="insertReport" parameterType="com.boot.dto.DefectReportDTO">
-        <selectKey keyProperty="id" resultType="long" order="BEFORE">
-            SELECT DEFECT_REPORT_SEQ.NEXTVAL FROM DUAL
-        </selectKey>
+    <insert id="insertReport" parameterType="com.boot.dto.DefectReportDTO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO DEFECT_REPORT (
-            ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+            USERNAME, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD, STATUS
         ) VALUES (
-            #{id},
+            #{username},
             #{reporterName},
             #{contact},
             #{carModel},
             #{vin},
             #{defectDetails},
-            SYSDATE,
-            #{password}
+            CURRENT_TIMESTAMP,
+            #{password},
+            #{status}
         )
     </insert>
 
     <resultMap id="defectReportResultMap" type="com.boot.dto.DefectReportDTO">
         <result property="id" column="ID"/>
+        <result property="username" column="USERNAME"/>
         <result property="reporterName" column="REPORTER_NAME"/>
         <result property="contact" column="CONTACT"/>
         <result property="carModel" column="CAR_MODEL"/>
@@ -31,31 +30,23 @@
         <result property="defectDetails" column="DEFECT_DETAILS"/>
         <result property="reportDate" column="REPORT_DATE"/>
         <result property="password" column="PASSWORD"/>
+        <result property="status" column="STATUS"/>
     </resultMap>
 
-    <!-- 페이징 및 검색 처리를 위한 selectAll 쿼리 수정 -->
+    <!-- 페이징 및 검색 처리를 위한 selectAll 쿼리 수정 (MySQL용) -->
     <select id="selectAll" resultMap="defectReportResultMap">
-        SELECT *
-        FROM (
-            SELECT
-                ROWNUM AS rn,
-                ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
-            FROM (
-                SELECT
-                    ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
-                FROM DEFECT_REPORT
-                <where>
-                    <if test="keyword != null and keyword != ''">
-                        UPPER(REPORTER_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
-                        OR UPPER(CAR_MODEL) LIKE '%' || UPPER(#{keyword}) || '%'
-                        OR UPPER(VIN) LIKE '%' || UPPER(#{keyword}) || '%'
-                    </if>
-                </where>
-                ORDER BY ID DESC
-            )
-            WHERE ROWNUM &lt;= #{pageNum} * #{amount}
-        )
-        WHERE rn > (#{pageNum} - 1) * #{amount}
+        SELECT
+            ID, USERNAME, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD, STATUS
+        FROM DEFECT_REPORT
+        <where>
+            <if test="keyword != null and keyword != ''">
+                UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+            </if>
+        </where>
+        ORDER BY ID DESC
+        LIMIT #{amount} OFFSET #{offset}
     </select>
 
 
@@ -73,9 +64,9 @@
         SELECT COUNT(*) FROM DEFECT_REPORT
         <where>
             <if test="keyword != null and keyword != ''">
-                UPPER(REPORTER_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
-                OR UPPER(CAR_MODEL) LIKE '%' || UPPER(#{keyword}) || '%'
-                OR UPPER(VIN) LIKE '%' || UPPER(#{keyword}) || '%'
+                UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
             </if>
         </where>
     </select>
@@ -83,7 +74,7 @@
     <!-- ID로 단일 결함 신고 조회 -->
     <select id="selectById" parameterType="long" resultMap="defectReportResultMap">
         SELECT
-            ID, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD
+            ID, USERNAME, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD, STATUS
         FROM DEFECT_REPORT
         WHERE ID = #{id}
     </select>
@@ -92,11 +83,19 @@
     <update id="updateReport" parameterType="com.boot.dto.DefectReportDTO">
         UPDATE DEFECT_REPORT
         SET
+            USERNAME = #{username},
             REPORTER_NAME = #{reporterName},
             CONTACT = #{contact},
             CAR_MODEL = #{carModel},
             VIN = #{vin},
-            DEFECT_DETAILS = #{defectDetails}
+            DEFECT_DETAILS = #{defectDetails},
+            STATUS = #{status}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE DEFECT_REPORT
+        SET STATUS = #{status}
         WHERE ID = #{id}
     </update>
 

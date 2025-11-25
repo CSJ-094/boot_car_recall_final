@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %> <!-- sec 태그 라이브러리 추가 -->
 
 <link rel="stylesheet" href="/css/header.css" />
 
@@ -24,8 +25,9 @@
 
                 <!-- 신고 관리 -->
                 <li class="menu-item has-sub">
-                    <a href="/admin/complain/list" class="menu-link">문의 관리</a>
+                    <a href="#" class="menu-link">신고 관리</a>
                     <ul class="submenu">
+                        <li><a href="/admin/defect_reports">결함 신고</a></li>
                         <li><a href="/admin/complain/list">고객 문의</a></li>
                     </ul>
                 </li>
@@ -41,11 +43,14 @@
                 </li>
 
                 <!-- 로그아웃 -->
-                <c:if test="${not empty sessionScope.admin}">
+                <sec:authorize access="isAuthenticated()"> <!-- Spring Security 인증 상태 확인 -->
                     <li class="menu-item">
-                        <a href="/admin/logout" class="menu-link logout-link">로그아웃</a>
+                        <form action="/logout" method="post" style="display: inline;"> <!-- action을 /logout으로 변경 -->
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                            <button type="submit" class="menu-link" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0;">로그아웃</button>
+                        </form>
                     </li>
-                </c:if>
+                </sec:authorize>
             </ul>
         </nav>
     </div>

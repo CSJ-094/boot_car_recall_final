@@ -32,7 +32,6 @@ import org.springframework.ui.Model;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 
@@ -40,6 +39,11 @@ import java.util.HashMap;
 @Slf4j
 @RequestMapping("/admin")
 public class AdminController {
+
+    // ===============================================
+    // Service Injection
+    // ===============================================
+
     @Autowired
     private AdminService service;
 
@@ -61,35 +65,29 @@ public class AdminController {
     @Autowired
     private ComplainService complainService;
 
+    // ===============================================
+    // 인증 및 메인 페이지 (Spring Security 적용 가정)
+    // ===============================================
+
+    // Spring Security의 기본 로그인 폼
     @GetMapping("/login")
     public String loginForm() {
         log.info("@# Admin login form");
         return "admin/login";
     }
 
-    @PostMapping("/login")
-    public String loginProcess(@RequestParam HashMap<String, String> param, HttpServletRequest request, RedirectAttributes rttr) {
-        log.info("@# Admin login process");
-        AdminDTO admin = service.login(param);
-
-        if (admin != null) {
-            HttpSession session = request.getSession();
-            session.setAttribute("admin", admin);
-            return "redirect:/admin/main"; // 로그인 성공 시 관리자 메인 페이지로 이동
-        } else {
-            rttr.addFlashAttribute("error", "아이디 또는 비밀번호가 일치하지 않습니다.");
-            return "redirect:/admin/login"; // 로그인 실패 시 다시 로그인 폼으로
-        }
-    }
+    /*
+     * @PostMapping("/login") 메서드는 Spring Security가 자동으로 처리합니다.
+     * 따라서 개발자가 명시적으로 구현할 필요가 없습니다. (첫 번째 코드의 test01/1234 하드코딩 로직 삭제)
+     */
 
     @GetMapping("/logout")
     public String logout(HttpServletRequest request) {
-        log.info("@# Admin logout");
-        HttpSession session = request.getSession(false); // 세션이 없으면 새로 생성하지 않음
-        if (session != null) {
-            session.invalidate(); // 세션 무효화
-        }
-        return "redirect:/"; // 로그아웃 후 사이트 메인 페이지로 리다이렉트
+        log.info("@# Admin logout (handled by Spring Security)");
+        // Spring Security의 LogoutFilter가 이 URL을 처리하도록 설정되어 있어야 합니다.
+        // 일반적으로 SecurityConfig에서 .logout().logoutSuccessUrl("/admin/login?logout") 등으로 설정합니다.
+        // 여기서는 Security 설정을 따르도록 "redirect:/admin/login?logout"으로 리다이렉트합니다.
+        return "redirect:/admin/login?logout";
     }
 
     @GetMapping("/main")
@@ -97,35 +95,52 @@ public class AdminController {
         log.info("@# Admin main page");
 
         // 최근 7일간 결함 신고 통계 데이터 조회
-        ArrayList<DailyStatsDTO> dailyStats = statsService.getDailyReportStats();
+        List<DailyStatsDTO> dailyStats = statsService.getDailyReportStats();
         model.addAttribute("dailyStats", dailyStats);
 
         // 최근 7일간 신고 목록 조회
-        ArrayList<DefectReportDTO> recentReports = statsService.getRecentReports();
+        List<DefectReportDTO> recentReports = statsService.getRecentReports();
         model.addAttribute("recentReports", recentReports);
 
         return "admin/main";
     }
 
-    // 결함 신고 상세 페이지
-    @GetMapping("/report_detail/{id}")
-    public String defectReportDetail(@PathVariable("id") Long id, Model model) {
-        log.info("@# Get defect report detail: {}", id);
-        DefectReportDTO report = defectReportService.getReportById(id);
-        model.addAttribute("report", report);
-        return "admin/report_detail"; // 상세 페이지 뷰
-    }
+    // ===============================================
+    // 결함 신고 (Defect Reports)
+    // ===============================================
 
-    // 결함 신고 목록 페이지
-    @GetMapping("/defect_report/list")
-    public String defectReportList(Criteria cri, Model model) {
-        log.info("@# Get defect report list");
+    // 결함 신고 목록 페이지 (두 번째 코드의 URL을 더 구체적으로 변경)
+    @GetMapping({"/defect_reports", "/defect_reports/list"})
+    public String adminDefectReportList(Criteria cri, Model model) {
+        log.info("@# Get admin defect report list");
         List<DefectReportDTO> list = defectReportService.getAllReports(cri);
         int total = defectReportService.getTotalCount(cri);
         model.addAttribute("list", list);
         model.addAttribute("pageMaker", new PageDTO(cri, total));
-        return "admin/defect_report_list"; // 결함 신고 목록 뷰
+        return "admin/defect_report_list"; // admin/defect_report_list.jsp 뷰 반환
     }
+
+    // 결함 신고 상세 페이지 (첫 번째 코드의 RESTful URL 사용)
+    @GetMapping("/defect_reports/{id}")
+    public String adminDefectReportDetail(@PathVariable("id") Long id, Model model) {
+        log.info("@# Get admin defect report detail: {}", id);
+        DefectReportDTO report = defectReportService.getReportById(id);
+        model.addAttribute("report", report);
+        return "admin/defect_report_detail"; // admin/defect_report_detail.jsp 뷰 반환
+    }
+
+    // 결함 신고 상태 업데이트 처리 (첫 번째 코드의 로직 사용)
+    @PostMapping("/defect_reports/update-status")
+    public String adminUpdateDefectReportStatus(@RequestParam Long id, @RequestParam String status, RedirectAttributes rttr) {
+        log.info("@# Update defect report status: id={}, status={}", id, status);
+        defectReportService.updateReportStatus(id, status);
+        rttr.addFlashAttribute("message", "결함 신고 상태가 업데이트되었습니다.");
+        return "redirect:/admin/defect_reports/" + id;
+    }
+
+    // ===============================================
+    // 공지사항 (Notice)
+    // ===============================================
 
     // 공지사항 목록
     @GetMapping("/notice/list")
@@ -168,7 +183,8 @@ public class AdminController {
     @GetMapping("/notice/modify")
     public String noticeModifyForm(@RequestParam("notice_id") Long notice_id, @ModelAttribute("cri") Criteria cri, Model model) {
         log.info("@# noticeModifyForm, notice_id: {}", notice_id);
-        NoticeDTO notice = noticeService.getNoticeWithoutViews(notice_id); // 조회수 증가 없이 데이터 가져오기
+        // 조회수 증가 없이 데이터 가져오기 (메서드명에 따라 예상)
+        NoticeDTO notice = noticeService.getNoticeWithoutViews(notice_id);
         model.addAttribute("notice", notice);
         return "admin/notice_modify";
     }
@@ -190,16 +206,21 @@ public class AdminController {
         log.info("@# noticeDelete, notice_id: {}", notice_id);
         noticeService.delete(notice_id);
         rttr.addFlashAttribute("result", "delete_success");
+        // 두 번째 코드에 있던 페이징 정보를 유지하는 속성을 추가합니다.
         rttr.addAttribute("pageNum", cri.getPageNum());
         rttr.addAttribute("amount", cri.getAmount());
         return "redirect:/admin/notice/list";
     }
 
+    // ===============================================
+    // FAQ
+    // ===============================================
+
     // FAQ 목록
     @GetMapping("/faq/list")
     public String faqList(Criteria cri, Model model) {
         log.info("@# faq list");
-        ArrayList<FaqDTO> list = faqService.getFaqList(cri);
+        List<FaqDTO> list = faqService.getFaqList(cri);
         int total = faqService.getTotal();
 
         model.addAttribute("list", list);
@@ -259,11 +280,15 @@ public class AdminController {
         return "redirect:/admin/faq/list";
     }
 
+    // ===============================================
+    // 보도자료 (Press/Board)
+    // ===============================================
+
     // 보도자료 목록
     @GetMapping("/press/list")
     public String pressList(Criteria cri, Model model) {
         log.info("@# press list");
-        ArrayList<BoardDTO> list = boardService.listWithPaging(cri);
+        List<BoardDTO> list = boardService.listWithPaging(cri);
         int total = boardService.getTotalCount(cri);
 
         model.addAttribute("list", list);
@@ -325,11 +350,15 @@ public class AdminController {
         return "redirect:/admin/press/list";
     }
 
+    // ===============================================
+    // 고객 문의 (Complain)
+    // ===============================================
+
     // 고객 문의 목록
     @GetMapping("/complain/list")
     public String complainList(Model model) {
         log.info("@# admin complain list");
-        ArrayList<ComplainDTO> list = complainService.complain_list();
+        List<ComplainDTO> list = complainService.complain_list();
         model.addAttribute("list", list);
         return "admin/complain_list";
     }
