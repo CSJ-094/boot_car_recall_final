@@ -2,6 +2,7 @@ package com.boot.dao;
 
 import com.boot.dto.UserVehicleDto;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -9,6 +10,6 @@ import java.util.List;
 public interface UserVehicleDao {
     void save(UserVehicleDto userVehicle);
     List<UserVehicleDto> findByUsername(String username);
-    List<UserVehicleDto> findAll(); // 모든 등록 차량 조회 (리콜 발생 시 매칭용)
+    List<String> findUsernamesByCarModel(@Param("carModel") String carModel); // 특정 차종을 소유한 사용자 아이디 목록 조회
     void delete(Long id);
 }

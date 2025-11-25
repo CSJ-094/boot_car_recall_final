@@ -3,12 +3,14 @@ package com.boot.service;
 import com.boot.dao.NotificationDao;
 import com.boot.dto.NotificationDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -31,12 +33,16 @@ public class NotificationService {
         notificationDao.save(notification);
 
         // 사용자에게 이메일 알림 발송
-        memberService.getMemberByUsername(username).ifPresent(memberDto -> {
-            String emailContent = "<h3>" + title + "</h3>"
-                                + "<p>" + message + "</p>"
-                                + (link != null ? "<p><a href=\"" + link + "\">자세히 보기</a></p>" : "");
-            emailService.sendEmail(memberDto.getEmail(), "[자동차 리콜 통합센터] " + title, emailContent);
-        });
+        try {
+            memberService.getMemberByUsername(username).ifPresent(memberDto -> {
+                String emailContent = "<h3>" + title + "</h3>"
+                                    + "<p>" + message + "</p>"
+                                    + (link != null ? "<p><a href=\"" + link + "\">자세히 보기</a></p>" : "");
+                emailService.sendEmail(memberDto.getEmail(), "[자동차 리콜 통합센터] " + title, emailContent);
+            });
+        } catch (Exception e) {
+            log.error("이메일 발송 중 오류 발생", e);
+        }
     }
 
     public List<NotificationDto> getNotificationsByUsername(String username) {

@@ -7,6 +7,7 @@ let listItems = [];
 
 let lastKeyword = null;   // 마지막 검색 키워드
 let idleSearchTimeout = null; // 지도 이동 후 디바운스용
+let isGlobalNameSearch = false;  // 이름으로 전국 검색 중인지 여부
 
 // =============================
 // 1. 지도 초기화
@@ -16,7 +17,7 @@ function initMap() {
     const options = {
         center: new kakao.maps.LatLng(35.1795543, 129.0756416), // 부산시청 좌표
         level: 5
-    };
+    };	
 
     map = new kakao.maps.Map(container, options);
     places = new kakao.maps.services.Places();
@@ -113,6 +114,9 @@ function searchByMyLocation() {
     const category = document.getElementById('categorySelect').value;
     const radius = parseInt(document.getElementById('radiusSelect').value, 10);
 
+	// 다시 주변 검색 모드
+	isGlobalNameSearch = false;
+	
 	// 카테고리 기준 키워드 저장
     lastKeyword = getKeywordByCategory(category);
 
@@ -144,6 +148,70 @@ function searchByMyLocation() {
     });
 }
 
+// =============================
+// 6-1. 정비소 이름으로 "전체" 검색
+// =============================
+function searchByName() {
+    const input = document.getElementById('centerNameInput');
+    if (!input) return;
+
+    const keyword = input.value.trim();
+    if (!keyword) {
+        alert('검색할 정비소 이름을 입력해 주세요.');
+        input.focus();
+        return;
+    }
+
+	isGlobalNameSearch = true;
+    lastKeyword = keyword;
+
+    const listEl = document.getElementById('centerList');
+    listEl.innerHTML = '검색 중입니다...';
+
+    clearMarkers();
+
+    const allResults = [];
+
+    function handleResult(data, status, pagination) {
+        if (status === kakao.maps.services.Status.OK) {
+            // 이번 페이지 결과 누적
+            Array.prototype.push.apply(allResults, data);
+
+            // 최대 3페이지까지만 가져오기 (원하면 5까지 늘릴 수도 있음)
+            if (pagination.hasNextPage && pagination.current < 3) {
+                pagination.gotoPage(pagination.current + 1);
+                return;
+            }
+
+            // 여기까지 오면 전체 페이지 수집 완료
+            if (allResults.length === 0) {
+                listEl.innerHTML = '검색 결과가 없습니다.';
+                return;
+            }
+
+            // 리스트 + 마커 렌더링
+            renderCenterList(allResults);
+            allResults.forEach((place, idx) => addMarker(place, idx));
+
+            // 결과 전체가 보이도록 지도 bounds 조정
+            const bounds = new kakao.maps.LatLngBounds();
+            allResults.forEach(place => {
+                bounds.extend(new kakao.maps.LatLng(place.y, place.x));
+            });
+            map.setBounds(bounds);
+
+        } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+            listEl.innerHTML = '검색 결과가 없습니다.';
+        } else {
+            listEl.innerHTML = '검색 중 오류가 발생했습니다.';
+        }
+    }
+
+    // 옵션에 location / radius 안 줌 → 전국 검색
+    places.keywordSearch(keyword, handleResult, {
+        size: 15    // 페이지당 개수 (기본 15)
+    });
+}
 
 // =============================
 // 7. 현재 지도 중심 기준으로 검색 (버튼 없이도 사용)
@@ -152,6 +220,9 @@ function searchByCurrentCenterWithSelectedRadius() {
     const category = document.getElementById('categorySelect').value;
     const radius = parseInt(document.getElementById('radiusSelect').value, 10);
 
+	// 다시 주변 검색 모드
+	isGlobalNameSearch = false;
+	
     // 항상 현재 카테고리로 lastKeyword 갱신
     lastKeyword = getKeywordByCategory(category);
 
@@ -171,6 +242,8 @@ function searchByCurrentCenterWithSelectedRadius() {
 function onMapIdle() {
     if (!lastKeyword) return; // 아직 검색 한 번도 안 했으면 무시
 
+	if (isGlobalNameSearch) return;
+	
     if (idleSearchTimeout) clearTimeout(idleSearchTimeout);
 
     idleSearchTimeout = setTimeout(function () {
@@ -200,26 +273,65 @@ function addMarker(place, index) {
 }
 
 // 말풍선 내용 생성 + 리스트 활성화
+// 말풍선 내용 생성 + 리스트 활성화
 function openInfoWindow(place, marker, index) {
     const addr = place.road_address_name || place.address_name || '';
     const phone = place.phone || '';
 
-    // 현재 클릭한 장소를 목적지로 넣기
+    // 현재 클릭한 장소를 목적지로 넣기 (좌표 기반)
     const link =
         'https://map.kakao.com/link/to/' +
         encodeURIComponent(place.place_name) + ',' +
         place.y + ',' + place.x;
 
-    const content =
-        '<div style="padding:8px 12px;font-size:13px;line-height:1.4;max-width:220px;">' +
-        '<div style="font-weight:600;margin-bottom:4px;">' + place.place_name + '</div>' +
-        (addr ? '<div style="color:#555;margin-bottom:3px;">' + addr + '</div>' : '') +
-        (phone ? '<div style="color:#666;margin-bottom:6px;">TEL: ' + phone + '</div>' : '') +
-        '<a href="' + link + '" target="_blank" ' +
-        'style="display:inline-block;padding:4px 8px;border-radius:4px;' +
-        'border:1px solid #2563eb;font-size:12px;text-decoration:none;">' +
-        '카카오맵 길찾기</a>' +
-        '</div>';
+		const content =
+		        '<div style="' +
+		            'padding:8px 10px 6px;' +        // 아래 패딩 줄이기
+		            'font-size:12px;' +
+		            'line-height:1.5;' +
+		            'max-width:240px;' +
+		            'box-sizing:border-box;' +
+		            'word-break:keep-all;' +
+		        '">' +
+
+            // 상호명
+            '<div style="font-weight:600;margin-bottom:4px;color:#111827;">'
+                + place.place_name +
+            '</div>' +
+
+            // 주소
+            (addr
+                ? '<div style="margin-bottom:2px;color:#4b5563;">' + addr + '</div>'
+                : ''
+            ) +
+
+            // 전화번호
+            (phone
+                ? '<div style="margin-top:2px;margin-bottom:6px;color:#6b7280;">TEL: ' + phone + '</div>'
+                : ''
+            ) +
+
+            // 버튼을 따로 감싸는 영역
+			'<div style="margin-top:2px;color:#6b7280;white-space:nowrap;">' +
+			            (phone ? 'TEL: ' + phone : '') +
+			            '<a href="' + link + '" target="_blank" ' +
+			               'style="' +
+			                 'display:inline-block;' +
+			                 'margin-left:8px;' +          // 전화번호랑 간격
+			                 'padding:2px 8px;' +          // 버튼 높이 줄이기
+			                 'border-radius:999px;' +
+			                 'border:1px solid #2563eb;' +
+			                 'font-size:11px;' +
+			                 'text-decoration:none;' +
+			                 'color:#2563eb;' +
+			                 'background:#ffffff;' +
+			                 'vertical-align:middle;' +
+			               '">' +
+			               '카카오맵 길찾기' +
+			            '</a>' +
+			          '</div>' +
+
+			        '</div>';
 
     infowindow.setContent(content);
     if (marker) {
@@ -235,6 +347,7 @@ function openInfoWindow(place, marker, index) {
         listItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
+
 
 // =============================
 // 10. 리스트 렌더링
@@ -298,7 +411,23 @@ document.addEventListener('DOMContentLoaded', function () {
         .addEventListener('change', function () {
             searchByCurrentCenterWithSelectedRadius();
         });
+		
+		// 정비소 이름 검색 버튼
+		   const btnNameSearch = document.getElementById('btnNameSearch');
+		   const inputName = document.getElementById('centerNameInput');
 
+		   if (btnNameSearch && inputName) {
+		       btnNameSearch.addEventListener('click', searchByName);
+
+		       // 엔터로도 검색
+		       inputName.addEventListener('keydown', function (e) {
+		           if (e.key === 'Enter') {
+		               e.preventDefault();
+		               searchByName();
+		           }
+		       });
+		   }
+		
     // 필요하면 페이지 진입 시 기본 카테고리로 자동 검색하고 싶을 때:
     // searchByCurrentCenterWithSelectedRadius();
 });

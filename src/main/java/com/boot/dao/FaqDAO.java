@@ -3,15 +3,17 @@ package com.boot.dao;
 import com.boot.dto.Criteria;
 import com.boot.dto.FaqDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Mapper
 public interface FaqDAO {
-    public ArrayList<FaqDTO> listWithPaging(Criteria cri);
-    public int getTotalCount();
-    public FaqDTO getFaq(long faq_id);
-    public void write(FaqDTO faqDTO);
-    public void modify(FaqDTO faqDTO);
-    public void delete(long faq_id);
+    List<FaqDTO> listWithPaging(Criteria cri);
+    int getTotalCount();
+    FaqDTO getFaq(long faq_id);
+    void write(FaqDTO faqDTO);
+    void modify(FaqDTO faqDTO);
+    void delete(long faq_id);
+    List<FaqDTO> searchByKeyword(@Param("keyword") String keyword);
 }

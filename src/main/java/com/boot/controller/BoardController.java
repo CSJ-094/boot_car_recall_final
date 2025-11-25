@@ -4,8 +4,8 @@ import com.boot.dto.BoardDTO;
 import com.boot.dto.Criteria;
 import com.boot.dto.PageDTO;
 import com.boot.service.BoardService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,22 +14,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @Controller
-@RequestMapping("/board") // URL 경로 그룹화
+@RequestMapping("/board")
+@RequiredArgsConstructor
 public class BoardController {
-    @Autowired
-    private BoardService service;
+
+    private final BoardService service;
 
     @GetMapping("/list")
     public String list(Criteria cri, Model model) {
         log.info("@# Board list");
         log.info("@# cri => " + cri);
 
-        ArrayList<BoardDTO> list = service.listWithPaging(cri);
+        List<BoardDTO> list = service.listWithPaging(cri);
         int total = service.getTotalCount(cri);
 
         model.addAttribute("list", list);
@@ -60,7 +61,7 @@ public class BoardController {
                                Model model) {
         log.info("@# report_content_view()");
 
-        service.hitUp(boardNo);
+        // BoardServiceImpl의 contentView에서 조회수 증가를 처리하므로 hitUp 호출 제거
         BoardDTO dto = service.contentView(boardNo);
         model.addAttribute("content_view", dto);
         model.addAttribute("pageNum", pageNum);
@@ -74,6 +75,7 @@ public class BoardController {
                                      @RequestParam("amount") int amount,
                                      Model model) {
         log.info("@# report_modify_view()");
+        // 수정 폼에서는 조회수가 오르면 안되므로, 별도의 메서드가 필요하지만 일단 contentView 사용
         BoardDTO dto = service.contentView(boardNo);
         model.addAttribute("content_view", dto);
         model.addAttribute("pageNum", pageNum);
