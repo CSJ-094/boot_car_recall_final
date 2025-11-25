@@ -41,7 +41,7 @@ public class ComplainController {
 	public String write_view() {
 		log.info("@# complain_write_view");
 		
-		return "complain_write_view";
+		return "complain_write_view"; // 확장자 없음 - OK
 	}
 
 	@RequestMapping("/complain_content_view")
@@ -52,7 +52,7 @@ public class ComplainController {
 		ComplainDTO dto = service.contentView(param);
 		model.addAttribute("content_view", dto);
 		
-		return "complain_content_view";
+		return "complain_content_view"; // 확장자 없음 - OK
 	}
 	
 	@RequestMapping("/complain_list")
@@ -63,7 +63,7 @@ public class ComplainController {
 		ArrayList<ComplainDTO> list = service.complain_list();
 		model.addAttribute("list", list);
 		
-		return "complain_list";
+		return "complain_list"; // 확장자 없음 - OK
 	}
 
 	@RequestMapping("/complain_content_modify")
@@ -75,7 +75,7 @@ public class ComplainController {
 		model.addAttribute("m_param", find_modify_content);
 		
 		
-		return "complain_content_modify";
+		return "complain_content_modify"; // 확장자 없음 - OK
 	}
 	
 	@RequestMapping("/complain_modify")

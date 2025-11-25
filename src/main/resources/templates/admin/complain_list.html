@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+    <title>고객 문의 목록</title>
+    <th:block layout:fragment="css">
+        <style>
+            .admin-container {
+                max-width: 1200px;
+                margin: 20px auto;
+                padding: 30px;
+            }
+            .table-hover tbody tr:hover { cursor: pointer; }
+        </style>
+    </th:block>
+</head>
+<div layout:fragment="content">
+<div class="container admin-container">
+    <h2>고객 문의 목록</h2>
+    <table class="table table-hover mt-3">
+        <thead class="thead-light text-center">
+        <tr>
+            <th>문의번호</th>
+            <th>제목</th>
+            <th>신고인</th>
+            <th>문의유형</th>
+            <th>작성일</th>
+            <th style="width: 10%;">답변상태</th>
+        </tr>
+        </thead>
+        <tbody class="text-center">
+        <tr th:if="${list.isEmpty()}">
+            <td colspan="6">등록된 고객 문의가 없습니다.</td>
+        </tr>
+        <tr th:each="item : ${list}" th:onclick="|location.href='@{/admin/complain/detail(report_id=${item.report_id})}'|">
+            <td th:text="${item.report_id}"></td>
+            <td class="text-left" th:text="${item.title}"></td>
+            <td th:text="${item.reporter_name}"></td>
+            <td th:text="${item.complain_type}"></td>
+            <td th:text="${#temporals.format(item.complainDate, 'yyyy-MM-dd')}"></td>
+            <td>
+                <span th:if="${!#strings.isEmpty(item.answer)}" class="badge badge-success">답변 완료</span>
+                <span th:if="${#strings.isEmpty(item.answer)}" class="badge badge-warning">답변 대기</span>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</html>
