@@ -1,20 +1,15 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>리콜센터 소개</title>
-    <!-- 페이지 전용 CSS -->
-    <link rel="stylesheet" th:href="@{/css/centers-about.css}" />
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <th:block layout:fragment="css">
+        <!-- 페이지 전용 CSS -->
+        <link rel="stylesheet" th:href="@{/css/centers-about.css}" />
+    </th:block>
 </head>
-<body>
-
-<!-- 공통 헤더 -->
-<div th:replace="~{fragment/header :: headerFragment}"></div>
-
-<main class="center-intro">
+<div layout:fragment="content">
 	<!-- 1) 풀-블리드 히어로(영상) -->
 	<section class="ci-hero-full" aria-labelledby="heroTitle">
 	  <video class="ci-hero-full__video" autoplay muted loop playsinline preload="metadata"
@@ -120,12 +115,9 @@
 			</section>
 		  </div><!-- /ci-container -->
 		</main>
-
-<!-- 공통 푸터 -->
-<div th:replace="~{fragment/footer :: footerFragment}"></div>
-
-<!-- 페이지 전용 JS -->
-<script th:src="@{/js/centers-about.js}"></script>
-
-</body>
+</div>
+<th:block layout:fragment="script">
+    <!-- 페이지 전용 JS -->
+    <script th:src="@{/js/centers-about.js}"></script>
+</th:block>
 </html>

@@ -1,17 +1,14 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>자주 묻는 질문 (FAQ)</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
-    <link rel="stylesheet" th:href="@{/css/faq.css}" />
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/faq.css}" />
+    </th:block>
 </head>
-<body>
-
-<div th:replace="~{fragment/header :: headerFragment}"></div>
-
+<div layout:fragment="content">
 <main class="fq">
   <section class="fq-wrap">
     <header class="fq-head">
@@ -65,11 +62,9 @@
     </div>
   </section>
 </main>
-
-<div th:replace="~{fragment/footer :: footerFragment}"></div>
-
+</div>
+<th:block layout:fragment="script">
 <script>
-  // 접근성 고려한 순수 JS 아코디언
   document.querySelectorAll('.fq-q').forEach(btn => {
     btn.addEventListener('click', () => {
       const expanded = btn.getAttribute('aria-expanded') === 'true';
@@ -82,6 +77,5 @@
     });
   });
 </script>
-
-</body>
+</th:block>
 </html>

@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>차량 결함 신고</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <th:block layout:fragment="css">
     <style>
         /* 이 페이지에만 적용될 추가적인 스타일 */
         .container { 
@@ -25,9 +24,7 @@
         .image-preview img { max-width: 100%; max-height: 100%; object-fit: cover; }
     </style>
 </head>
-<body>
-    <div th:replace="~{fragment/header :: headerFragment}"></div>
-
+<div layout:fragment="content">
     <div class="container">
         <h2>결함 신고 접수</h2>
         <form th:action="@{/defect-report}" method="post" enctype="multipart/form-data">
@@ -64,9 +61,9 @@
             <button type="submit" class="submit-btn">신고 접수하기</button>
         </form>
     </div>
+</div>
 
-    <div th:replace="~{fragment/footer :: footerFragment}"></div>
-
+<th:block layout:fragment="script">
     <script>
         function previewImages(event) {
             const previewContainer = document.getElementById('imagePreviewContainer');
@@ -88,5 +85,5 @@
             }
         }
     </script>
-</body>
+</th:block>
 </html>

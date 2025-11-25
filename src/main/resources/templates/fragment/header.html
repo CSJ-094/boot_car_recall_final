@@ -24,16 +24,15 @@
         <nav id="global-nav" class="nav" aria-label="주 메뉴">
             <ul class="menu">
                 <li sec:authorize="hasRole('ADMIN')" class="menu-item has-sub">
-                    <li class="menu-item has-sub">
-                        <a href="/admin/main" class="menu-link">관리자 홈</a>
-                        <ul class="submenu">
-                            <li><a href="/admin/defect_reports">결함 신고 관리</a></li>
-                            <li><a href="/admin/notice/list">공지사항 관리</a></li>
-                            <li><a href="/admin/faq/list">FAQ 관리</a></li>
-                            <li><a href="/admin/press/list">보도자료 관리</a></li>
-                            <li><a href="/admin/complain/list">고객 문의 관리</a></li>
-                        </ul>
-                    </li>
+                    <a th:href="@{/admin/main}" class="menu-link">관리자 홈</a>
+                    <ul class="submenu">
+                        <li><a th:href="@{/admin/defect_reports}">결함 신고 관리</a></li>
+                        <li><a th:href="@{/admin/notice/list}">공지사항 관리</a></li>
+                        <li><a th:href="@{/admin/faq/list}">FAQ 관리</a></li>
+                        <li><a th:href="@{/admin/press/list}">보도자료 관리</a></li>
+                        <li><a th:href="@{/admin/complain/list}">고객 문의 관리</a></li>
+                    </ul>
+                </li>
 
                 <th:block sec:authorize="!hasRole('ADMIN')">
                     <li class="menu-item has-sub">
@@ -44,19 +43,19 @@
                         </ul>
                     </li>
                     <li class="menu-item has-sub">
-                        <a href="/recall-status" class="menu-link">리콜정보</a>
+                        <a th:href="@{/recall-status}" class="menu-link">리콜정보</a>
                         <ul class="submenu">
-                            <li><a href="/recall-status">리콜현황</a></li>
-                            <li><a href="/board/list">리콜 보도자료</a></li>
+                            <li><a th:href="@{/recall-status}">리콜현황</a></li>
+                            <li><a th:href="@{/report_recallInfo}">리콜 보도자료</a></li>
                         </ul>
                     </li>
                     <li class="menu-item has-sub">
-                        <a href="/notice/list" class="menu-link">리콜센터</a>
+                        <a href="#" class="menu-link">리콜센터</a>
                         <ul class="submenu">
-                            <li><a href="/notice/list">공지사항</a></li>
-                            <li><a href="/faq/list">FAQ</a></li>
-                            <li><a href="/centers/about">리콜센터 소개</a></li>
-                            <li><a href="/centers/map">주변 리콜센터 찾기</a></li>
+                            <li><a th:href="@{/notice/list}">공지사항</a></li>
+                            <li><a th:href="@{/faq/list}">FAQ</a></li>
+                            <li><a th:href="@{/centers/about}">리콜센터 소개</a></li>
+                            <li><a th:href="@{/centers/map}">주변 리콜센터 찾기</a></li>
                         </ul>
                     </li>
                     <sec:authorize access="isAuthenticated()">

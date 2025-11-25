@@ -1,13 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-<meta charset="UTF-8">
 <title>신청인 정보</title>
-
-<link rel="stylesheet" th:href="@{/css/main.css}">
-<link rel="stylesheet" th:href="@{/css/header.css}">
-<link rel="stylesheet" th:href="@{/css/footer.css}">
-
+<th:block layout:fragment="css">
 <style>
 	html, body {
 	    height: 100%;
@@ -117,10 +114,9 @@
 	    background-color: #444;
 	}
 </style>
+</th:block>
 </head>
-<body>
-	<div th:replace="~{fragment/header :: headerFragment}"></div>
-
+<div layout:fragment="content">
 	<div id="content-wrap">
 		<div class="container" th:if="${content_view != null}" th:object="${content_view}">
 		    <h2>신청인 정보</h2>
@@ -165,7 +161,5 @@
 		    </div>
 		</div>
 	</div>
-
-	<div th:replace="~{fragment/footer :: footerFragment}"></div>
-</body>
+</div>
 </html>

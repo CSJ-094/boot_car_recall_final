@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title th:text="${content_view.boardTitle}">보도자료 상세</title>
-
-    <link rel="stylesheet" th:href="@{/css/main.css}"/>
-    <script th:src="@{/js/jquery.js}"></script>
-
-    <style>
+    <th:block layout:fragment="css">
+        <style>
         body {
             font-family: "Noto Sans KR", sans-serif;
             margin: 0;
@@ -116,11 +114,9 @@
             background-color: #0056b3;
         }
     </style>
+    </th:block>
 </head>
-
-<body>
-<div th:replace="~{fragment/header :: headerFragment}"></div>
-
+<div layout:fragment="content">
 <div class="container" th:if="${content_view != null}" th:object="${content_view}">
     <h2 th:text="*{boardTitle}"></h2>
 
@@ -168,10 +164,9 @@
         <input type="hidden" name="boardNo" th:value="*{boardNo}">
     </form>
 </div>
-
-<div th:replace="~{fragment/footer :: footerFragment}"></div>
-
-<script th:inline="javascript">
+</div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
     $(document).ready(function () {
         const boardNo = /*[[${content_view.boardNo}]]*/ '';
 
@@ -225,5 +220,5 @@
         });
     });
 </script>
-
+</th:block>
 </html>

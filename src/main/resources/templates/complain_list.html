@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>신청 내역 게시판</title>
-
-    
-    <link rel="stylesheet" th:href="@{/css/main.css}">
-    <link rel="stylesheet" th:href="@{/css/header.css}">
-    <link rel="stylesheet" th:href="@{/css/footer.css}">
-
+    <th:block layout:fragment="css">
     <style>
         html, body {
             height: 100%;
@@ -102,7 +98,7 @@
     </style>
 </head>
 <body>
-	<div th:replace="~{fragment/header :: headerFragment}"></div>
+	
     <div class="page-wrapper">
         <div class="board-container">
             <h2>신청 내역</h2>
@@ -151,6 +147,5 @@
             </div>
         </div>
     </div>
-	<div th:replace="~{fragment/footer :: footerFragment}"></div>
-</body>
+</div>
 </html>

@@ -1,14 +1,12 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>리콜 보도자료</title>
 
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.css" />
-    <script src="${pageContext.request.contextPath}/js/jquery.js"></script>
+    
+    
+    <script th:src="@{/js/jquery.js}"></script>
 
     <style>
         body {
@@ -154,7 +152,7 @@
         <input type="hidden" name="amount" th:value="${pageMaker.cri.amount}">
     </form>
 </div>
-<div th:replace="~{fragment/footer :: footerFragment}"></div>
+
 </body>
 </html>
 <script th:inline="javascript">

@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-</head>
-<body>
 
+<!--/* adminHeaderFragment 시작 */-->
 <header class="site-header" th:fragment="adminHeaderFragment">
     <div class="header-inner">
         <a class="brand" th:href="@{/admin/main}" style="text-decoration: none; color: inherit;">
@@ -28,15 +24,16 @@
 
                 <!-- 신고 관리 -->
                 <li class="menu-item has-sub">
-                    <a th:href="@{/admin/complain/list}" class="menu-link">문의 관리</a>
+                    <a href="#" class="menu-link">신고 관리</a>
                     <ul class="submenu">
+                        <li><a th:href="@{/admin/defect_reports}">결함 신고</a></li>
                         <li><a th:href="@{/admin/complain/list}">고객 문의</a></li>
                     </ul>
                 </li>
 
                 <!-- 컨텐츠 관리 -->
                 <li class="menu-item has-sub">
-                    <a th:href="@{/admin/notice/list}" class="menu-link">컨텐츠 관리</a>
+                    <a href="#" class="menu-link">컨텐츠 관리</a>
                     <ul class="submenu">
                         <li><a th:href="@{/admin/notice/list}">공지사항</a></li>
                         <li><a th:href="@{/admin/faq/list}">FAQ</a></li>
@@ -45,15 +42,14 @@
                 </li>
 
                 <!-- 로그아웃 -->
-                <li class="menu-item" sec:authorize="isAuthenticated()">
-                    <form th:action="@{/admin/logout}" method="post" style="display: inline;">
-                        <button type="submit" class="menu-link" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0;">로그아웃</button>
+                <li sec:authorize="isAuthenticated()" class="menu-item">
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="menu-link" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0;">로그아웃</button>
                     </form>
                 </li>
             </ul>
         </nav>
     </div>
 </header>
-<script th:src="@{/js/header.js}"></script>
-</body>
+<!--/* adminHeaderFragment 끝 */-->
 </html>

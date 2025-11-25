@@ -1,15 +1,11 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>유사 리콜 사례</title>
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/header.css" />
-    <link rel="stylesheet" href="/css/footer.css" />
-    <style>
+    <th:block layout:fragment="css">
+        <style>
         /* 이 페이지에만 적용될 추가적인 스타일 */
         .container {
             padding-top: 50px;
@@ -73,21 +69,20 @@
         .col-model { width: 18%; }
         .col-date { width: 12%; }
 
-    </style>
+        </style>
+    </th:block>
 </head>
-<body>
-<jsp:include page="/WEB-INF/views/fragment/header.jsp"/>
-
-<div class="container">
-    <c:if test="${not empty errorMessage}">
+<div layout:fragment="content">
+    <div class="container">
+    <div th:if="${errorMessage != null}" class="error-message">
         <div class="error-message">
-            <p>${errorMessage}</p>
+            <p th:text="${errorMessage}"></p>
         </div>
-    </c:if>
+    </div>
 
     <h2>유사 리콜 사례</h2>
 
-    <c:if test="${not empty similarRecalls}">
+    <div th:if="${not #lists.isEmpty(similarRecalls)}">
         <table id="recallTable">
             <thead>
             <tr>
@@ -95,28 +90,22 @@
                 <th class="col-model">차종</th>
                 <th class="col-date">리콜 날짜</th>
                 <th>리콜 사유</th>
-<%--                <th>유사도 점수</th>--%>
             </tr>
             </thead>
             <tbody>
-            <c:forEach items="${similarRecalls}" var="item">
-                <tr>
-                    <td>${item.recall.maker}</td>
-                    <td>${item.recall.modelName}</td>
-                    <td>${item.recall.recallDate}</td>
-                    <td>${item.recall.recallReason}</td>
-<%--                    <td style="text-align: center"><fmt:formatNumber value="${item.similarity * 100}" maxFractionDigits="0" />%</td>--%>
-                </tr>
-            </c:forEach>
+            <tr th:each="item : ${similarRecalls}">
+                <td th:text="${item.recall.maker}"></td>
+                <td th:text="${item.recall.modelName}"></td>
+                <td th:text="${item.recall.recallDate}"></td>
+                <td th:text="${item.recall.recallReason}"></td>
+            </tr>
             </tbody>
         </table>
-    </c:if>
+    </div>
 
-    <c:if test="${empty similarRecalls}">
+    <div th:if="${#lists.isEmpty(similarRecalls)}">
         <p style="text-align:center; padding-top: 20px;">유사 리콜 사례가 없습니다.</p>
-    </c:if>
+    </div>
+    </div>
 </div>
-
-<jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
-</body>
 </html>

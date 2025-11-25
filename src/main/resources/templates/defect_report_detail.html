@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>결함 신고 상세</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <th:block layout:fragment="css">
     <style>
         /* 이 페이지에만 적용될 추가적인 스타일 */
         .container { 
@@ -68,14 +67,11 @@
         .password-modal-content .cancel-btn { background-color: #6c757d; color: white; }
         .password-error { color: red; font-size: 0.9em; margin-top: 5px; display: none; }
 
-        /* 이미지 표시 스타일 */
         .image-display-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; justify-content: center; }
         .image-display { max-width: 150px; max-height: 150px; border: 1px solid #ddd; padding: 5px; object-fit: contain; }
     </style>
 </head>
-<body>
-    <div th:replace="~{fragment/header :: headerFragment}"></div>
-
+<div layout:fragment="content">
     <div class="container">
         <h2>신고 상세 내용</h2>
         <p th:if="${message}" style="text-align:center; color: green;" th:text="${message}"></p>
@@ -140,8 +136,9 @@
             <button type="button" class="cancel-btn" onclick="closePasswordModal()">취소</button>
         </div>
     </div>
+</div>
 
-    <!-- 수정 폼 (숨김) -->
+<th:block layout:fragment="script">
     <form id="editForm" th:action="@{/report/edit}" method="get" style="display:none;" th:if="${report != null}">
         <input type="hidden" name="id" th:value="${report.id}">
         <input type="hidden" name="password" id="editPassword">
@@ -153,9 +150,6 @@
         <input type="hidden" name="id" th:value="${report.id}">
         <input type="hidden" name="password" id="deletePassword">
     </form>
-
-    <div th:replace="~{fragment/footer :: footerFragment}"></div>
-
     <script th:inline="javascript">
         /*<![CDATA[*/
         let currentAction = ''; // 'edit' 또는 'delete'
@@ -212,5 +206,5 @@
         };
         /*]]>*/
     </script>
-</body>
+</th:block>
 </html>

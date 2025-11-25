@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>리콜 보도자료</title>
-
-    <link rel="stylesheet" th:href="@{/css/main.css}"/>
-    <script th:src="@{/js/jquery.js}"></script>
-
-    <style>
+    <th:block layout:fragment="css">
+        <style>
         body {
             font-family: "Noto Sans KR", sans-serif;
             margin: 0;
@@ -110,13 +108,11 @@
         .write-btn:hover {
             background-color: #0056b3;
         }
-    </style>
+        </style>
+    </th:block>
 </head>
-
-<body>
-<div th:replace="~{fragment/header :: headerFragment}"></div>
-
-<div class="container">
+<div layout:fragment="content">
+    <div class="container">
     <h2>리콜 보도자료</h2>
     <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px;">
         <form method="get" id="searchForm" th:action="@{/board/report_recallInfo}">
@@ -163,13 +159,10 @@
         <input type="hidden" name="type" th:value="${pageMaker.cri.type}">
         <input type="hidden" name="keyword" th:value="${pageMaker.cri.keyword}">
     </form>
+    </div>
 </div>
-
-<div th:replace="~{fragment/footer :: footerFragment}"></div>
-
-</body>
-</html>
-<script th:inline="javascript">
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
     /*<![CDATA[*/
     var actionForm = $("#actionForm");
 
@@ -199,4 +192,6 @@
 
     }); //end of paginate_button click
     /*]]>*/
-</script>
+    </script>
+</th:block>
+</html>

@@ -1,24 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>요청 처리 결과 - 자동차 리콜 통합센터</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/login.css}" />
-</head>
-<body>
-    <div th:replace="~{fragment/header :: headerFragment}"></div>
-
-    <main class="login-container">
-        <div class="login-card">
-            <h1 class="login-title">요청 처리 완료</h1>
-            <p class="result-message" th:text="${message}">요청이 성공적으로 처리되었습니다.</p>
-            <a th:href="@{/login}" class="login-btn" style="text-decoration: none; display: block; margin-top: 1.5rem;">로그인으로 돌아가기</a>
-        </div>
-    </main>
-
-    <div th:replace="~{fragment/footer :: footerFragment}"></div>
+    <title>요청 처리 결과</title>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/login.css}" />
     <style>
         .result-message {
             font-size: 1.1rem;
@@ -27,5 +14,15 @@
             margin-bottom: 2rem;
         }
     </style>
-</body>
+    </th:block>
+</head>
+<div layout:fragment="content">
+    <main class="login-container">
+        <div class="login-card">
+            <h1 class="login-title">요청 처리 완료</h1>
+            <p class="result-message" th:text="${message}">요청이 성공적으로 처리되었습니다.</p>
+            <a th:href="@{/login}" class="login-btn" style="text-decoration: none; display: block; margin-top: 1.5rem;">로그인으로 돌아가기</a>
+        </div>
+    </main>
+</div>
 </html>

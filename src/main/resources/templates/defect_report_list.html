@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>결함 신고 목록</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <th:block layout:fragment="css">
     <style>
         /* 이 페이지에만 적용될 추가적인 스타일 */
         .container { 
@@ -96,9 +95,7 @@
         }
     </style>
 </head>
-<body>
-    <div th:replace="~{fragment/header :: headerFragment}"></div>
-
+<div layout:fragment="content">
     <div class="container">
         <div class="search-container">
             <form th:action="@{/report/history}" method="get">
@@ -152,7 +149,5 @@
             <a th:if="${pageMaker.next}" th:href="@{/report/history(pageNum=${pageMaker.endPage + 1}, keyword=${pageMaker.cri.keyword})}">&raquo;</a>
         </div>
     </div>
-
-    <div th:replace="~{fragment/footer :: footerFragment}"></div>
-</body>
+</div>
 </html>

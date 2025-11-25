@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>차량 리콜 현황</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <th:block layout:fragment="css">
     <style>
         /* 이 페이지에만 적용될 추가적인 스타일 */
         .container {
@@ -105,9 +104,7 @@
 
     </style>
 </head>
-<body>
-    <div th:replace="~{fragment/header :: headerFragment}"></div>
-
+<div layout:fragment="content">
     <div class="container">
         <div th:if="${errorMessage != null}" class="error-message">
             <p th:text="${errorMessage}"></p>
@@ -165,8 +162,5 @@
             <p style="text-align:center; padding-top: 20px;">표시할 리콜 데이터가 없습니다.</p>
         </div>
     </div>
-
-    <div th:replace="~{fragment/footer :: footerFragment}"></div>
-
-</body>
+</div>
 </html>

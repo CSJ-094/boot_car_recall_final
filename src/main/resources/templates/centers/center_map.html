@@ -1,23 +1,17 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
     <meta charset="UTF-8">
     <title>주변 리콜센터 찾기</title>
-    <!-- 카카오 지도 SDK (반드시 kakao 객체 쓰기 전에 로드) -->
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=0f08a719a533ce4c77b85bb7a496e7b8&libraries=services"></script>
-
-    <!-- 페이지 전용 CSS -->
-    <link rel="stylesheet" th:href="@{/css/center_map.css}" />
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <th:block layout:fragment="css">
+        <!-- 페이지 전용 CSS -->
+        <link rel="stylesheet" th:href="@{/css/center_map.css}" />
+    </th:block>
 </head>
-<body>
-
-<!-- 공통 헤더 -->
-<div th:replace="~{fragment/header :: headerFragment}"></div>
-
-<main class="content-body">
+<div layout:fragment="content">
+    <main class="content-body">
     <section class="content-area">
         <h2 class="center-page-title">주변 리콜센터 / 정비소 찾기</h2>
 
@@ -79,14 +73,13 @@
 			    </div>
 
 			</div>
-    </section>
-</main>
-
-<!-- 공통 푸터 -->
-<div th:replace="~{fragment/footer :: footerFragment}"></div>
-
-<!-- 페이지 전용 JS -->
-<script th:src="@{/js/center_map.js}"></script>
-
-</body>
+        </section>
+    </main>
+</div>
+<th:block layout:fragment="script">
+    <!-- 카카오 지도 SDK (반드시 kakao 객체 쓰기 전에 로드) -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=0f08a719a533ce4c77b85bb7a496e7b8&libraries=services"></script>
+    <!-- 페이지 전용 JS -->
+    <script th:src="@{/js/center_map.js}"></script>
+</th:block>
 </html>

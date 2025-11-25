@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>결함 신고 수정</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
+    <th:block layout:fragment="css">
     <style>
         /* 이 페이지에만 적용될 추가적인 스타일 */
         .container { 
@@ -32,9 +31,7 @@
         .existing-image-item .delete-image-btn { position: absolute; top: 0; right: 0; background-color: rgba(255, 0, 0, 0.7); color: white; border: none; border-radius: 0 0 0 5px; cursor: pointer; padding: 2px 5px; font-size: 0.8em; }
     </style>
 </head>
-<body>
-    <div th:replace="~{fragment/header :: headerFragment}"></div>
-
+<div layout:fragment="content">
     <div class="container">
         <h2>결함 신고 수정</h2>
         <div th:if="${report == null}">
@@ -90,9 +87,9 @@
             </form>
         </div>
     </div>
+</div>
 
-    <div th:replace="~{fragment/footer :: footerFragment}"></div>
-
+<th:block layout:fragment="script">
     <script>
         function previewNewImages(event) {
             const previewContainer = document.getElementById('newImagePreviewContainer');
@@ -121,5 +118,5 @@
             }
         }
     </script>
-</body>
+</th:block>
 </html>

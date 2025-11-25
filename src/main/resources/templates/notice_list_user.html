@@ -1,17 +1,14 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
     <title>공지사항</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/footer.css}" />
-    <link rel="stylesheet" th:href="@{/css/notice_user.css}" />
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/notice_user.css}" />
+    </th:block>
 </head>
-<body>
-
-<div th:replace="~{fragment/header :: headerFragment}"></div>
-
+<div layout:fragment="content">
 <main class="nu">
   <section class="nu-wrap">
     <header class="nu-head">
@@ -70,11 +67,9 @@
     </nav>
   </section>
 </main>
-
-<div th:replace="~{fragment/footer :: footerFragment}"></div>
-
+</div>
+<th:block layout:fragment="script">
 <script>
-  // 행 클릭으로 상세 이동
   document.querySelectorAll('.nu-row').forEach(tr => {
     tr.addEventListener('click', () => {
       const href = tr.getAttribute('data-href');
@@ -82,6 +77,5 @@
     });
   });
 </script>
-
-</body>
+</th:block>
 </html>

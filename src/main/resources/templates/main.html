@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>자동차 리콜 통합센터</title>
-
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <head>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head><title>메인</title></head>
+<th:block layout:fragment="css">
+    <style>
         /* ... (기존 테이블 스타일 유지) ... */
 
         /* ---------------------------------------------------- */
@@ -243,10 +241,9 @@
             }
         }
     </style>
-</head>
-<body data-contextpath="">
+</th:block>
 
-<div th:replace="~{fragment/header :: headerFragment}"></div>
+<div layout:fragment="content">
 
 <div class="hero">
     <h2>내 차량이 리콜 대상인지 확인하세요</h2>
@@ -259,7 +256,7 @@
             </div>
 
             <div class="search-input-area">
-                <input type="text" name="query" id="queryInput" placeholder="차대번호 17자리 (예: KMMDD47F...)" value="<c:out value="${query}"/>" required />
+                <input type="text" name="query" id="queryInput" placeholder="차대번호 17자리 (예: KMMDD47F...)" th:value="${query}" required />
                 <button type="submit">🔍 검색</button>
             </div>
 
@@ -289,16 +286,14 @@
                         </thead>
                         <tbody>
                         <tr th:each="recall : ${recallList}">
-                            <tr>
-                                <td th:text="${recall.maker}"></td>
-                                <td th:text="${recall.modelName}"></td>
-                                <!-- <td th:text="|${recall.makeStart} ~ ${recall.makeEnd}|"></td> -->
-                                <td th:text="${recall.recallDate}"></td>
-                                <td th:text="${recall.recallReason}"></td>
-                                <td th:text="${recall.vin}"></td>
-                                <td th:text="${recall.registrationNumber}"></td>
-                                <td><a th:href="@{/recall/detail/{id}(id=${recall.id})}">자세히 보기</a></td>
-                            </tr>
+                            <td th:text="${recall.maker}"></td>
+                            <td th:text="${recall.modelName}"></td>
+                            <!-- <td th:text="|${recall.makeStart} ~ ${recall.makeEnd}|"></td> -->
+                            <td th:text="${recall.recallDate}"></td>
+                            <td th:text="${recall.recallReason}"></td>
+                            <td th:text="${recall.vin}"></td>
+                            <td th:text="${recall.registrationNumber}"></td>
+                            <td><a th:href="@{/recall/detail/{id}(id=${recall.id})}">자세히 보기</a></td>
                         </tbody>
                     </table>
                 </div>
@@ -483,10 +478,11 @@
     </div>
 </section>
 
-<div th:replace="~{fragment/footer :: footerFragment}"></div>
+</div>
 
-<script th:src="@{/js/main.js}"></script>
-<script>
+<th:block layout:fragment="script">
+    <script th:src="@{/js/main.js}"></script>
+    <script>
     document.addEventListener('DOMContentLoaded', function() {
         const typeButtons = document.querySelectorAll('.search-tabs .type-btn');
         const queryInput = document.getElementById('queryInput');
@@ -539,5 +535,5 @@
         initializeSearchType();
     });
 </script>
-</body>
+</th:block>
 </html>
