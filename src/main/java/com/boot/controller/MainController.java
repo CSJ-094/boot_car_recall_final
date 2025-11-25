@@ -1,10 +1,23 @@
 package com.boot.controller;
 
+import com.boot.dto.Criteria;
+import com.boot.dto.NoticeDTO;
+import com.boot.dto.BoardDTO;
+import com.boot.dto.DefectReportDTO;
+import com.boot.dto.PageDTO;
+import com.boot.dto.RecallDTO;
+import com.boot.dto.SearchResultsDTO;
+import com.boot.service.DefectReportService;
+import com.boot.service.NoticeService;
+import com.boot.service.BoardService;
+import com.boot.service.PdfExportService;
+import com.boot.service.RecallService;
 import com.boot.dto.*;
 import com.boot.service.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Controller;
@@ -18,11 +31,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.security.Principal;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+import com.opencsv.CSVWriter;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class MainController {
 
     private final ResourceLoader resourceLoader;
@@ -30,6 +50,7 @@ public class MainController {
     private final DefectReportService defectReportService;
     private final NoticeService noticeService;
     private final BoardService boardService;
+    private final PdfExportService pdfExportService;
     private final SearchService searchService;
 
     // -------------------------------------------------------------------
@@ -211,6 +232,155 @@ public class MainController {
     }
 
     // -------------------------------------------------------------------
+    // 11. 리콜 데이터 CSV 다운로드
+    // URL: /recall/download/csv
+    // -------------------------------------------------------------------
+    @GetMapping("/recall/download/csv")
+    public void downloadRecallCsv(HttpServletResponse response) throws IOException {
+        log.info("@# Recall CSV download requested");
+        
+        // 전체 리콜 데이터 조회
+        List<RecallDTO> recallList = recallService.getAllRecallsWithoutPaging();
+        
+        // CSV 파일명 설정 (한글 파일명 처리)
+        String fileName = "리콜내역_" + System.currentTimeMillis() + ".csv";
+        String encodedFileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+        
+        // 응답 헤더 설정
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFileName + "\"");
+        response.setCharacterEncoding("UTF-8");
+        
+        // BOM 추가 (Excel에서 한글 깨짐 방지) - Writer 생성 전에 먼저 작성
+        response.getOutputStream().write(0xEF);
+        response.getOutputStream().write(0xBB);
+        response.getOutputStream().write(0xBF);
+        
+        // CSV 작성
+        try (Writer writer = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8);
+             CSVWriter csvWriter = new CSVWriter(writer)) {
+            
+            // CSV 헤더 작성
+            String[] header = {"번호", "제조사", "모델명", "제조시작일", "제조종료일", "리콜일자", "리콜사유"};
+            csvWriter.writeNext(header);
+            
+            // 데이터 작성
+            for (RecallDTO recall : recallList) {
+                String[] row = {
+                    recall.getId() != null ? String.valueOf(recall.getId()) : "",
+                    recall.getMaker() != null ? recall.getMaker() : "",
+                    recall.getModelName() != null ? recall.getModelName() : "",
+                    recall.getMakeStart() != null ? recall.getMakeStart() : "",
+                    recall.getMakeEnd() != null ? recall.getMakeEnd() : "",
+                    recall.getRecallDate() != null ? recall.getRecallDate() : "",
+                    recall.getRecallReason() != null ? recall.getRecallReason().replace("\n", " ").replace("\r", "") : ""
+                };
+                csvWriter.writeNext(row);
+            }
+            
+            csvWriter.flush();
+        } catch (Exception e) {
+            log.error("@# Recall CSV download error", e);
+            throw new IOException("CSV 파일 생성 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // 12. 리콜 데이터 PDF 다운로드
+    // URL: /recall/download/pdf
+    // -------------------------------------------------------------------
+    @GetMapping("/recall/download/pdf")
+    public void downloadRecallPdf(HttpServletResponse response) throws IOException {
+        log.info("@# Recall PDF download requested");
+
+        List<RecallDTO> recallList = recallService.getAllRecallsWithoutPaging();
+        byte[] pdfBytes = pdfExportService.generateRecallPdf(recallList);
+        writePdfResponse(response, pdfBytes, "리콜내역");
+    }
+
+    // -------------------------------------------------------------------
+    // 13. 결함 신고(리콜 신청) 내역 CSV 다운로드
+    // URL: /report/download/csv
+    // -------------------------------------------------------------------
+    @GetMapping("/report/download/csv")
+    public void downloadDefectReportCsv(HttpServletResponse response) throws IOException {
+        log.info("@# Defect Report CSV download requested");
+        
+        // 전체 결함 신고 데이터 조회
+        List<DefectReportDTO> reportList = defectReportService.getAllReportsWithoutPaging();
+        
+        // CSV 파일명 설정 (한글 파일명 처리)
+        String fileName = "리콜신청내역_" + System.currentTimeMillis() + ".csv";
+        String encodedFileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+        
+        // 응답 헤더 설정
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFileName + "\"");
+        response.setCharacterEncoding("UTF-8");
+        
+        // BOM 추가 (Excel에서 한글 깨짐 방지) - Writer 생성 전에 먼저 작성
+        response.getOutputStream().write(0xEF);
+        response.getOutputStream().write(0xBB);
+        response.getOutputStream().write(0xBF);
+        
+        // CSV 작성
+        try (Writer writer = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8);
+             CSVWriter csvWriter = new CSVWriter(writer)) {
+            
+            // CSV 헤더 작성
+            String[] header = {"번호", "신고자명", "연락처", "차량모델", "VIN", "결함내용", "신고일자"};
+            csvWriter.writeNext(header);
+            
+            // 데이터 작성
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            for (DefectReportDTO report : reportList) {
+                String reportDateStr = "";
+                if (report.getReportDate() != null) {
+                    reportDateStr = dateFormat.format(report.getReportDate());
+                }
+                
+                String[] row = {
+                    report.getId() != null ? String.valueOf(report.getId()) : "",
+                    report.getReporterName() != null ? report.getReporterName() : "",
+                    report.getContact() != null ? report.getContact() : "",
+                    report.getCarModel() != null ? report.getCarModel() : "",
+                    report.getVin() != null ? report.getVin() : "",
+                    report.getDefectDetails() != null ? report.getDefectDetails().replace("\n", " ").replace("\r", "") : "",
+                    reportDateStr
+                };
+                csvWriter.writeNext(row);
+            }
+            
+            csvWriter.flush();
+        } catch (Exception e) {
+            log.error("@# Defect Report CSV download error", e);
+            throw new IOException("CSV 파일 생성 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // 14. 결함 신고(리콜 신청) 내역 PDF 다운로드
+    // URL: /report/download/pdf
+    // -------------------------------------------------------------------
+    @GetMapping("/report/download/pdf")
+    public void downloadDefectReportPdf(HttpServletResponse response) throws IOException {
+        log.info("@# Defect Report PDF download requested");
+
+        List<DefectReportDTO> reportList = defectReportService.getAllReportsWithoutPaging();
+        byte[] pdfBytes = pdfExportService.generateDefectReportPdf(reportList);
+        writePdfResponse(response, pdfBytes, "리콜신청내역");
+    }
+
+    private void writePdfResponse(HttpServletResponse response, byte[] pdfBytes, String prefix) throws IOException {
+        byte[] payload = pdfBytes == null ? new byte[0] : pdfBytes;
+        String fileName = prefix + "_" + System.currentTimeMillis() + ".pdf";
+        String encodedFileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFileName + "\"");
+        response.setContentLength(payload.length);
+        response.getOutputStream().write(payload);
+    }
     // 11. 리콜 상세 조회
     // URL: /recall/detail/{id}
     // -------------------------------------------------------------------

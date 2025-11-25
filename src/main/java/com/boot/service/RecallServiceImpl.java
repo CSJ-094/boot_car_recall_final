@@ -54,7 +54,14 @@ public class RecallServiceImpl implements RecallService {
     public int countAllRecalls() {
         return recallDAO.count(new Criteria());
     }
-    
+
+    // -------------------------------------------------------------------
+    // 7. 전체 목록 조회 (페이징 없이, CSV 다운로드용)
+    // -------------------------------------------------------------------
+    @Override
+    public List<RecallDTO> getAllRecallsWithoutPaging() {
+        return recallDAO.selectAllWithoutPaging();
+    }
     @Override
     public List<String> getMakerList() {
         return recallDAO.selectDistinctMaker();
