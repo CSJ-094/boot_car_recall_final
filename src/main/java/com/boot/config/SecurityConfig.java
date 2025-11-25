@@ -40,6 +40,8 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/admin/login")
                 .loginProcessingUrl("/admin/login")
+                .usernameParameter("admin_id") 
+                .passwordParameter("admin_pw")
                 .defaultSuccessUrl("/admin/main", true)
                 .failureUrl("/admin/login?error")
                 .permitAll()
@@ -55,12 +57,28 @@ public class SecurityConfig {
 
         return http.build();
     }
-
+    
     @Bean
     @Order(2)
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .antMatcher("/api/admin/**")
+            .authorizeHttpRequests(authorize -> authorize
+                .antMatchers("/api/admin/consultation/**").hasRole("ADMIN")
+                .anyRequest().hasRole("ADMIN")
+            )
+            .csrf(csrf -> csrf.disable());
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(3)
     public SecurityFilterChain userSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
+                .antMatchers("/api/consultation/**").permitAll()
+                .antMatchers("/ws/**").permitAll()
                 .anyRequest().permitAll()
             )
             .formLogin(form -> form

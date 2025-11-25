@@ -8,18 +8,18 @@
     <insert id="insertRecall" parameterType="com.boot.dto.RecallDTO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO RECALL (
         MAKER, MODEL_NAME, MAKE_START, MAKE_END,
-        RECALL_DATE, RECALL_REASON
+        RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
         ) VALUES (
         #{maker}, #{modelName}, #{makeStart}, #{makeEnd},
-        #{recallDate}, #{recallReason}
+        #{recallDate}, #{recallReason}, #{vin}, #{registrationNumber}
         )
     </insert>
 
     <insert id="insertRecallList" parameterType="java.util.List">
-        INSERT INTO RECALL (MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON)
+        INSERT INTO RECALL (MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER)
         VALUES
         <foreach collection="list" item="recall">
-            (#{recall.maker}, #{recall.modelName}, #{recall.makeStart}, #{recall.makeEnd}, #{recall.recallDate}, #{recall.recallReason})
+            (#{recall.maker}, #{recall.modelName}, #{recall.makeStart}, #{recall.makeEnd}, #{recall.recallDate}, #{recall.recallReason}, #{recall.vin}, #{recall.registrationNumber})
         </foreach>
     </insert>
 
@@ -31,16 +31,25 @@
         <result property="makeEnd" column="MAKE_END" />
         <result property="recallDate" column="RECALL_DATE" />
         <result property="recallReason" column="RECALL_REASON" />
+        <result property="vin" column="VIN" />
+        <result property="registrationNumber" column="REGISTRATION_NUMBER" />
     </resultMap>
 
+    <select id="selectAllWithoutPagings" resultMap="recallResultMap">
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        FROM RECALL
+        ORDER BY ID DESC
+    </select>
 
     <select id="selectAll" parameterType="com.boot.dto.Criteria" resultMap="recallResultMap">
-        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
         FROM RECALL
         <where>
             <if test="keyword != null and keyword != ''">
                 UPPER(MAKER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
                 OR UPPER(MODEL_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(REGISTRATION_NUMBER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
             </if>
         </where>
         ORDER BY ID DESC
@@ -53,13 +62,15 @@
             <if test="keyword != null and keyword != ''">
                 UPPER(MAKER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
                 OR UPPER(MODEL_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(REGISTRATION_NUMBER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
             </if>
         </where>
     </select>
 
     <select id="searchByModelName" parameterType="string" resultMap="recallResultMap">
         SELECT
-        ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
         FROM RECALL
         WHERE UPPER(MODEL_NAME) LIKE CONCAT('%', UPPER(#{modelName}), '%')
         ORDER BY RECALL_DATE DESC
@@ -71,6 +82,126 @@
     	WHERE MAKER IS NOT NULL
       		AND TRIM(MAKER) != ''
     	ORDER BY MAKER
-</select>
+    </select>
+
+    <select id="selectAllWithoutPaging" resultMap="recallResultMap">
+        SELECT
+        ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
+        FROM RECALL
+        ORDER BY ID DESC
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="recallResultMap">
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
+        FROM RECALL
+        WHERE ID = #{id}
+    </select>
+    
+        <!-- 리콜 통계 집계 쿼리 -->
+    <select id="selectRecallStats"
+            parameterType="com.boot.dto.RecallStatsFilterDTO"
+            resultType="com.boot.dto.RecallStatsRowDTO">
+
+        SELECT
+            <!-- 집계 기준: 제조사 / 모델 -->
+            <choose>
+                <when test="groupBy == 'MODEL'">
+                    r.MODEL_NAME AS groupName
+                </when>
+                <otherwise>
+                    r.MAKER AS groupName
+                </otherwise>
+            </choose>
+            ,
+
+            <!-- 기간 레이블 -->
+            <choose>
+                <!-- 분기별 -->
+                <when test="timeUnit == 'QUARTER'">
+                    CONCAT(
+                        YEAR(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d')),
+                        ' Q',
+                        QUARTER(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d'))
+                    ) AS periodLabel
+                </when>
+
+                <!-- 상·하반기 -->
+                <when test="timeUnit == 'HALF_YEAR'">
+                    CONCAT(
+                        YEAR(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d')),
+                        CASE
+                            WHEN MONTH(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d')) &lt;= 6
+                                THEN ' 상반기'
+                            ELSE ' 하반기'
+                        END
+                    ) AS periodLabel
+                </when>
+
+                <!-- 기본: 월별 -->
+                <otherwise>
+                    DATE_FORMAT(
+                        STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d'),
+                        '%Y-%m'
+                    ) AS periodLabel
+                </otherwise>
+            </choose>
+            ,
+
+            -- 리콜 건수: RECALL 고유 ID 개수
+            COUNT(DISTINCT r.ID) AS recallCount
+
+        FROM RECALL r
+
+        WHERE 1 = 1
+
+            <!-- 날짜 필터 (문자열 비교, RECALL_DATE가 'YYYY-MM-DD' 형식이라는 전제) -->
+            <if test="startDate != null and startDate != ''">
+                AND r.RECALL_DATE &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND r.RECALL_DATE &lt;= #{endDate}
+            </if>
+
+            <!-- 제조사 필터 -->
+            <if test="maker != null and maker != ''">
+                AND r.MAKER = #{maker}
+            </if>
+
+            <!-- 모델 LIKE 검색 -->
+            <if test="modelKeyword != null and modelKeyword != ''">
+                AND UPPER(r.MODEL_NAME) LIKE CONCAT('%', UPPER(#{modelKeyword}), '%')
+            </if>
+
+        GROUP BY
+            <choose>
+                <when test="groupBy == 'MODEL'">
+                    r.MODEL_NAME
+                </when>
+                <otherwise>
+                    r.MAKER
+                </otherwise>
+            </choose>
+            ,
+            periodLabel
+
+        ORDER BY
+            periodLabel ASC,
+            recallCount DESC
+    </select>
+
+
+    <select id="searchByVin" parameterType="string" resultMap="recallResultMap">
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
+        FROM RECALL
+        WHERE UPPER(VIN) LIKE CONCAT('%', UPPER(#{vin}), '%')
+        ORDER BY RECALL_DATE DESC
+    </select>
+
+    <select id="searchByRegistrationNumber" parameterType="string" resultMap="recallResultMap">
+        SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
+        FROM RECALL
+        WHERE UPPER(REGISTRATION_NUMBER) LIKE CONCAT('%', UPPER(#{registrationNumber}), '%')
+        ORDER BY RECALL_DATE DESC
+    </select>
 
 </mapper>

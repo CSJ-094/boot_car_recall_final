@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -9,6 +10,243 @@
     <title>자동차 리콜 통합센터</title>
 
     <link rel="stylesheet" href="/css/main.css" />
+    <style>
+        /* ... (기존 테이블 스타일 유지) ... */
+
+        /* ---------------------------------------------------- */
+        /* 🚨 검색 폼 스타일 (세로 탭, 2열 레이아웃) 🚨 */
+        /* ---------------------------------------------------- */
+        .hero .search-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            max-width: 750px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: transparent;
+            padding: 0;
+        }
+
+        /* 폼 태그가 전체 박스 역할을 함 */
+        .hero .search-form form {
+            display: flex; /* 탭 영역과 입력 영역을 가로로 정렬 */
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ----------------------- */
+        /* 1. 탭 버튼 영역 (왼쪽 50%) - 세로 정렬 */
+        /* ----------------------- */
+        .hero .search-form .search-tabs {
+            display: flex;
+            flex-direction: column; /* 세로 정렬 */
+            flex: 1; /* 50% 너비 */
+            padding: 0;
+        }
+        .hero .search-form .search-tabs .type-btn {
+            flex: 1; /* 두 버튼이 높이를 동일하게 나눠 가짐 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 15px; /* 세로 패딩 증가 */
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: white; /* 기본 글자색 흰색 */
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        /* 비활성 탭 배경색 (이미지에서 아래쪽 탭이 하늘색) */
+        .hero .search-form .search-tabs .type-btn[data-type="regNum"] {
+            background-color: #5bc0de; /* 등록번호: 밝은 하늘색 */
+        }
+        /* 비활성 탭 배경색 (이미지에서 위쪽 탭이 진한 파란색) */
+        .hero .search-form .search-tabs .type-btn[data-type="vin"] {
+            background-color: #007bff; /* 차대번호: 진한 파란색 */
+        }
+
+        /* 활성 버튼 스타일 */
+        .hero .search-form .search-tabs .type-btn.active {
+            /* 활성 버튼은 항상 진한 파란색 계열 */
+            background-color: #004d99; /* 활성 시 가장 짙은 파랑 (이미지의 왼쪽 탭 색상) */
+            color: white;
+            font-weight: bold;
+        }
+
+        /* 활성/비활성에 따른 경계선 스타일 (선택적) */
+        .hero .search-form .search-tabs .type-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* ----------------------- */
+        /* 2. 입력 및 버튼 영역 (오른쪽 50%) */
+        /* ----------------------- */
+        .hero .search-form .search-input-area {
+            flex: 1; /* 50% 너비 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 입력창과 버튼을 영역 중앙에 세로로 정렬 */
+            padding: 20px 25px;
+            gap: 15px;
+            background-color: white;
+        }
+
+        /* 검색 입력창 스타일 */
+        .hero .search-form input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-shadow: none;
+            transition: border-color 0.2s;
+        }
+        .hero .search-form input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+
+        /* 검색 버튼 스타일 */
+        .hero .search-form button[type="submit"] {
+            width: 100%;
+            padding: 15px 30px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .hero .search-form button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        /* ---------------------------------------------------- */
+        /* 🚨 검색 결과 UI 개선 🚨 */
+        /* ---------------------------------------------------- */
+        .main-recall-results {
+            margin-top: 40px; /* 검색 폼과의 간격 */
+            margin-bottom: 60px; /* 다음 섹션과의 간격 */
+        }
+
+        .main-recall-results h3 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .main-recall-results .results-summary {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 25px;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            display: inline-block; /* 내용 길이에 맞게 너비 조절 */
+            margin-left: auto;
+            margin-right: auto;
+            display: block; /* 중앙 정렬을 위해 블록 요소로 변경 */
+            max-width: fit-content; /* 내용에 맞게 최대 너비 설정 */
+        }
+
+        /* 반응형 테이블 컨테이너 */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* iOS 스크롤 부드럽게 */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e0e0; /* 전체 테이블 테두리 */
+        }
+
+        .main-recall-results table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0; /* table-responsive 내부에 있으므로 상단 마진 제거 */
+            min-width: 800px; /* 작은 화면에서 가로 스크롤 생기도록 최소 너비 설정 */
+        }
+
+        .main-recall-results th,
+        .main-recall-results td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        .main-recall-results thead th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            position: sticky; /* 스크롤 시 헤더 고정 */
+            top: 0;
+            z-index: 1;
+        }
+
+        .main-recall-results tbody tr:nth-child(even) {
+            background-color: #f8f9fa; /* 줄무늬 효과 */
+        }
+
+        .main-recall-results tbody tr:hover {
+            background-color: #e2f0ff; /* 호버 효과 */
+            cursor: pointer;
+        }
+
+        .main-recall-results td a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .main-recall-results td a:hover {
+            text-decoration: underline;
+        }
+
+        .main-recall-results .no-results-message {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #fff3cd; /* 경고색 배경 */
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            color: #856404; /* 경고색 텍스트 */
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .main-recall-results .no-results-message strong {
+            color: #664d03;
+        }
+
+        /* 모바일 최적화 (선택적: 필요시 추가) */
+        @media (max-width: 768px) {
+            .main-recall-results th,
+            .main-recall-results td {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+            .main-recall-results .results-summary {
+                font-size: 1rem;
+                padding: 8px 15px;
+            }
+            .main-recall-results .no-results-message {
+                padding: 30px 15px;
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body data-contextpath="">
 
@@ -17,53 +255,67 @@
 <div class="hero">
     <h2>내 차량이 리콜 대상인지 확인하세요</h2>
     <div class="search-form">
-        <form action="/" method="get">
-            <input type="text" name="query" placeholder="차량 모델명 또는 제조사 입력" value="<c:out value="${searchQuery}"/>" />
-            <button type="submit">검색</button>
+        <form action="/" method="get" id="recallSearchForm">
+
+            <div class="search-tabs">
+                <button type="button" class="type-btn" data-type="vin">차대번호(VIN)</button>
+                <button type="button" class="type-btn" data-type="regNum">등록번호</button>
+            </div>
+
+            <div class="search-input-area">
+                <input type="text" name="query" id="queryInput" placeholder="차대번호 17자리 (예: KMMDD47F...)" value="<c:out value="${query}"/>" required />
+                <button type="submit">🔍 검색</button>
+            </div>
+
+            <input type="hidden" name="searchType" id="hiddenSearchType" value="${searchType}"/>
         </form>
     </div>
 </div>
 
-<c:if test="${not empty searchResults}">
-    <section class="section-search-results">
-        <div class="container">
-            <h3>'${searchQuery}' 검색 결과</h3>
-            <c:choose>
-                <c:when test="${not empty searchResults.recallList}">
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
+<c:if test="${not empty query}">
+    <section class="main-recall-results container">
+        <h3>'${query}' 검색 결과</h3>
+        <c:choose>
+            <c:when test="${not empty recallList}">
+                <p class="results-summary">총 <strong>${fn:length(recallList)}</strong>건의 리콜 정보가 있습니다.</p>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>제조사</th>
+                            <th>모델명</th>
+                            <th>생산 기간</th>
+                            <th>리콜 날짜</th>
+                            <th>리콜 사유</th>
+                            <th>VIN</th>
+                            <th>등록번호</th>
+                            <th>상세</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <c:forEach var="recall" items="${recallList}">
                             <tr>
-                                <th>ID</th>
-                                <th>제조사</th>
-                                <th>모델명</th>
-                                <th>생산 시작일</th>
-                                <th>생산 종료일</th>
-                                <th>리콜 날짜</th>
-                                <th>리콜 사유</th>
+                                <td><c:out value="${recall.maker}"/></td>
+                                <td><c:out value="${recall.modelName}"/></td>
+                                <td><c:out value="${recall.makeStart}"/> ~ <c:out value="${recall.makeEnd}"/></td>
+                                <td><c:out value="${recall.recallDate}"/></td>
+                                <td><c:out value="${recall.recallReason}"/></td>
+                                <td><c:out value="${recall.vin}"/></td>
+                                <td><c:out value="${recall.registrationNumber}"/></td>
+                                <td><a href="/recall/detail/${recall.id}">자세히 보기</a></td>
                             </tr>
-                            </thead>
-                            <tbody>
-                            <c:forEach var="recall" items="${searchResults.recallList}">
-                                <tr>
-                                    <td><c:out value="${recall.id}"/></td>
-                                    <td><c:out value="${recall.maker}"/></td>
-                                    <td><c:out value="${recall.modelName}"/></td>
-                                    <td><c:out value="${recall.makeStart}"/></td>
-                                    <td><c:out value="${recall.makeEnd}"/></td>
-                                    <td><c:out value="${recall.recallDate}"/></td>
-                                    <td><c:out value="${recall.recallReason}"/></td>
-                                </tr>
-                            </c:forEach>
-                            </tbody>
-                        </table>
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <p class="no-results">'${searchQuery}'에 대한 검색 결과가 없습니다.</p>
-                </c:otherwise>
-            </c:choose>
-        </div>
+                        </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <p class="no-results-message">
+                    '<strong><c:out value="${query}"/></strong>'에 대한 리콜 정보가 없습니다.<br>
+                    입력하신 정보가 정확한지 다시 확인해 주세요.
+                </p>
+            </c:otherwise>
+        </c:choose>
     </section>
 </c:if>
 
@@ -256,5 +508,59 @@
 <jsp:include page="/WEB-INF/views/fragment/footer.jsp"/>
 
 <script src="/js/main.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeButtons = document.querySelectorAll('.search-tabs .type-btn');
+        const queryInput = document.getElementById('queryInput');
+        const hiddenSearchType = document.getElementById('hiddenSearchType');
+
+        // 플레이스홀더 텍스트 정의
+        const placeholders = {
+            vin: '차대번호 17자리 (예: KMMDD47F...)',
+            regNum: '자동차 등록번호 (예: 12가3456)'
+        };
+
+        // 초기 활성화 버튼 설정 및 플레이스홀더 업데이트
+        function initializeSearchType() {
+            // URL 파라미터가 없으면 'vin'으로 시작
+            let initialType = hiddenSearchType.value || 'vin';
+            let found = false;
+
+            // 데이터 타입에 따라 플레이스홀더 설정
+            typeButtons.forEach(button => {
+                if (button.dataset.type === initialType) {
+                    button.classList.add('active');
+                    queryInput.placeholder = placeholders[initialType];
+                    found = true;
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+
+            // 초기값이 없을 경우 'vin'으로 설정
+            if (!found) {
+                initialType = 'vin';
+                document.querySelector(`.search-tabs .type-btn[data-type="${initialType}"]`).classList.add('active');
+                queryInput.placeholder = placeholders[initialType];
+                hiddenSearchType.value = initialType;
+            }
+        }
+
+        // 버튼 클릭 이벤트 리스너
+        typeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                typeButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                const selectedType = this.dataset.type;
+                queryInput.placeholder = placeholders[selectedType];
+                hiddenSearchType.value = selectedType; // hidden input 값 업데이트
+            });
+        });
+
+        // 페이지 로드 시 초기화
+        initializeSearchType();
+    });
+</script>
+<script type="text/javascript" src="/js/chat.js"></script>
 </body>
 </html>

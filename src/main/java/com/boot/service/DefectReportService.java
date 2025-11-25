@@ -2,6 +2,8 @@ package com.boot.service;
 
 import com.boot.dto.Criteria;
 import com.boot.dto.DefectReportDTO;
+import com.boot.dto.RecallDTO;
+import com.boot.dto.RecallSimilarDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -9,10 +11,14 @@ import java.util.List;
 public interface DefectReportService {
     void saveReport(DefectReportDTO report, List<MultipartFile> files);
     List<DefectReportDTO> getAllReports(Criteria cri);
+    List<DefectReportDTO> getAllReportsWithoutPaging(); // CSV 다운로드를 위한 전체 목록 조회
     int getTotalCount(Criteria cri); // 검색 조건에 따른 전체 개수
     DefectReportDTO getReportById(Long id);
     void updateReport(DefectReportDTO report, List<MultipartFile> newFiles, List<String> existingFileNames);
     void deleteReport(Long id);
     boolean checkPassword(Long id, String password);
     void updateReportStatus(Long id, String status); // 결함 신고 상태 업데이트 메서드 추가
+    List<RecallSimilarDTO> findSimilarRecalls(String carModel,
+                                              String defectText,
+                                              List<RecallDTO> recallList);
 }

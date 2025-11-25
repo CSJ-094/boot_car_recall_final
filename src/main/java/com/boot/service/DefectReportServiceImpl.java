@@ -2,9 +2,7 @@ package com.boot.service;
 
 import com.boot.dao.DefectImageDAO;
 import com.boot.dao.DefectReportDAO;
-import com.boot.dto.Criteria;
-import com.boot.dto.DefectImageDTO;
-import com.boot.dto.DefectReportDTO;
+import com.boot.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -90,6 +88,12 @@ public class DefectReportServiceImpl implements DefectReportService {
             report.setImages(defectImageDAO.selectImagesByReportId(report.getId()));
         }
         return reports;
+    }
+
+    @Override
+    public List<DefectReportDTO> getAllReportsWithoutPaging() {
+        // CSV 다운로드용이므로 이미지는 제외하고 신고 데이터만 반환
+        return defectReportDAO.selectAllWithoutPaging();
     }
 
     @Override
@@ -196,4 +200,62 @@ public class DefectReportServiceImpl implements DefectReportService {
             }
         }
     }
+
+    @Override
+    public List<RecallSimilarDTO> findSimilarRecalls(String carModel, String defectText, List<RecallDTO> recallList) {
+        String targetText = preprocessKoreanSimple(carModel + " " + defectText);
+
+        List<String> corpus = new ArrayList<>();
+        corpus.add(targetText);
+        corpus.addAll(recallList.stream()
+                .map(r -> r.getModelName() + " " + r.getRecallReason())
+                .toList());
+
+        // TF-IDF 변환
+        TfidfVectorizer vectorizer = new TfidfVectorizer();
+        List<double[]> vectors = vectorizer.fitTransform(corpus);
+
+        // 벡터 분리
+        double[] targetVector = vectors.get(0); // 첫 번째가 신고 텍스트
+        List<double[]> recallVectors = vectors.subList(1, vectors.size()); // 나머지가 DB
+
+        // 코사인 유사도 계산
+        List<RecallSimilarDTO> scoredList = new ArrayList<>();
+        for (int i = 0; i < recallVectors.size(); i++) {
+            double similarity = cosineSimilarity(targetVector, recallVectors.get(i));
+            if (similarity > 0.0) { // 0보다 큰 경우만 로그 출력
+                System.out.println(recallList.get(i).getModelName() + " / "
+                        + recallList.get(i).getRecallReason()
+                        + " : " + similarity);
+            }
+            scoredList.add(new RecallSimilarDTO(recallList.get(i), similarity));
+        }
+
+        // 유사도 높은 순 정렬 및 10개 반환
+        return scoredList.stream()
+                .sorted((a, b) -> Double.compare(b.getSimilarity(), a.getSimilarity()))
+                .limit(10)
+                .toList();
+    }
+
+
+    private double cosineSimilarity(double[] a, double[] b) {
+        double dot = 0, normA = 0, normB = 0;
+        for (int i = 0; i < a.length; i++) {
+            dot += a[i] * b[i];
+            normA += Math.pow(a[i], 2);
+            normB += Math.pow(b[i], 2);
+        }
+        return dot / (Math.sqrt(normA) * Math.sqrt(normB) + 1e-9);
+    }
+
+    private String preprocessKoreanSimple(String text) {
+        if (text == null) return "";
+        text = text.toLowerCase();                 // 소문자화
+        text = text.replaceAll("[^가-힣a-z0-9 ]", " "); // 특수문자 제거
+        text = text.replaceAll("\\s+", " ").trim();    // 공백 정리
+        return text;
+    }
+
+    private record RecallSimilarityScore(RecallDTO recall, double similarity) {}
 }

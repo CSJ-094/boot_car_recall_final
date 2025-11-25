@@ -3,20 +3,29 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.boot.dao.UserVehicleDao">
-    <insert id="save" parameterType="com.boot.dto.UserVehicleDto" useGeneratedKeys="true" keyProperty="id">
+
+    <resultMap id="userVehicleResultMap" type="com.boot.dto.UserVehicleDto">
+        <id property="id" column="ID"/>
+        <result property="username" column="USERNAME"/>
+        <result property="maker" column="MAKER"/>
+        <result property="carModel" column="MODEL_NAME"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.boot.dto.UserVehicleDto">
         INSERT INTO USER_VEHICLE (USERNAME, MAKER, MODEL_NAME)
-        VALUES (#{username}, #{maker}, #{modelName})
+        VALUES (#{username}, #{maker}, #{carModel})
     </insert>
 
-    <select id="findByUsername" parameterType="String" resultType="com.boot.dto.UserVehicleDto">
+    <select id="findByUsername" parameterType="String" resultMap="userVehicleResultMap">
         SELECT ID, USERNAME, MAKER, MODEL_NAME
         FROM USER_VEHICLE
         WHERE USERNAME = #{username}
     </select>
 
-    <select id="findAll" resultType="com.boot.dto.UserVehicleDto">
-        SELECT ID, USERNAME, MAKER, MODEL_NAME
+    <select id="findUsernamesByCarModel" parameterType="String" resultType="String">
+        SELECT DISTINCT USERNAME
         FROM USER_VEHICLE
+        WHERE MODEL_NAME = #{carModel}
     </select>
 
     <delete id="delete" parameterType="long">

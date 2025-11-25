@@ -223,3 +223,71 @@
         max-height: 360px;
     }
 }
+/* 이름 검색 영역 */
+.filter-name-group {
+    flex: 1;
+    min-width: 220px;
+}
+
+.filter-name-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.filter-input {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #111827;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.filter-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.35);
+}
+
+/* 이름 검색 버튼 (세컨더리 느낌) */
+.btn-secondary.name-search-btn {
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        background 0.16s ease,
+        box-shadow 0.16s ease,
+        border-color 0.16s ease,
+        transform 0.1s ease;
+}
+
+.btn-secondary.name-search-btn:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+    transform: translateY(-1px);
+}
+
+.btn-secondary.name-search-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* 반응형에서 한 줄씩 떨어지게 */
+@media (max-width: 1024px) {
+    .filter-name-group {
+        width: 100%;
+    }
+}
+
