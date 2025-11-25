@@ -33,7 +33,7 @@
         <result property="recallReason" column="RECALL_REASON" />
     </resultMap>
 
-    <select id="selectAllWithoutPaging" resultMap="recallResultMap">
+    <select id="selectAllWithoutPagings" resultMap="recallResultMap">
         SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
         FROM RECALL
         ORDER BY ID DESC

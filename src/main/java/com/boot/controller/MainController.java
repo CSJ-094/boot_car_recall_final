@@ -390,4 +390,25 @@ public class MainController {
         model.addAttribute("recall", recall);
         return "recall_detail"; // recall_detail.jsp 뷰 반환
     }
+
+    @GetMapping("/report/similar-recalls")
+    public String getSimilarRecalls2(@RequestParam("id") Long id, Model model) {
+        DefectReportDTO report = defectReportService.getReportById(id);
+        if(report == null) {
+            model.addAttribute("errorMessage", "정보를 찾을 수 없습니다.");
+            return "defect_report_detail";
+        }
+
+        List<RecallDTO> recallList = recallService.getAllRecallsWithoutPaging();
+        List<RecallSimilarDTO> similarRecalls = defectReportService.findSimilarRecalls(
+                report.getCarModel(),
+                report.getDefectDetails(),
+                recallList
+        );
+
+        model.addAttribute("report", report);
+        model.addAttribute("similarRecalls", similarRecalls);
+
+        return "recall_similar_status"; // 새 JSP
+    }
 }

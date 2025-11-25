@@ -60,7 +60,7 @@ public class RecallServiceImpl implements RecallService {
     // -------------------------------------------------------------------
     @Override
     public List<RecallDTO> getAllRecallsWithoutPaging() {
-        return recallDAO.selectAllWithoutPaging();
+        return recallDAO.selectAllWithoutPagings();
     }
     @Override
     public List<String> getMakerList() {

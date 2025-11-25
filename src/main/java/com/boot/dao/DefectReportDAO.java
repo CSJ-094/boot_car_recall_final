@@ -19,5 +19,5 @@ public interface DefectReportDAO {
     void updateStatus(@Param("id") Long id, @Param("status") String status);
     void deleteReport(Long id);
     String selectPasswordById(Long id);
-    List<RecallDTO> selectAllWithoutPaging();
+    List<RecallDTO> selectAllWithoutPagings();
 }
