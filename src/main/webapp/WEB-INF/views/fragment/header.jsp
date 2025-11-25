@@ -86,6 +86,7 @@
                         <ul class="submenu">
                             <li><a href="/recall-status">리콜현황</a></li>
                             <li><a href="/board/list">리콜 보도자료</a></li>
+                            <li><a href="/recall/stats">리콜 통계</a></li>
                         </ul>
                     </li>
                     <li class="menu-item has-sub">
