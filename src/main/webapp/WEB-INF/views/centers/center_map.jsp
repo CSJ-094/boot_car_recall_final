@@ -22,6 +22,21 @@
 
             <!-- 상단 필터 -->
             <div class="center-filter-row">
+				<div class="filter-group filter-name-group">
+
+				    <div class="filter-name-input-wrap">
+				        <input
+				            id="centerNameInput"
+				            type="text"
+				            class="filter-input"
+				            placeholder="정비소 이름을 입력하세요"
+				        />
+				        <button id="btnNameSearch" class="btn-secondary name-search-btn">
+				            검색
+				        </button>
+				    </div>
+				</div>
+				
                 <div class="filter-group">
                     <label class="filter-label" for="categorySelect">종류</label>
                     <select id="categorySelect" class="filter-select">
@@ -48,15 +63,19 @@
             </div>
 
             <!-- 하단 지도 + 리스트 -->
-            <div class="center-content-row">
-                <div class="center-map-area">
-                    <div id="map"></div>
-                </div>
-                <div class="center-list-area" id="centerList">
-                    주변 리콜센터를 검색하려면 [내 위치 기준 검색] 버튼을 눌러 주세요.
-                </div>
-            </div>
-        </div>
+			<div class="center-map-card">
+
+			    <div class="center-content-row">
+			        <div class="center-map-area">
+			            <div id="map"></div>
+			        </div>
+
+			        <div class="center-list-area" id="centerList">
+			            주변 리콜센터를 검색하려면 [내 위치 기준 검색] 버튼을 눌러 주세요.
+			        </div>
+			    </div>
+
+			</div>
     </section>
 </main>
 

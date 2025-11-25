@@ -3,6 +3,38 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <link rel="stylesheet" href="/css/header.css" />
+<style>
+    .notification-badge {
+        background-color: #dc3545;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        vertical-align: top;
+        margin-left: 4px;
+    }
+    .header-search {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+        margin-right: 20px;
+    }
+    .header-search input {
+        border: 1px solid #ccc;
+        padding: 8px;
+        border-radius: 4px;
+        margin-right: 5px;
+    }
+    .header-search button {
+        padding: 8px 12px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+</style>
 
 <header class="site-header">
     <div class="header-inner">
@@ -10,6 +42,14 @@
             <img src="/img/car.png" class="brand-logo" alt="자동차 아이콘">
             <span class="brand-text">자동차 리콜 통합센터</span>
         </a>
+
+        <!-- 통합 검색창 -->
+        <div class="header-search">
+            <form action="/search" method="get">
+                <input type="text" name="query" placeholder="통합 검색..." value="${results.query}" />
+                <button type="submit">검색</button>
+            </form>
+        </div>
 
         <!-- 모바일 메뉴 토글 -->
         <button class="nav-toggle" aria-controls="global-nav" aria-expanded="false" aria-label="메뉴 열기">
@@ -34,7 +74,6 @@
 
                 <sec:authorize access="!hasRole('ADMIN')">
                     <!-- 일반 사용자 메뉴 -->
-                    <!-- 결함신고 -->
                     <li class="menu-item has-sub">
                         <a href="/report/write" class="menu-link">결함신고</a>
                         <ul class="submenu">
@@ -42,8 +81,6 @@
                             <li><a href="/report/history">신고내역</a></li>
                         </ul>
                     </li>
-
-                    <!-- 리콜정보 -->
                     <li class="menu-item has-sub">
                         <a href="/recall-status" class="menu-link">리콜정보</a>
                         <ul class="submenu">
@@ -51,8 +88,6 @@
                             <li><a href="/board/list">리콜 보도자료</a></li>
                         </ul>
                     </li>
-
-                    <!-- 리콜센터 (공지사항 리스트를 메인으로) -->
                     <li class="menu-item has-sub">
                         <a href="/notice/list" class="menu-link">리콜센터</a>
                         <ul class="submenu">
@@ -62,19 +97,21 @@
                             <li><a href="/centers/map">주변 리콜센터 찾기</a></li>
                         </ul>
                     </li>
-
-                    <!-- 내 차량 관리 (로그인 시에만 표시) -->
                     <sec:authorize access="isAuthenticated()">
                         <li class="menu-item">
                             <a href="/my-vehicles" class="menu-link">내 차량 관리</a>
                         </li>
                         <li class="menu-item">
-                            <a href="/my-notifications" class="menu-link">내 알림</a>
+                            <a href="/my-notifications" class="menu-link">
+                                내 알림
+                                <c:if test="${unreadNotificationCount > 0}">
+                                    <span class="notification-badge">${unreadNotificationCount}</span>
+                                </c:if>
+                            </a>
                         </li>
                     </sec:authorize>
                 </sec:authorize>
 
-                <!-- 로그인/로그아웃 (관리자/사용자 공통) -->
                 <sec:authorize access="isAuthenticated()">
                     <li class="menu-item">
                         <form action="/logout" method="post" style="display: inline;">

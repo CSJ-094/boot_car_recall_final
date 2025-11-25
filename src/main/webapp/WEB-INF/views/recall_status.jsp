@@ -106,7 +106,7 @@
                         <c:forEach items="${recallList}" var="recall">
                             <tr>
                                 <td>${recall.maker}</td>
-                                <td>${recall.modelName}</td>
+                                <td><a href="/recall/detail/${recall.id}">${recall.modelName}</a></td>
                                 <td>${recall.recallDate}</td>
                                 <td>${recall.recallReason}</td>
                             </tr>

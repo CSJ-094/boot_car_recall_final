@@ -108,8 +108,8 @@
                         <input type="text" id="maker" name="maker" required />
                     </div>
                     <div class="input-group">
-                        <label for="modelName">모델명</label>
-                        <input type="text" id="modelName" name="modelName" required />
+                        <label for="carModel">모델명</label>
+                        <input type="text" id="carModel" name="carModel" required />
                     </div>
                     <button type="submit" class="login-btn">차량 등록</button>
                 </form>
@@ -122,7 +122,7 @@
                         <c:forEach var="vehicle" items="${userVehicles}">
                             <li class="vehicle-item">
                                 <div class="vehicle-info">
-                                    <strong>${vehicle.maker} ${vehicle.modelName}</strong>
+                                    <strong>${vehicle.maker} ${vehicle.carModel}</strong>
                                     <span>ID: ${vehicle.id}</span>
                                 </div>
                                 <form action="/my-vehicles/delete" method="post" onsubmit="return confirm('정말로 이 차량을 삭제하시겠습니까?');">

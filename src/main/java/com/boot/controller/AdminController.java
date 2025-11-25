@@ -32,7 +32,6 @@ import org.springframework.ui.Model;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 
@@ -96,11 +95,11 @@ public class AdminController {
         log.info("@# Admin main page");
 
         // 최근 7일간 결함 신고 통계 데이터 조회
-        ArrayList<DailyStatsDTO> dailyStats = statsService.getDailyReportStats();
+        List<DailyStatsDTO> dailyStats = statsService.getDailyReportStats();
         model.addAttribute("dailyStats", dailyStats);
 
         // 최근 7일간 신고 목록 조회
-        ArrayList<DefectReportDTO> recentReports = statsService.getRecentReports();
+        List<DefectReportDTO> recentReports = statsService.getRecentReports();
         model.addAttribute("recentReports", recentReports);
 
         return "admin/main";
@@ -227,7 +226,7 @@ public class AdminController {
     @GetMapping("/faq/list")
     public String faqList(Criteria cri, Model model) {
         log.info("@# faq list");
-        ArrayList<FaqDTO> list = faqService.getFaqList(cri);
+        List<FaqDTO> list = faqService.getFaqList(cri);
         int total = faqService.getTotal();
 
         model.addAttribute("list", list);
@@ -295,7 +294,7 @@ public class AdminController {
     @GetMapping("/press/list")
     public String pressList(Criteria cri, Model model) {
         log.info("@# press list");
-        ArrayList<BoardDTO> list = boardService.listWithPaging(cri);
+        List<BoardDTO> list = boardService.listWithPaging(cri);
         int total = boardService.getTotalCount(cri);
 
         model.addAttribute("list", list);
@@ -365,7 +364,7 @@ public class AdminController {
     @GetMapping("/complain/list")
     public String complainList(Model model) {
         log.info("@# admin complain list");
-        ArrayList<ComplainDTO> list = complainService.complain_list();
+        List<ComplainDTO> list = complainService.complain_list();
         model.addAttribute("list", list);
         return "admin/complain_list";
     }

@@ -9,5 +9,5 @@ public class UserVehicleDto {
     private Long id;
     private String username;
     private String maker;
-    private String modelName;
+    private String carModel; // modelName -> carModel로 변경
 }

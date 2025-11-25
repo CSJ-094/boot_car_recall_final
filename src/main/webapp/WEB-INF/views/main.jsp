@@ -16,56 +16,8 @@
 
 <div class="hero">
     <h2>내 차량이 리콜 대상인지 확인하세요</h2>
-    <div class="search-form">
-        <form action="/" method="get">
-            <input type="text" name="query" placeholder="차량 모델명 또는 제조사 입력" value="<c:out value="${searchQuery}"/>" />
-            <button type="submit">검색</button>
-        </form>
-    </div>
+    <!-- 검색창은 헤더로 이동했습니다. -->
 </div>
-
-<c:if test="${not empty searchResults}">
-    <section class="section-search-results">
-        <div class="container">
-            <h3>'${searchQuery}' 검색 결과</h3>
-            <c:choose>
-                <c:when test="${not empty searchResults.recallList}">
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>제조사</th>
-                                <th>모델명</th>
-                                <th>생산 시작일</th>
-                                <th>생산 종료일</th>
-                                <th>리콜 날짜</th>
-                                <th>리콜 사유</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <c:forEach var="recall" items="${searchResults.recallList}">
-                                <tr>
-                                    <td><c:out value="${recall.id}"/></td>
-                                    <td><c:out value="${recall.maker}"/></td>
-                                    <td><c:out value="${recall.modelName}"/></td>
-                                    <td><c:out value="${recall.makeStart}"/></td>
-                                    <td><c:out value="${recall.makeEnd}"/></td>
-                                    <td><c:out value="${recall.recallDate}"/></td>
-                                    <td><c:out value="${recall.recallReason}"/></td>
-                                </tr>
-                            </c:forEach>
-                            </tbody>
-                        </table>
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <p class="no-results">'${searchQuery}'에 대한 검색 결과가 없습니다.</p>
-                </c:otherwise>
-            </c:choose>
-        </div>
-    </section>
-</c:if>
 
 <section class="section-center-hero">
     <div class="hero-carousel" data-autoplay="true" data-interval="3000" aria-roledescription="carousel">
