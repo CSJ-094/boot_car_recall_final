@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--/* headerFragment 시작 */-->
+<header class="site-header" th:fragment="headerFragment">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}">
+            <img th:src="@{/img/car.png}" class="brand-logo" alt="자동차 아이콘">
+            <span class="brand-text">자동차 리콜 통합센터</span>
+        </a>
+
+        <div class="header-search">
+            <form th:action="@{/search}" method="get">
+                <input type="text" name="query" placeholder="통합 검색..." th:value="${query}" />
+                <button type="submit">검색</button>
+            </form>
+        </div>
+
+        <!-- 모바일 메뉴 토글 -->
+        <button class="nav-toggle" aria-controls="global-nav" aria-expanded="false" aria-label="메뉴 열기">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+
+        <nav id="global-nav" class="nav" aria-label="주 메뉴">
+            <ul class="menu">
+                <li sec:authorize="hasRole('ADMIN')" class="menu-item has-sub">
+                    <a th:href="@{/admin/main}" class="menu-link">관리자 홈</a>
+                    <ul class="submenu">
+                        <li><a th:href="@{/admin/defect_reports}">결함 신고 관리</a></li>
+                        <li><a th:href="@{/admin/notice/list}">공지사항 관리</a></li>
+                        <li><a th:href="@{/admin/faq/list}">FAQ 관리</a></li>
+                        <li><a th:href="@{/admin/press/list}">보도자료 관리</a></li>
+                        <li><a th:href="@{/admin/complain/list}">고객 문의 관리</a></li>
+                    </ul>
+                </li>
+
+                <th:block sec:authorize="!hasRole('ADMIN')">
+                    <li class="menu-item has-sub">
+                        <a th:href="@{/defect-report}" class="menu-link">결함신고</a>
+                        <ul class="submenu">
+                            <li><a th:href="@{/defect-report}">신고</a></li>
+                            <li><a th:href="@{/report/history}">신고내역</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item has-sub">
+                        <a th:href="@{/recall-status}" class="menu-link">리콜정보</a>
+                        <ul class="submenu">
+                            <li><a th:href="@{/recall-status}">리콜현황</a></li>
+                            <li><a th:href="@{/report_recallInfo}">리콜 보도자료</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item has-sub">
+                        <a href="#" class="menu-link">리콜센터</a>
+                        <ul class="submenu">
+                            <li><a th:href="@{/notice/list}">공지사항</a></li>
+                            <li><a th:href="@{/faq/list}">FAQ</a></li>
+                            <li><a th:href="@{/centers/about}">리콜센터 소개</a></li>
+                            <li><a th:href="@{/centers/map}">주변 리콜센터 찾기</a></li>
+                        </ul>
+                    </li>
+                    <sec:authorize access="isAuthenticated()">
+                        <li class="menu-item">
+                            <a href="/my-vehicles" class="menu-link">내 차량 관리</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="/my-notifications" class="menu-link">
+                                내 알림
+                                <span th:if="${unreadNotificationCount > 0}"
+                                      th:text="${unreadNotificationCount}" class="notification-badge"></span>
+                            </a>
+                        </li>
+                    </sec:authorize>
+                </th:block>
+
+                <sec:authorize access="isAuthenticated()">
+                    <li class="menu-item">
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="menu-link btn-logout">로그아웃</button>
+                        </form>
+                    </li>
+                </sec:authorize>
+                <sec:authorize access="isAnonymous()">
+                    <li class="menu-item">
+                        <a th:href="@{/login}" class="menu-link">로그인</a>
+                    </li>
+                </sec:authorize>
+            </ul>
+        </nav>
+    </div>
+</header>
+<!--/* headerFragment 끝 */-->
+</html>

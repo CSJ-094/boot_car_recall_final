@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+    <title>통합 검색 결과</title>
+    <th:block layout:fragment="css">
+    <style>
+        .search-results-container { max-width: 900px; margin: 50px auto; padding: 30px; }
+        .search-query { font-size: 1.8rem; font-weight: bold; color: #007bff; margin-bottom: 30px; text-align: center; }
+        .search-query small { font-size: 1rem; color: #666; font-weight: normal; }
+        .results-section { margin-bottom: 40px; }
+        .results-section h2 { font-size: 1.5rem; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
+        .result-list { list-style: none; padding: 0; }
+        .result-item { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .result-item a { text-decoration: none; color: #333; font-size: 1.1rem; font-weight: 500; }
+        .result-item a:hover { color: #0056b3; }
+        .result-item .meta { font-size: 0.85rem; color: #888; margin-top: 5px; }
+        .no-results { text-align: center; color: #888; padding: 50px; border: 1px dashed #ccc; border-radius: 8px; }
+    </style>
+    </th:block>
+</head>
+<div layout:fragment="content">
+    <main class="container">
+        <div class="search-results-container">
+            <h1 class="search-query">
+                '<span th:text="${results.query}"></span>' <small>에 대한 통합 검색 결과입니다.</small>
+            </h1>
+
+            <div th:if="${results.empty}">
+                <p class="no-results">모든 카테고리에서 검색 결과가 없습니다.</p>
+            </div>
+
+            <!-- 리콜 정보 결과 -->
+            <section th:if="${not #lists.isEmpty(results.recalls)}" class="results-section">
+                <section class="results-section">
+                    <h2>리콜 정보 (<span th:text="${#lists.size(results.recalls)}"></span>건)</h2>
+                    <ul class="result-list">
+                        <li th:each="item : ${results.recalls}" class="result-item">
+                            <a th:href="@{/recall-status(keyword=${item.modelName})}" th:text="|${item.maker} ${item.modelName}|"></a>
+                            <div class="meta" th:text="|리콜 사유: ${item.recallReason} | 리콜 시작일: ${item.recallDate}|"></div>
+                        </li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- 공지사항 결과 -->
+            <section th:if="${not #lists.isEmpty(results.notices)}" class="results-section">
+                <section class="results-section">
+                    <h2>공지사항 (<span th:text="${#lists.size(results.notices)}"></span>건)</h2>
+                    <ul class="result-list">
+                        <li th:each="item : ${results.notices}" class="result-item">
+                            <a th:href="@{/notice/detail(notice_id=${item.notice_id})}" th:text="${item.title}"></a>
+                            <div class="meta" th:text="|작성일: ${#strings.substring(item.created_at, 0, 10)}|"></div>
+                        </li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- 보도자료 결과 -->
+            <section th:if="${not #lists.isEmpty(results.pressReleases)}" class="results-section">
+                <section class="results-section">
+                    <h2>보도자료 (<span th:text="${#lists.size(results.pressReleases)}"></span>건)</h2>
+                    <ul class="result-list">
+                        <li th:each="item : ${results.pressReleases}" class="result-item">
+                            <a th:href="@{/board/report_content_view(boardNo=${item.boardNo})}" th:text="${item.boardTitle}"></a>
+                            <div class="meta" th:text="|작성일: ${#strings.substring(item.boardDate, 0, 10)}|"></div>
+                        </li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- FAQ 결과 -->
+            <section th:if="${not #lists.isEmpty(results.faqs)}" class="results-section">
+                <section class="results-section">
+                    <h2>FAQ (<span th:text="${#lists.size(results.faqs)}"></span>건)</h2>
+                    <ul class="result-list">
+                        <li th:each="item : ${results.faqs}" class="result-item">
+                            <a th:href="@{/faq/detail(faq_id=${item.faq_id})}" th:text="${item.question}"></a>
+                        </li>
+                    </ul>
+                </section>
+            </section>
+        </div>
+    </main>
+
+</div>
+</html>
