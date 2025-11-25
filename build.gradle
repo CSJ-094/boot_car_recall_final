@@ -33,6 +33,8 @@ dependencies {
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.3.1'
 	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
 	implementation 'javax.servlet:jstl:1.2'
+	implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.20'
+	implementation 'org.apache.pdfbox:pdfbox:2.0.30'
 	implementation 'net.coobird:thumbnailator:0.4.20'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

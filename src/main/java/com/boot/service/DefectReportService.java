@@ -11,6 +11,7 @@ import java.util.List;
 public interface DefectReportService {
     void saveReport(DefectReportDTO report, List<MultipartFile> files);
     List<DefectReportDTO> getAllReports(Criteria cri);
+    List<DefectReportDTO> getAllReportsWithoutPaging(); // CSV 다운로드를 위한 전체 목록 조회
     int getTotalCount(Criteria cri); // 검색 조건에 따른 전체 개수
     DefectReportDTO getReportById(Long id);
     void updateReport(DefectReportDTO report, List<MultipartFile> newFiles, List<String> existingFileNames);

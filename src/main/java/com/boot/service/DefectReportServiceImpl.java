@@ -91,6 +91,12 @@ public class DefectReportServiceImpl implements DefectReportService {
     }
 
     @Override
+    public List<DefectReportDTO> getAllReportsWithoutPaging() {
+        // CSV 다운로드용이므로 이미지는 제외하고 신고 데이터만 반환
+        return defectReportDAO.selectAllWithoutPaging();
+    }
+
+    @Override
     public int getTotalCount(Criteria cri) {
         return defectReportDAO.count(cri.getKeyword()); // 검색 조건에 따른 카운트
     }

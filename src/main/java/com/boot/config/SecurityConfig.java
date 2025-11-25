@@ -40,6 +40,8 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/admin/login")
                 .loginProcessingUrl("/admin/login")
+                .usernameParameter("admin_id") 
+                .passwordParameter("admin_pw")
                 .defaultSuccessUrl("/admin/main", true)
                 .failureUrl("/admin/login?error")
                 .permitAll()

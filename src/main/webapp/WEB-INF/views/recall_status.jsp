@@ -71,6 +71,35 @@
         .col-maker { width: 12%; }
         .col-model { width: 18%; }
         .col-date { width: 12%; }
+        
+        .csv-download-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.95em;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .csv-download-btn:hover {
+            background-color: #218838;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .button-container a + a {
+            margin-left: 10px;
+        }
+        .pdf-download-btn {
+            background-color: #ff7043;
+        }
+        .pdf-download-btn:hover {
+            background-color: #f4511e;
+        }
 
     </style>
 </head>
@@ -90,6 +119,11 @@
                 <button type="submit">검색</button>
             </form>
         </div>
+        
+        <div class="button-container">
+            <a href="/recall/download/csv" class="csv-download-btn">📥 리콜 내역 CSV 다운로드</a>
+            <a href="/recall/download/pdf" class="csv-download-btn pdf-download-btn">📄 리콜 내역 PDF 다운로드</a>
+        </div>
 
         <c:choose>
             <c:when test="${not empty recallList}">
@@ -106,7 +140,7 @@
                         <c:forEach items="${recallList}" var="recall">
                             <tr>
                                 <td>${recall.maker}</td>
-                                <td>${recall.modelName}</td>
+                                <td><a href="/recall/detail/${recall.id}">${recall.modelName}</a></td>
                                 <td>${recall.recallDate}</td>
                                 <td>${recall.recallReason}</td>
                             </tr>

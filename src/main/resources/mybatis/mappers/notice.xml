@@ -54,4 +54,11 @@
         DELETE FROM RECALL_NOTICE_DB
         WHERE notice_id = #{notice_id}
     </delete>
+
+    <select id="searchByKeyword" parameterType="String" resultMap="noticeResultMap">
+        SELECT notice_id, title, content, views, DATE_FORMAT(created_at, '%Y-%m-%d') as created_at, is_urgent
+        FROM RECALL_NOTICE_DB
+        WHERE title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY notice_id DESC
+    </select>
 </mapper>
