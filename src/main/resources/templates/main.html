@@ -335,7 +335,7 @@
                 </div>
                 <div class="panel-cta">
                     <a class="btn-ghost" th:href="@{/recall-status}">리콜현황 보기</a>
-                    <a class="btn-solid" th:href="@{/defect-report}">내 차량 신고하기</a>
+                    <a class="btn-solid" th:href="@{/report/write}">내 차량 신고하기</a>
                 </div>
             </div>
         </div>
@@ -370,7 +370,7 @@
                 <div class="icon-badge" aria-hidden="true">📅</div>
                 <h4>서비스 예약</h4>
                 <p>대상 차량이면 가까운 리콜센터 예약 안내를 드립니다.</p>
-                <a class="more" href="#">예약 절차</a> <!-- TODO: 링크 수정 필요 -->
+                <a class="more" th:href="@{/centers/map}">예약 절차</a> <!-- TODO: 링크 수정 필요 -->
             </article>
             <article class="card">
                 <div class="icon-badge" aria-hidden="true">🛡️</div>
@@ -386,7 +386,7 @@
 <section class="section-hub">
     <div class="container">
         <nav class="hub-grid" aria-label="주요 서비스 바로가기">
-            <a class="hub-card" th:href="@{/defect-report}">
+            <a class="hub-card" th:href="@{/report/write}">
                     <span class="hub-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none"><path d="M9 5h6m-3-3v6M6 9h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                     </span>
@@ -439,13 +439,13 @@
         <ul id="newsList" class="news-list" aria-live="polite">
             <li class="news-item" th:each="notice : ${noticeList}">
                 <span class="tag notice">공지</span>
-                <a th:href="@{/notice/detail(notice_id=${notice.notice_id})}" th:text="${notice.title}" ></a>
+                <a th:href="@{/notice/{id}(id=${notice.notice_id})}" th:text="${notice.title}" ></a>
                 <time th:datetime="${notice.created_at}" th:text="${#strings.substring(notice.created_at, 0, 10)}"></time>
             </li>
             <li class="news-item" th:each="press : ${pressList}">
                 <span class="tag press">보도자료</span>
-                <a th:href="@{/board/report_content_view(boardNo=${press.boardNo})}" th:text="${press.boardTitle}"></a>
-                <time th:datetime="${press.boardDate}" th:text="${#strings.substring(press.boardDate, 0, 10)}"></time>
+                <a th:href="@{/board/get(boardNo=${press.boardNo})}" th:text="${press.boardTitle}"></a>
+                <time th:datetime="${press.boardDate}" th:text="${#dates.format(press.boardDate, 'yyyy-MM-dd')}"></time>
             </li>
             <li class="news-item no-items" th:if="${#lists.isEmpty(noticeList) and #lists.isEmpty(pressList)}">
                 <li class="news-item no-items">
