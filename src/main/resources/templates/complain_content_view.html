@@ -131,7 +131,10 @@
 		        </tr>
 		        <tr>
 		            <th>상담구분</th>
-		            <td th:text="*{complain_type}"></td>
+		            <td>
+                        <span th:if="*{complain_type == '1'}">제작결함</span>
+                        <span th:if="*{complain_type == '2'}">기타</span>
+                    </td>
 		        </tr>
 		        <tr>
 		            <th>내용</th>

@@ -1,5 +1,6 @@
 package com.boot.service;
 
+import com.boot.dto.BoardAttachDTO;
 import com.boot.dto.BoardDTO;
 import com.boot.dto.Criteria;
 
@@ -16,11 +17,12 @@ public interface BoardService {
     int getTotalCount(Criteria cri);
 
     // 공통 사용 메소드들
-    void write(HashMap<String, String> param);
+    void write(BoardDTO board);
     BoardDTO contentView(int boardNo);
-    void modify(HashMap<String, String> param);
-    void delete(HashMap<String, String> param);
+    void modify(BoardDTO board);
+    void delete(int boardNo);
 
     // 키워드 검색
     List<BoardDTO> searchByKeyword(String keyword);
+    List<BoardAttachDTO> getFileList(int boardNo);
 }

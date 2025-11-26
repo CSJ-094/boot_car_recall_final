@@ -116,9 +116,9 @@
                 <h2><i class="fa-solid fa-bullhorn"></i>공지사항 (<span th:text="${#lists.size(results.notices)}"></span>건)</h2>
                 <ul class="result-list">
                     <li th:each="item : ${results.notices}" class="result-item">
-                        <a th:href="@{/notice/detail(notice_id=${item.notice_id})}" th:text="${item.title}"></a>
+                        <a th:href="@{/notice/{id}(id=${item.notice_id})}" th:text="${item.title}"></a>
                         <div class="meta">
-                            <span><strong>작성일:</strong> </span><span th:text="${item.created_at}"></span>
+                            <span><strong>작성일:</strong> </span><span th:text="${#dates.format(item.created_at, 'yyyy-MM-dd')}"></span>
                         </div>
                     </li>
                 </ul>
@@ -129,9 +129,9 @@
                 <h2><i class="fa-solid fa-newspaper"></i>보도자료 (<span th:text="${#lists.size(results.pressReleases)}"></span>건)</h2>
                 <ul class="result-list">
                     <li th:each="item : ${results.pressReleases}" class="result-item">
-                        <a th:href="@{/board/report_content_view(boardNo=${item.boardNo})}" th:text="${item.boardTitle}"></a>
+                        <a th:href="@{/board/get(boardNo=${item.boardNo})}" th:text="${item.boardTitle}"></a>
                         <div class="meta">
-                            <span><strong>작성일:</strong> </span><span th:text="${item.boardDate}"></span>
+                            <span><strong>작성일:</strong> </span><span th:text="${#dates.format(item.boardDate, 'yyyy-MM-dd')}"></span>
                         </div>
                     </li>
                 </ul>

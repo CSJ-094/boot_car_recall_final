@@ -61,6 +61,7 @@
                         <a th:href="@{/recall-status}" class="menu-link">리콜 정보</a>
                         <ul class="submenu">
                             <li><a th:href="@{/recall-status}">리콜현황</a></li>
+                            <li><a th:href="@{/recall/stats}">리콜통계</a></li>
                             <li><a th:href="@{/board/list}">리콜 보도자료</a></li>
                         </ul>
                     </li>
@@ -74,7 +75,7 @@
                         </ul>
                     </li>
                     <li class="menu-item" sec:authorize="isAuthenticated()">
-                        <a href="/my-vehicles" class="menu-link">내 차량 관리</a>
+                        <a href="/my-vehicles" class="menu-link">차량 관리</a>
                     </li>
                     <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a href="/my-notifications" class="menu-link">
