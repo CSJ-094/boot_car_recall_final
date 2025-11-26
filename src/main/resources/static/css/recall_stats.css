@@ -189,3 +189,101 @@
     width: 100%;
     max-height: 380px;
 }
+
+/* 표 기본 */
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;  /* 칸 폭 고정 */
+}
+
+.stats-table th,
+.stats-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    vertical-align: top;
+}
+
+/* 제조사 칸: 짧으니까 한 줄 고정 */
+.stats-table th:nth-child(1),
+.stats-table td:nth-child(1) {
+    width: 15%;
+    white-space: nowrap;
+}
+
+/* 모델명 칸: 길어서 말줄임표 처리 */
+.stats-table th:nth-child(2),
+.stats-table td.col-model {
+    width: 55%;
+}
+
+.stats-table td.col-model {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 기간 / 리콜 건수 */
+.stats-table th:nth-child(3),
+.stats-table td:nth-child(3),
+.stats-table th:nth-child(4),
+.stats-table td:nth-child(4) {
+    width: 15%;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-backdrop.hidden {
+    display: none;
+}
+
+.modal-dialog {
+    background: #fff;
+    border-radius: 10px;
+    width: 600px;
+    max-height: 70vh;
+    padding: 20px 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.modal-close {
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.modal-meta {
+    font-size: 13px;
+    color: #666;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.modal-model-list {
+    margin: 0;
+    padding-left: 18px;
+    list-style: disc;
+    overflow-y: auto;
+}

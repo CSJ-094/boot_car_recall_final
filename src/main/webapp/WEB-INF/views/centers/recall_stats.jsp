@@ -70,16 +70,17 @@
         <!-- 표 -->
         <div id="tableView" class="result-view is-active">
             <div class="result-summary" id="resultSummary"></div>
-            <table class="stats-table">
-                <thead>
-                <tr>
-                    <th>그룹명</th>
-                    <th>기간</th>
-                    <th>리콜 건수</th>
-                </tr>
-                </thead>
-                <tbody id="statsTableBody"></tbody>
-            </table>
+			<table class="stats-table">
+				<thead>
+				  <tr>
+				    <th>제조사</th>
+				    <th id="thModelName">모델명</th>
+				    <th>기간</th>
+				    <th>리콜 건수</th>
+				  </tr>
+				</thead>
+				<tbody id="statsTableBody"></tbody>
+			</table>
             <div class="table-footer">
                 <button type="button" id="btnShowAll" class="btn-outline">전체 목록 보기</button>
             </div>

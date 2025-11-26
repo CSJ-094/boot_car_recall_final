@@ -1,6 +1,7 @@
 let currentGroupBy = 'MANUFACTURER';
 let chartInstance = null;
 let fullData = [];
+let showModelCol = false;   // ← 모델명 컬럼 표시 여부
 
 document.addEventListener('DOMContentLoaded', () => {
     // 집계 기준 탭
@@ -45,8 +46,11 @@ function loadStats() {
     const maker = document.getElementById('maker').value;
     if (maker) params.append('maker', maker);
 
-    const modelKeyword = document.getElementById('modelKeyword').value;
+    const modelKeyword = document.getElementById('modelKeyword').value.trim();
     if (modelKeyword) params.append('modelKeyword', modelKeyword);
+
+    // 🔹 모델 기준이거나, 모델 검색어가 있으면 컬럼 보이게
+    showModelCol = (currentGroupBy === 'MODEL' || !!modelKeyword);
 
     fetch('/recall/stats/data?' + params.toString())
         .then(res => res.json())
@@ -55,8 +59,7 @@ function loadStats() {
 
             const top10 = fullData.slice(0, 10);
             renderTable(top10);
-
-            renderChart(fullData);  // 전체 데이터 기준으로 막대 그래프
+            renderChart(fullData);
         })
         .catch(err => {
             console.error(err);
@@ -65,21 +68,30 @@ function loadStats() {
 }
 
 
-
 function renderTable(rows) {
     const tbody = document.getElementById('statsTableBody');
     tbody.innerHTML = '';
 
     rows.forEach(row => {
         const tr = document.createElement('tr');
+        const displayModelName = row.modelName || '';
+
         tr.innerHTML = `
-            <td>${row.groupName}</td>
+            <td>${row.maker}</td>
+            <td class="col-model" title="${displayModelName}">
+                ${displayModelName}
+            </td>
             <td>${row.periodLabel}</td>
             <td>${row.recallCount}</td>
         `;
         tbody.appendChild(tr);
     });
+
+    toggleModelColumn();   // 아래에서 만들 함수 호출
 }
+
+
+
 
 function renderChart(rows) {
     const ctx = document.getElementById('statsChart').getContext('2d');
@@ -135,4 +147,22 @@ function renderChart(rows) {
         }
     });
 }
+
+function toggleModelColumn() {
+    const thModel = document.getElementById('thModelName');
+    if (!thModel) return;
+
+    if (showModelCol) {
+        thModel.style.display = '';
+        document.querySelectorAll('.col-model').forEach(td => {
+            td.style.display = '';
+        });
+    } else {
+        thModel.style.display = 'none';
+        document.querySelectorAll('.col-model').forEach(td => {
+            td.style.display = 'none';
+        });
+    }
+}
+
 
