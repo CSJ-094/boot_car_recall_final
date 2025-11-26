@@ -40,7 +40,7 @@
     <!-- 하단 영역: 페이지네이션 및 문의하기 버튼 -->
     <div class="fq-footer">
       <!-- 페이지네이션 -->
-      <nav class="fq-paging" aria-label="FAQ 페이지 이동">
+      <nav class="fq-paging" aria-label="FAQ 페이지 이동" th:if="${pageMaker.total > 0}">
         <ul>
           <li th:if="${pageMaker.prev}">
             <a class="fq-page" th:href="@{/faq/list(pageNum=${pageMaker.startPage - 1})}">이전</a>

@@ -49,7 +49,7 @@
             <td th:text="${report.reporterName}"></td>
             <td th:text="${report.carModel}"></td>
             <td th:text="${report.vin}"></td>
-            <td th:text="${#temporals.format(report.reportDate, 'yyyy-MM-dd')}"></td>
+            <td th:text="${#dates.format(report.reportDate, 'yyyy-MM-dd')}"></td>
             <td th:switch="${report.status}">
                 <span th:case="'접수'" class="badge badge-info">접수</span>
                 <span th:case="'처리중'" class="badge badge-warning">처리중</span>

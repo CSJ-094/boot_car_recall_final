@@ -97,8 +97,7 @@
         }
     </style>
 </head>
-<body>
-	
+<div layout:fragment="content">
     <div class="page-wrapper">
         <div class="board-container">
             <h2>신청 내역</h2>
@@ -131,9 +130,12 @@
                                 </th:block>
                             </a>
                         </td>
-                        <td th:text="${dto.complain_type}"></td>
+                        <td>
+                            <span th:if="${dto.complain_type == '1'}">제작결함</span>
+                            <span th:if="${dto.complain_type == '2'}">기타</span>
+                        </td>
                         <td th:text="${dto.reporter_name}"></td>
-                        <td th:text="${dto.complainDate}"></td>
+                        <td th:text="${#dates.format(dto.complainDate, 'yyyy-MM-dd')}"></td>
                         <td>
                             <span th:if="${!#strings.isEmpty(dto.answer)}" class="badge badge-success">답변 완료</span>
                             <span th:if="${#strings.isEmpty(dto.answer)}" class="badge badge-warning">답변 대기</span>
@@ -147,5 +149,5 @@
             </div>
         </div>
     </div>
-</div>
 </html>
+</div>

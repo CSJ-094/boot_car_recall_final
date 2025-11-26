@@ -26,7 +26,7 @@
           </h1>
         </div>
         <ul class="nu-meta">
-          <li><strong>작성일</strong> <span th:text="*{created_at}"></span></li>
+          <li><strong>작성일</strong> <span th:text="${#strings.substring(notice.created_at, 0, 10)}"></span></li>
           <li><strong>조회수</strong> <span th:text="*{views}"></span></li>
         </ul>
       </header>
