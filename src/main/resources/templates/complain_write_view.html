@@ -79,7 +79,6 @@
     <div class="container">
         <h2>온라인 상담 신청</h2>
         <form th:action="@{/complain_write}" method="post" class="cmpl_frm">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <table class="cmpl_tab">
                 <tr>
                     <td class="label">신청인 <span class="required">※</span></td>

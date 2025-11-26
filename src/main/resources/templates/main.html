@@ -482,6 +482,7 @@
 
 <th:block layout:fragment="script">
     <script th:src="@{/js/main.js}"></script>
+    <script type="text/javascript" src="/js/chat.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const typeButtons = document.querySelectorAll('.search-tabs .type-btn');
@@ -536,6 +537,4 @@
     });
 </script>
 </th:block>
-<script type="text/javascript" src="/js/chat.js"></script>
-</body>
 </html>

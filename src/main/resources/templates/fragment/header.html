@@ -1,7 +1,17 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<!--/* headerFragment 시작 */-->
+<!-- 1. 헤더 스타일 조각 (메뉴 깨짐 방지용) -->
+<th:block th:fragment="header-style">
+    <style>
+        .menu-item {
+            white-space: nowrap; /* 메뉴 항목의 글자가 줄바꿈되지 않도록 설정 */
+        }
+        .btn-logout {
+            background: none; border: none; padding: 0;
+            font: inherit; cursor: pointer; color: inherit;
+        }
+    </style>
+</th:block>
+
+<!-- 2. 실제 헤더 내용 조각 -->
 <header class="site-header" th:fragment="headerFragment">
     <div class="header-inner">
         <a class="brand" th:href="@{/}">
@@ -10,7 +20,7 @@
         </a>
 
         <div class="header-search">
-            <form th:action="@{/search}" method="get">
+            <form th:action="@{/search}" method="get" th:object="${#object.empty}">
                 <input type="text" name="query" placeholder="통합 검색..." th:value="${query}" />
                 <button type="submit">검색</button>
             </form>
@@ -25,7 +35,7 @@
             <ul class="menu">
 
                 <!-- 관리자 메뉴 -->
-                <th:block sec:authorize="hasRole('ADMIN')">
+                <th:block sec:authorize="hasAuthority('ROLE_ADMIN')">
                     <li class="menu-item has-sub">
                         <a th:href="@{/admin/main}" class="menu-link">관리자 홈</a>
                         <ul class="submenu">
@@ -38,8 +48,8 @@
                     </li>
                 </th:block>
 
-                <!-- 비로그인 사용자 메뉴 -->
-                <th:block sec:authorize="isAnonymous()">
+                <!-- 일반 사용자 및 비로그인 사용자 공통 메뉴 -->
+                <th:block sec:authorize="!hasAuthority('ROLE_ADMIN')">
                     <li class="menu-item has-sub">
                         <a th:href="@{/report/write}" class="menu-link">결함신고</a>
                         <ul class="submenu">
@@ -48,14 +58,14 @@
                         </ul>
                     </li>
                     <li class="menu-item has-sub">
-                        <a th:href="@{/recall-status}" class="menu-link">리콜정보</a>
+                        <a th:href="@{/recall-status}" class="menu-link">리콜 정보</a>
                         <ul class="submenu">
                             <li><a th:href="@{/recall-status}">리콜현황</a></li>
-                            <li><a th:href="@{/report_recallInfo}">리콜 보도자료</a></li>
+                            <li><a th:href="@{/board/list}">리콜 보도자료</a></li>
                         </ul>
                     </li>
                     <li class="menu-item has-sub">
-                        <a href="#" class="menu-link">리콜센터</a>
+                        <a href="#" class="menu-link">리콜 센터</a>
                         <ul class="submenu">
                             <li><a th:href="@{/notice/list}">공지사항</a></li>
                             <li><a th:href="@{/faq/list}">FAQ</a></li>
@@ -63,40 +73,10 @@
                             <li><a th:href="@{/centers/map}">주변 리콜센터 찾기</a></li>
                         </ul>
                     </li>
-                    <li class="menu-item">
-                        <a th:href="@{/login}" class="menu-link">로그인</a>
-                    </li>
-                </th:block>
-
-                <!-- 로그인한 일반 사용자 메뉴 -->
-                <th:block sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
-                    <li class="menu-item has-sub">
-                        <a th:href="@{/report/write}" class="menu-link">결함신고</a>
-                        <ul class="submenu">
-                            <li><a th:href="@{/report/write}">신고</a></li>
-                            <li><a th:href="@{/report/history}">신고내역</a></li>
-                        </ul>
-                    </li>
-                    <li class="menu-item has-sub">
-                        <a th:href="@{/recall-status}" class="menu-link">리콜정보</a>
-                        <ul class="submenu">
-                            <li><a th:href="@{/recall-status}">리콜현황</a></li>
-                            <li><a th:href="@{/report_recallInfo}">리콜 보도자료</a></li>
-                        </ul>
-                    </li>
-                    <li class="menu-item has-sub">
-                        <a href="#" class="menu-link">리콜센터</a>
-                        <ul class="submenu">
-                            <li><a th:href="@{/notice/list}">공지사항</a></li>
-                            <li><a th:href="@{/faq/list}">FAQ</a></li>
-                            <li><a th:href="@{/centers/about}">리콜센터 소개</a></li>
-                            <li><a th:href="@{/centers/map}">주변 리콜센터 찾기</a></li>
-                        </ul>
-                    </li>
-                    <li class="menu-item">
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a href="/my-vehicles" class="menu-link">내 차량 관리</a>
                     </li>
-                    <li class="menu-item">
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a href="/my-notifications" class="menu-link">
                             내 알림
                             <span th:if="${unreadNotificationCount > 0}"
@@ -105,10 +85,15 @@
                     </li>
                 </th:block>
 
+                <!-- 비로그인 시에만 보이는 로그인 버튼 -->
+                <li sec:authorize="isAnonymous()" class="menu-item">
+                    <a th:href="@{/login}" class="menu-link">로그인</a>
+                </li>
+
                 <!-- 로그아웃 버튼 (모든 로그인 사용자) -->
                 <li sec:authorize="isAuthenticated()" class="menu-item">
-                    <form th:action="@{/logout}" method="post" style="display: inline;">
-                        <button type="submit" class="menu-link btn-logout">로그아웃</button>
+                    <form th:action="@{/logout}" method="post" class="menu-link" style="padding:0;" th:object="${#object.empty}">
+                        <button type="submit" class="btn-logout" style="padding: 10px 14px;">로그아웃</button>
                     </form>
                 </li>
 
@@ -116,5 +101,3 @@
         </nav>
     </div>
 </header>
-<!--/* headerFragment 끝 */-->
-</html>

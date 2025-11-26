@@ -98,6 +98,20 @@
   font-family: "Noto Sans KR", sans-serif; /* 폰트 통일 */
   font-size: 1rem; /* 폰트 크기 명시 */
 }
+.menu-item {
+  white-space: nowrap; /* 메뉴 항목 글자 깨짐 방지 */
+}
+
+/* 로그아웃 form을 a 태그처럼 보이게 */
+form.menu-link {
+  padding: 0; /* 내부 버튼과 여백이 중첩되지 않도록 */
+}
+
+/* 로그아웃 버튼 스타일 초기화 */
+.btn-logout {
+  background: none; border: none; padding: 10px 14px;
+  font: inherit; color: var(--text-on-dark); cursor: pointer;
+}
 .menu-link:hover,
 .menu > li > a:hover{ background: rgba(255,255,255,.12); }
 

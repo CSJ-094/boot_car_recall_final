@@ -32,7 +32,6 @@
                     <!-- 아이디 찾기 폼 -->
                     <div id="find-id" class="tab-pane active">
                         <form th:action="@{/find-id}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <p class="form-description">가입 시 사용한 이메일 주소를 입력하세요.</p>
                             <div class="input-group">
                                 <label for="email-id">이메일</label>
@@ -44,7 +43,6 @@
                     <!-- 비밀번호 재설정 폼 -->
                     <div id="reset-pw" class="tab-pane">
                         <form th:action="@{/reset-password}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <p class="form-description">아이디와 이메일 주소를 입력하세요.</p>
                             <div class="input-group">
                                 <label for="username-pw">아이디</label>
