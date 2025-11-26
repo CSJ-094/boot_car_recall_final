@@ -6,15 +6,15 @@
 <mapper namespace="com.boot.dao.BoardAttachDAO">
 
     <insert id="insert">
-        insert into tbl_attach (uuid, uploadPath, fileName, image, boardNo)
+        insert into board_attach (uuid, uploadPath, fileName, image, boardNo)
         values (#{uuid}, #{uploadPath}, #{fileName}, #{image}, #{boardNo})
     </insert>
 
     <select id="findByBoardNo" resultType="com.boot.dto.BoardAttachDTO">
-        select * from tbl_attach where boardNo = #{boardNo}
+        select * from board_attach where boardNo = #{boardNo}
     </select>
 
     <delete id="deleteAll">
-        delete from tbl_attach where boardNo = #{boardNo}
+        delete from board_attach where boardNo = #{boardNo}
     </delete>
 </mapper>
