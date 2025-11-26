@@ -1,7 +1,7 @@
 let currentGroupBy = 'MANUFACTURER';
 let chartInstance = null;
 let fullData = [];
-let showModelCol = false;   // ← 모델명 컬럼 표시 여부
+let showModelCol = false;   // 모델명 컬럼 표시 여부
 
 document.addEventListener('DOMContentLoaded', () => {
     // 집계 기준 탭
@@ -33,6 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnShowAll').addEventListener('click', () => {
         renderTable(fullData);
     });
+
+    // 상세 패널 닫기
+    const btnCloseDetail = document.getElementById('btnCloseDetail');
+    if (btnCloseDetail) {
+        btnCloseDetail.addEventListener('click', closeDetailPanel);
+    }
 });
 
 function loadStats() {
@@ -49,7 +55,7 @@ function loadStats() {
     const modelKeyword = document.getElementById('modelKeyword').value.trim();
     if (modelKeyword) params.append('modelKeyword', modelKeyword);
 
-    // 🔹 모델 기준이거나, 모델 검색어가 있으면 컬럼 보이게
+    // 모델 기준이거나 모델 검색어가 있으면 모델명 컬럼 표시
     showModelCol = (currentGroupBy === 'MODEL' || !!modelKeyword);
 
     fetch('/recall/stats/data?' + params.toString())
@@ -67,7 +73,6 @@ function loadStats() {
         });
 }
 
-
 function renderTable(rows) {
     const tbody = document.getElementById('statsTableBody');
     tbody.innerHTML = '';
@@ -84,14 +89,15 @@ function renderTable(rows) {
             <td>${row.periodLabel}</td>
             <td>${row.recallCount}</td>
         `;
+
+        // 행 클릭 → 오른쪽 상세 패널 열기
+        tr.addEventListener('click', () => openDetailPanel(row));
+
         tbody.appendChild(tr);
     });
 
-    toggleModelColumn();   // 아래에서 만들 함수 호출
+    toggleModelColumn();
 }
-
-
-
 
 function renderChart(rows) {
     const ctx = document.getElementById('statsChart').getContext('2d');
@@ -107,11 +113,11 @@ function renderChart(rows) {
     // 1) 기간 라벨
     const labels = [...new Set(rows.map(r => r.periodLabel))];
 
-    // 2) 제조사 목록 (너무 많으면 보기 지저분하니 상위 5개까지만)
+    // 2) 그룹 이름 (제조사 or 제조사+모델) 상위 5개
     let groups = [...new Set(rows.map(r => r.groupName))];
     groups = groups.slice(0, 5);
 
-    // 3) 선택된 제조사만 사용
+    // 3) 선택된 그룹만 사용
     const filteredRows = rows.filter(r => groups.includes(r.groupName));
 
     // 4) dataset 구성
@@ -125,12 +131,11 @@ function renderChart(rows) {
         return {
             label: g,
             data: dataForGroup
-            // 색상은 Chart.js 기본값 사용
         };
     });
 
     chartInstance = new Chart(ctx, {
-        type: 'bar',   // ★ 라인 → 막대
+        type: 'bar',
         data: {
             labels,
             datasets
@@ -165,4 +170,22 @@ function toggleModelColumn() {
     }
 }
 
+// ====== 오른쪽 상세 패널 제어 ======
 
+function openDetailPanel(row) {
+    const panel = document.getElementById('detailPanel');
+    if (!panel) return;
+
+    document.getElementById('detailMaker').textContent      = row.maker || '';
+    document.getElementById('detailModelName').textContent  = row.modelName || '-';
+    document.getElementById('detailPeriod').textContent     = row.periodLabel || '';
+    document.getElementById('detailCount').textContent      = row.recallCount != null ? row.recallCount : '';
+
+    panel.classList.add('is-open');
+}
+
+function closeDetailPanel() {
+    const panel = document.getElementById('detailPanel');
+    if (!panel) return;
+    panel.classList.remove('is-open');
+}
