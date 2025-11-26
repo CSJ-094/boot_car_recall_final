@@ -3,7 +3,7 @@
    ========================= */
 
 /* Design tokens & container */
-.center-intro{
+.ci-intro{
   --max: 1080px;
   --space-2: 16px;
   --space-3: 24px;
@@ -55,7 +55,7 @@
   z-index:1; pointer-events:none; overflow:visible;
 }
 /* 전역 아이콘 CSS가 path fill을 덮어도 끄기(특이성 ↑) */
-.center-intro svg.snake-static path{ fill:none !important; }
+.ci-intro svg.snake-static path{ fill:none !important; }
 
 /* 그리드: 위 1-2-3 / 아래 5-4 */
 .snake-grid{
