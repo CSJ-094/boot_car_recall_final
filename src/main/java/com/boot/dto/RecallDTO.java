@@ -17,4 +17,6 @@ public class RecallDTO {
     private String makeEnd;
     private String recallDate;
     private String recallReason;
+    private String vin; // 차대번호 추가
+    private String registrationNumber; // 자동차 등록번호 추가
 }

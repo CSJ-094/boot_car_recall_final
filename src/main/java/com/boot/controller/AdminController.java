@@ -105,6 +105,12 @@ public class AdminController {
         return "admin/main";
     }
 
+    @GetMapping("/consultation")
+    public String adminConsultation() {
+        log.info("@# Admin consultation dashboard");
+        return "admin/consultation";
+    }
+
     // ===============================================
     // 결함 신고 (Defect Reports)
     // ===============================================

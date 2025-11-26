@@ -28,7 +28,7 @@ public interface RecallDAO {
     List<RecallDTO> searchByModelName(@Param("modelName") String modelName);
 
     // 5. 전체 목록 조회 (페이징 없이, CSV 다운로드용)
-    List<RecallDTO> selectAllWithoutPaging();
+    List<RecallDTO> selectAllWithoutPagings();
     
     // 제조사 목록 조회 추가
     List<String> selectDistinctMaker();
@@ -37,4 +37,10 @@ public interface RecallDAO {
     RecallDTO selectById(Long id);
     
     List<RecallStatsRowDTO> selectRecallStats(RecallStatsFilterDTO filter);
+
+    // VIN으로 검색
+    List<RecallDTO> searchByVin(@Param("vin") String vin);
+
+    // 등록번호로 검색
+    List<RecallDTO> searchByRegistrationNumber(@Param("registrationNumber") String registrationNumber);
 }

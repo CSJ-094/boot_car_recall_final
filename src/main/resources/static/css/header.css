@@ -36,6 +36,46 @@
   letter-spacing: .2px;
 }
 
+/* ===== 검색창 ===== */
+.header-search {
+    flex-grow: 1;
+    max-width: 400px;
+    margin: 0 20px;
+}
+
+.header-search form {
+    display: flex;
+    background-color: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.header-search input[type="text"] {
+    flex-grow: 1;
+    border: none;
+    padding: 8px 15px;
+    font-size: 0.95rem;
+    background: transparent;
+    color: #333;
+    outline: none;
+}
+
+.header-search button {
+    border: none;
+    background-color: var(--blue-500);
+    color: white;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background-color 0.2s;
+}
+
+.header-search button:hover {
+    background-color: var(--blue-600);
+}
+
+
 /* ===== 네비게이션(공통) ===== */
 .nav{ display: block; position: relative; }
 .menu{
@@ -57,6 +97,20 @@
   position: relative;
   font-family: "Noto Sans KR", sans-serif; /* 폰트 통일 */
   font-size: 1rem; /* 폰트 크기 명시 */
+}
+.menu-item {
+  white-space: nowrap; /* 메뉴 항목 글자 깨짐 방지 */
+}
+
+/* 로그아웃 form을 a 태그처럼 보이게 */
+form.menu-link {
+  padding: 0; /* 내부 버튼과 여백이 중첩되지 않도록 */
+}
+
+/* 로그아웃 버튼 스타일 초기화 */
+.btn-logout {
+  background: none; border: none; padding: 10px 14px;
+  font: inherit; color: var(--text-on-dark); cursor: pointer;
 }
 .menu-link:hover,
 .menu > li > a:hover{ background: rgba(255,255,255,.12); }
@@ -136,6 +190,10 @@
 @media (max-width: 920px){
   .nav-toggle{ display: inline-block; }
 
+  .header-search {
+    display: none; /* 모바일에서는 헤더 검색창 숨김 */
+  }
+
   .nav{
     position: fixed;
     inset: 60px 0 0 0;            /* 헤더 바로 아래 전체 */
@@ -197,4 +255,25 @@ body.nav-open{ overflow: hidden; }
 
 .brand-text {
   display: inline-block;
+}
+
+.notification-badge {
+    display: inline-block;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #ff4d4f;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 50%;
+    box-shadow: 0 0 3px rgba(0,0,0,0.3);
+}
+
+.menu-link {
+    position: relative; /* badge의 absolute 포지셔닝 기준점 */
 }
