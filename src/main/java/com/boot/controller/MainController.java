@@ -187,11 +187,16 @@ public class MainController {
     // URL: /report/history
     // -------------------------------------------------------------------
     @GetMapping("/report/history")
-    public String defectReportList(Criteria cri, Model model) {
-        List<DefectReportDTO> reportList = defectReportService.getAllReports(cri);
+    public String defectReportList(Criteria cri, Model model, Principal principal) { // Principal 추가
+        String username = null;
+        if (principal != null) {
+            username = principal.getName();
+        }
+
+        List<DefectReportDTO> reportList = defectReportService.getAllReports(cri, username); // username 전달
         model.addAttribute("reportList", reportList);
 
-        int total = defectReportService.getTotalCount(cri);
+        int total = defectReportService.getTotalCount(cri, username); // getTotalCount에도 username 전달
         PageDTO pageDTO = new PageDTO(cri, total);
         model.addAttribute("pageMaker", pageDTO);
 

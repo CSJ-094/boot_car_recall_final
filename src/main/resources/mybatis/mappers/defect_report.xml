@@ -39,14 +39,23 @@
             ID, USERNAME, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD, STATUS
         FROM DEFECT_REPORT
         <where>
-            <if test="keyword != null and keyword != ''">
-                UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-                OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+            <choose>
+                <when test="username != null and username != ''">
+                    USERNAME = #{username}
+                </when>
+                <otherwise>
+                    <!-- username이 null이거나 빈 문자열인 경우, USERNAME이 NULL인 신고만 조회 -->
+                    USERNAME IS NULL
+                </otherwise>
+            </choose>
+            <if test="cri.keyword != null and cri.keyword != ''">
+                AND (UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{cri.keyword}), '%')
+                OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{cri.keyword}), '%')
+                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{cri.keyword}), '%'))
             </if>
         </where>
         ORDER BY ID DESC
-        LIMIT #{amount} OFFSET #{offset}
+        LIMIT #{cri.amount} OFFSET #{cri.offset}
     </select>
 
 
@@ -63,10 +72,19 @@
     <select id="count" resultType="int">
         SELECT COUNT(*) FROM DEFECT_REPORT
         <where>
+            <choose>
+                <when test="username != null and username != ''">
+                    USERNAME = #{username}
+                </when>
+                <otherwise>
+                    <!-- username이 null이거나 빈 문자열인 경우, USERNAME이 NULL인 신고만 조회 -->
+                    USERNAME IS NULL
+                </otherwise>
+            </choose>
             <if test="keyword != null and keyword != ''">
-                UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                AND (UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
                 OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
+                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%'))
             </if>
         </where>
     </select>
@@ -107,6 +125,13 @@
     <!-- 비밀번호 조회 -->
     <select id="selectPasswordById" parameterType="long" resultType="string">
         SELECT PASSWORD FROM DEFECT_REPORT WHERE ID = #{id}
+    </select>
+
+    <select id="selectAllWithoutPagings" resultMap="defectReportResultMap">
+        SELECT
+            ID, USERNAME, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD, STATUS
+        FROM DEFECT_REPORT
+        ORDER BY ID DESC
     </select>
 
 </mapper>
