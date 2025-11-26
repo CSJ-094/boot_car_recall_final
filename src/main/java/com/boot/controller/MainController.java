@@ -173,6 +173,7 @@ public class MainController {
             if (principal != null) {
                 report.setUsername(principal.getName());
             }
+            report.setStatus("접수"); // 상태를 '접수'로 초기화
             defectReportService.saveReport(report, files);
             rttr.addFlashAttribute("message", "결함 신고가 성공적으로 접수되었습니다. 신고 내역에서 확인해 주세요.");
         } catch (Exception e) {

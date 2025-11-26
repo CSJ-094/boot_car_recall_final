@@ -7,6 +7,6 @@ public class PasswordEncoderGenerator {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String rawPassword = "1230"; //
         String encodedPassword = encoder.encode(rawPassword);
-        System.out.println("인코딩된 비밀번호 (admin123): " + encodedPassword);
+        System.out.println("인코딩된 비밀번호 : " + encodedPassword);
     }
 }

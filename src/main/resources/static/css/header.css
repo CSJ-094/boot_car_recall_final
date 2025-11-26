@@ -260,8 +260,8 @@ body.nav-open{ overflow: hidden; }
 .notification-badge {
     display: inline-block;
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 0;
+    right: -5px;
     background-color: #ff4d4f;
     color: white;
     font-size: 11px;

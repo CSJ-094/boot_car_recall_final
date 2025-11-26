@@ -188,7 +188,7 @@ public class DefectReportServiceImpl implements DefectReportService {
             if (username != null) {
                 String title = "결함 신고 처리 상태 변경 알림";
                 String message = String.format("회원님의 결함 신고 (ID: %d) 상태가 '%s'(으)로 변경되었습니다.", id, status);
-                String link = "/defect-report/detail?id=" + id;
+                String link = "/report/detail?id=" + id;
 
                 notificationService.createAndSendNotification(
                     username,

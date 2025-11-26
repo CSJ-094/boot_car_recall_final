@@ -119,9 +119,9 @@ public class AdminController {
     @GetMapping({"/defect_reports", "/defect_reports/list"})
     public String adminDefectReportList(@ModelAttribute("cri") Criteria cri, Model model) {
         log.info("@# Get admin defect report list");
-        // username 인자를 null로 전달하여 모든 사용자의 신고를 조회하도록 수정
-        List<DefectReportDTO> list = defectReportService.getAllReports(cri, null);
-        int total = defectReportService.getTotalCount(cri, null);
+        // "admin"을 전달하여 모든 사용자의 신고를 조회하도록 요청
+        List<DefectReportDTO> list = defectReportService.getAllReports(cri, "admin");
+        int total = defectReportService.getTotalCount(cri, "admin");
         model.addAttribute("list", list);
         model.addAttribute("pageMaker", new PageDTO(cri, total));
         return "admin/defect_report_list"; // admin/defect_report_list.jsp 뷰 반환

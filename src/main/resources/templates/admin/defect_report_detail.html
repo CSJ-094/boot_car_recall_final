@@ -61,7 +61,7 @@
     </div>
     <div class="row detail-item">
         <div class="col-md-3 detail-label">신고 시간</div>
-                <div class="col-md-9 font-weight-bold" th:text="${#dates.format(report.reportDate, 'yyyy-MM-dd HH:mm:ss')}"></div>
+                <div class="col-md-9 font-weight-bold" th:text="${#temporals.format(report.reportDate, 'yyyy-MM-dd HH:mm:ss')}"></div>
     </div>
     <div class="detail-item">
         <div class="detail-label mb-2">상세 결함 내용</div>
@@ -99,4 +99,16 @@
     </form>
 </div>
 </div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function() {
+            const message = /*[[${message}]]*/ null;
+            if (message) {
+                alert(message);
+            }
+        });
+        /*]]>*/
+    </script>
+</th:block>
 </html>

@@ -39,15 +39,9 @@
             ID, USERNAME, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD, STATUS
         FROM DEFECT_REPORT
         <where>
-            <choose>
-                <when test="username != null and username != ''">
-                    USERNAME = #{username}
-                </when>
-                <otherwise>
-                    <!-- username이 null이거나 빈 문자열인 경우, USERNAME이 NULL인 신고만 조회 -->
-                    USERNAME IS NULL
-                </otherwise>
-            </choose>
+            <if test="username != null and username != 'admin'">
+                USERNAME = #{username}
+            </if>
             <if test="cri.keyword != null and cri.keyword != ''">
                 AND (UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{cri.keyword}), '%')
                 OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{cri.keyword}), '%')
@@ -72,15 +66,9 @@
     <select id="count" resultType="int">
         SELECT COUNT(*) FROM DEFECT_REPORT
         <where>
-            <choose>
-                <when test="username != null and username != ''">
-                    USERNAME = #{username}
-                </when>
-                <otherwise>
-                    <!-- username이 null이거나 빈 문자열인 경우, USERNAME이 NULL인 신고만 조회 -->
-                    USERNAME IS NULL
-                </otherwise>
-            </choose>
+            <if test="username != null and username != 'admin'">
+                USERNAME = #{username}
+            </if>
             <if test="keyword != null and keyword != ''">
                 AND (UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
                 OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{keyword}), '%')

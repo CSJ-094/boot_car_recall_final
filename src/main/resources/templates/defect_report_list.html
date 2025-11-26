@@ -93,6 +93,22 @@
         .btn-pdf:hover {
             background-color: #f4511e;
         }
+        /* Bootstrap Badge 스타일 */
+        .badge {
+            display: inline-block;
+            padding: .25em .4em;
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: .25rem;
+        }
+        .badge-info { color: #fff; background-color: #17a2b8; }
+        .badge-warning { color: #212529; background-color: #ffc107; }
+        .badge-success { color: #fff; background-color: #28a745; }
+        .badge-secondary { color: #fff; background-color: #6c757d; }
     </style>
 </head>
 <div layout:fragment="content">
@@ -115,9 +131,9 @@
                     <th class="col-small col-id">신고번호</th>
                     <th class="col-small">신고인</th>
                     <th class="col-medium">차량 모델</th>
-                    <th class="col-medium">차대번호</th>
                     <th>결함 내용</th>
                     <th class="col-medium">신고일</th>
+                    <th class="col-small">상태</th>
                     <th class="col-action"></th> <!-- 상세보기 버튼을 위한 컬럼 -->
                 </tr>
             </thead>
@@ -129,9 +145,14 @@
                     <td class="col-id" th:text="${report.id}"></td>
                     <td th:text="${report.reporterName}"></td>
                     <td th:text="${report.carModel}"></td>
-                    <td th:text="${report.vin}"></td>
                     <td th:text="${report.defectDetails}"></td>
                     <td th:text="${#temporals.format(report.reportDate, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:switch="${report.status}">
+                        <span th:case="'접수'" class="badge badge-info">접수</span>
+                        <span th:case="'처리중'" class="badge badge-warning">처리중</span>
+                        <span th:case="'완료'" class="badge badge-success">완료</span>
+                        <span th:case="*" class="badge badge-secondary" th:text="${report.status}"></span>
+                    </td>
                     <td class="col-action"><a th:href="@{/report/detail(id=${report.id})}" class="detail-btn">상세보기</a></td>
                 </tr>
             </tbody>
