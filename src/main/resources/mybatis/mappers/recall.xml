@@ -99,96 +99,105 @@
     
         <!-- 리콜 통계 집계 쿼리 -->
     <select id="selectRecallStats"
-            parameterType="com.boot.dto.RecallStatsFilterDTO"
-            resultType="com.boot.dto.RecallStatsRowDTO">
+        parameterType="com.boot.dto.RecallStatsFilterDTO"
+        resultType="com.boot.dto.RecallStatsRowDTO">
 
-        SELECT
-            <!-- 집계 기준: 제조사 / 모델 -->
-            <choose>
-                <when test="groupBy == 'MODEL'">
-                    r.MODEL_NAME AS groupName
-                </when>
-                <otherwise>
-                    r.MAKER AS groupName
-                </otherwise>
-            </choose>
-            ,
+    SELECT
+        <!-- 공통 컬럼: 제조사 / 모델명 -->
+        <choose>
+            <!-- 🔹 모델 기준: 제조사 + 모델명 둘 다 사용 -->
+            <when test="groupBy == 'MODEL'">
+                r.MAKER      AS maker,
+                r.MODEL_NAME AS modelName,
+                r.MODEL_NAME AS groupName
+            </when>
 
-            <!-- 기간 레이블 -->
-            <choose>
-                <!-- 분기별 -->
-                <when test="timeUnit == 'QUARTER'">
-                    CONCAT(
-                        YEAR(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d')),
-                        ' Q',
-                        QUARTER(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d'))
-                    ) AS periodLabel
-                </when>
+            <!-- 🔹 제조사 기준: 제조사만 그룹, modelName은 의미 없음 -->
+            <otherwise>
+                r.MAKER      AS maker,
+                GROUP_CONCAT(DISTINCT r.MODEL_NAME ORDER BY r.MODEL_NAME SEPARATOR ', ') AS modelName,
+        		r.MAKER AS groupName
+            </otherwise>
+        </choose>
+        ,
 
-                <!-- 상·하반기 -->
-                <when test="timeUnit == 'HALF_YEAR'">
-                    CONCAT(
-                        YEAR(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d')),
-                        CASE
-                            WHEN MONTH(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d')) &lt;= 6
-                                THEN ' 상반기'
-                            ELSE ' 하반기'
-                        END
-                    ) AS periodLabel
-                </when>
+        <!-- 기간 레이블 -->
+        <choose>
+            <!-- 분기별 -->
+            <when test="timeUnit == 'QUARTER'">
+                CONCAT(
+                    YEAR(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d')),
+                    ' Q',
+                    QUARTER(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d'))
+                ) AS periodLabel
+            </when>
 
-                <!-- 기본: 월별 -->
-                <otherwise>
-                    DATE_FORMAT(
-                        STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d'),
-                        '%Y-%m'
-                    ) AS periodLabel
-                </otherwise>
-            </choose>
-            ,
+            <!-- 상·하반기 -->
+            <when test="timeUnit == 'HALF_YEAR'">
+                CONCAT(
+                    YEAR(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d')),
+                    CASE
+                        WHEN MONTH(STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d')) &lt;= 6
+                             THEN ' 상반기'
+                        ELSE ' 하반기'
+                    END
+                ) AS periodLabel
+            </when>
 
-            -- 리콜 건수: RECALL 고유 ID 개수
-            COUNT(DISTINCT r.ID) AS recallCount
+            <!-- 기본: 월별 -->
+            <otherwise>
+                DATE_FORMAT(
+                    STR_TO_DATE(r.RECALL_DATE, '%Y-%m-%d'),
+                    '%Y-%m'
+                ) AS periodLabel
+            </otherwise>
+        </choose>
+        ,
 
-        FROM RECALL r
+        -- 리콜 건수
+        COUNT(DISTINCT r.ID) AS recallCount
 
-        WHERE 1 = 1
+    FROM RECALL r
+    WHERE 1 = 1
 
-            <!-- 날짜 필터 (문자열 비교, RECALL_DATE가 'YYYY-MM-DD' 형식이라는 전제) -->
-            <if test="startDate != null and startDate != ''">
-                AND r.RECALL_DATE &gt;= #{startDate}
-            </if>
-            <if test="endDate != null and endDate != ''">
-                AND r.RECALL_DATE &lt;= #{endDate}
-            </if>
+        <!-- 날짜 필터: 문자열 비교 -->
+        <if test="startDate != null and startDate != ''">
+            AND r.RECALL_DATE &gt;= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND r.RECALL_DATE &lt;= #{endDate}
+        </if>
 
-            <!-- 제조사 필터 -->
-            <if test="maker != null and maker != ''">
-                AND r.MAKER = #{maker}
-            </if>
+        <!-- 제조사 부분 검색 -->
+        <if test="maker != null and maker != ''">
+            AND UPPER(r.MAKER) LIKE CONCAT('%', UPPER(#{maker}), '%')
+        </if>
 
-            <!-- 모델 LIKE 검색 -->
-            <if test="modelKeyword != null and modelKeyword != ''">
-                AND UPPER(r.MODEL_NAME) LIKE CONCAT('%', UPPER(#{modelKeyword}), '%')
-            </if>
+        <!-- 모델 부분 검색 -->
+        <if test="modelKeyword != null and modelKeyword != ''">
+            AND UPPER(r.MODEL_NAME) LIKE CONCAT('%', UPPER(#{modelKeyword}), '%')
+        </if>
 
-        GROUP BY
-            <choose>
-                <when test="groupBy == 'MODEL'">
-                    r.MODEL_NAME
-                </when>
-                <otherwise>
-                    r.MAKER
-                </otherwise>
-            </choose>
-            ,
-            periodLabel
+    GROUP BY
+        <choose>
+            <!-- 🔹 모델 기준: maker + modelName + periodLabel 모두 그룹 -->
+            <when test="groupBy == 'MODEL'">
+                r.MAKER,
+                r.MODEL_NAME,
+                periodLabel
+            </when>
 
-        ORDER BY
-            periodLabel ASC,
-            recallCount DESC
-    </select>
+            <!-- 🔹 제조사 기준: maker + periodLabel만 그룹 -->
+            <otherwise>
+                r.MAKER,
+                periodLabel
+            </otherwise>
+        </choose>
 
+    ORDER BY
+        periodLabel ASC,
+        recallCount DESC
+</select>
 
     <select id="searchByVin" parameterType="string" resultMap="recallResultMap">
         SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
