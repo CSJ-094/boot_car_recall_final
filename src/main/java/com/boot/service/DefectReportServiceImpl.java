@@ -81,8 +81,8 @@ public class DefectReportServiceImpl implements DefectReportService {
     }
 
     @Override
-    public List<DefectReportDTO> getAllReports(Criteria cri) {
-        List<DefectReportDTO> reports = defectReportDAO.selectAll(cri);
+    public List<DefectReportDTO> getAllReports(Criteria cri, String username) { // username 파라미터 추가
+        List<DefectReportDTO> reports = defectReportDAO.selectAll(cri, username); // username 전달
         // 각 신고에 이미지 목록을 추가
         for (DefectReportDTO report : reports) {
             report.setImages(defectImageDAO.selectImagesByReportId(report.getId()));
@@ -97,8 +97,8 @@ public class DefectReportServiceImpl implements DefectReportService {
     }
 
     @Override
-    public int getTotalCount(Criteria cri) {
-        return defectReportDAO.count(cri.getKeyword()); // 검색 조건에 따른 카운트
+    public int getTotalCount(Criteria cri, String username) { // username 파라미터 추가
+        return defectReportDAO.count(cri.getKeyword(), username); // username 전달
     }
 
     @Override
