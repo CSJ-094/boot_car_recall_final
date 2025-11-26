@@ -20,4 +20,5 @@ public class ComplainDTO {
 	private String complainDate;
 	private String content;
 	private String answer;
+	private String status;
 }

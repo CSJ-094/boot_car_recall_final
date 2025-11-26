@@ -28,7 +28,6 @@
     <div class="container">
         <h2>결함 신고 접수</h2>
         <form th:action="@{/defect-report}" method="post" enctype="multipart/form-data">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div class="form-group">
                 <label for="reporterName">신고인 성명</label>
                 <input type="text" id="reporterName" name="reporterName" required>

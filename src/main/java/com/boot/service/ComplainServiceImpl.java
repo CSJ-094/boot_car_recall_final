@@ -73,6 +73,9 @@ public class ComplainServiceImpl implements ComplainService{
 		dao.updateAnswer(param);
 	}
 
-	
-
+	@Override
+	public ComplainDTO getComplainById(int reportId) {
+		ComplainDAO dao = sqlSession.getMapper(ComplainDAO.class);
+		return dao.getComplainById(reportId);
+	}
 }

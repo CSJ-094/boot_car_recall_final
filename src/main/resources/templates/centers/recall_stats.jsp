@@ -66,14 +66,14 @@
 
     <!-- 결과 영역 -->
     <section class="result-area">
-
         <!-- 표 -->
         <div id="tableView" class="result-view is-active">
             <div class="result-summary" id="resultSummary"></div>
             <table class="stats-table">
                 <thead>
                 <tr>
-                    <th>그룹명</th>
+                    <th>제조사</th>
+                    <th id="thModelName">모델명</th>
                     <th>기간</th>
                     <th>리콜 건수</th>
                 </tr>
@@ -91,6 +91,31 @@
             <canvas id="statsChart"></canvas>
         </div>
 
+        <!-- 오른쪽 상세 패널 -->
+        <aside id="detailPanel" class="stats-detail-panel">
+            <div class="detail-header">
+                <h3>상세 정보</h3>
+                <button type="button" id="btnCloseDetail" class="detail-close">&times;</button>
+            </div>
+            <div class="detail-body">
+                <div class="detail-row">
+                    <span class="label">제조사</span>
+                    <span id="detailMaker" class="value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">모델명</span>
+                    <span id="detailModelName" class="value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">기간</span>
+                    <span id="detailPeriod" class="value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">리콜 건수</span>
+                    <span id="detailCount" class="value"></span>
+                </div>
+            </div>
+        </aside>
     </section>
 </main>
 

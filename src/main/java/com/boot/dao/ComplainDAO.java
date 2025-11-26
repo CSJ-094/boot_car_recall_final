@@ -15,4 +15,5 @@ public interface ComplainDAO {
 	public void complain_modify(HashMap<String, String> param);
 	public void complain_delete(HashMap<String, String> param);
 	public void updateAnswer(HashMap<String, String> param);
+	public ComplainDTO getComplainById(int reportId);
 }

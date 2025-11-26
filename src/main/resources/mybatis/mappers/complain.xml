@@ -16,28 +16,29 @@
         <result property="complainDate" column="COMPLAINDATE"/>
         <result property="content" column="CONTENT"/>
         <result property="answer" column="ANSWER"/>
+        <result property="status" column="STATUS"/>
     </resultMap>
 
     <select id="complain_list" resultMap="Map">
-        select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, DATE_FORMAT(COMPLAINDATE, '%Y-%m-%d %H:%i') AS COMPLAINDATE
+        select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, DATE_FORMAT(COMPLAINDATE, '%Y-%m-%d %H:%i') AS COMPLAINDATE, STATUS
         from ONLINE_COMPLAIN
         order by REPORT_ID desc
     </select>
    
     <select id="find_modify_content" parameterType="hashmap" resultMap="Map">
-        select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, DATE_FORMAT(COMPLAINDATE, '%Y-%m-%d %H:%i') AS COMPLAINDATE
+        select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, DATE_FORMAT(COMPLAINDATE, '%Y-%m-%d %H:%i') AS COMPLAINDATE, STATUS
         from ONLINE_COMPLAIN
         where REPORT_ID = #{report_id}
     </select>
     
      <insert id="complain_write" useGeneratedKeys="true" keyProperty="report_id">
-    	insert into online_complain(reporter_name, password, phone, title, COMPLAIN_TYPE, carNum, is_public, content)
+    	insert into online_complain(reporter_name, password, phone, title, COMPLAIN_TYPE, carNum, is_public, content, status, complainDate)
     	values(#{reporter_name, jdbcType=VARCHAR}, #{password, jdbcType=VARCHAR}, #{phone, jdbcType=VARCHAR}, #{title, jdbcType=VARCHAR},
-    	#{complain_type, jdbcType=VARCHAR}, #{carNum, jdbcType=VARCHAR}, #{is_public, jdbcType=VARCHAR}, #{content, jdbcType=VARCHAR})
+    	#{complain_type, jdbcType=VARCHAR}, #{carNum, jdbcType=VARCHAR}, #{is_public, jdbcType=VARCHAR}, #{content, jdbcType=VARCHAR}, #{status, jdbcType=VARCHAR}, NOW())
     </insert>
     
       <select id="contentView" parameterType="hashmap" resultMap="Map">
-    	select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, DATE_FORMAT(COMPLAINDATE, '%Y-%m-%d %H:%i') AS COMPLAINDATE
+    	select REPORT_ID, REPORTER_NAME, PASSWORD, PHONE, TITLE, COMPLAIN_TYPE, CARNUM, IS_PUBLIC, CONTENT, ANSWER, DATE_FORMAT(COMPLAINDATE, '%Y-%m-%d %H:%i') AS COMPLAINDATE, STATUS
         from ONLINE_COMPLAIN
         where REPORT_ID = #{report_id}
     </select>
@@ -56,5 +57,9 @@
         SET ANSWER = #{answer}
         WHERE REPORT_ID = #{report_id}
     </update>
+
+    <select id="getComplainById" parameterType="int" resultMap="Map">
+        SELECT * FROM ONLINE_COMPLAIN WHERE report_id = #{reportId}
+    </select>
 
 </mapper>

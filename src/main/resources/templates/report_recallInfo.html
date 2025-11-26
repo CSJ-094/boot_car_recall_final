@@ -115,7 +115,7 @@
     <div class="container">
     <h2>리콜 보도자료</h2>
     <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px;">
-        <form method="get" id="searchForm" th:action="@{/board/report_recallInfo}">
+        <form method="get" id="searchForm" th:action="@{/board/list}">
             <select name="type">
                 <option value="" th:selected="${pageMaker.cri.type == null}">--</option>
                 <option value="T" th:selected="${pageMaker.cri.type == 'T'}">제목</option>
@@ -171,7 +171,7 @@
         e.preventDefault();
 
         actionForm.find("input[name='pageNum']").val($(this).attr("href"));
-        actionForm.attr("action", /*[[@{/board/report_recallInfo}]]*/).submit();
+        actionForm.attr("action", /*[[@{/board/list}]]*/).submit();
     }); //end of paginate_button click
 
     //게시글 처리
@@ -180,7 +180,6 @@
 
         var targetBno = $(this).attr("href");
 
-<<<<<<< Updated upstream
         //버그처리
         var bno = actionForm.find("input[name='boardNo']").val();
         if (bno != "") {
@@ -188,16 +187,13 @@
         }
 
 
-=======
-        // 기존에 boardNo 파라미터가 있다면 제거
-        actionForm.find("input[name='boardNo']").remove();
-    
-        // 새로운 boardNo 파라미터를 추가하여 상세 페이지로 이동
->>>>>>> Stashed changes
         actionForm.append("<input type='hidden' name='boardNo' value='" + targetBno + "'>");
         actionForm.attr("action", /*[[@{/board/get}]]*/).submit();
 
     }); //end of paginate_button click
+    
+    // 상세 페이지에서 목록으로 돌아올 때 boardNo 파라미터가 남는 것을 방지
+    actionForm.find("input[name='boardNo']").remove();
     /*]]>*/
     </script>
 </th:block>

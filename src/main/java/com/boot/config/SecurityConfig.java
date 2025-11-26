@@ -53,8 +53,7 @@ public class SecurityConfig {
                 .deleteCookies("JSESSIONID")
             )
             .userDetailsService(adminDetailsService)
-            .csrf(csrf -> csrf.disable());
-
+            .csrf().and();
         return http.build();
     }
     
@@ -67,8 +66,7 @@ public class SecurityConfig {
                 .antMatchers("/api/admin/consultation/**").hasRole("ADMIN")
                 .anyRequest().hasRole("ADMIN")
             )
-            .csrf(csrf -> csrf.disable());
-
+            .csrf().disable(); // API는 상태를 저장하지 않으므로 CSRF 비활성화 유지 가능
         return http.build();
     }
 
@@ -92,8 +90,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .userDetailsService(memberService)
-            .csrf(csrf -> csrf.disable());
-
+            .csrf(); // CSRF 보호 기능 활성화
         return http.build();
     }
 }

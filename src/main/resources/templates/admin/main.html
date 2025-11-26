@@ -17,6 +17,9 @@
         .table-container {
             margin-top: 40px;
         }
+        .table-hover tbody tr:hover {
+            cursor: pointer;
+        }
         </style>
     </th:block>
 </head>
@@ -44,12 +47,12 @@
                 <tr th:if="${#lists.isEmpty(recentReports)}">
                     <td colspan="5" class="text-center">최근 7일간 접수된 결함 신고가 없습니다.</td>
                 </tr>
-                <tr th:each="report : ${recentReports}" th:onclick="|location.href='@{/admin/report_detail/{id}(id=${report.id})}'|">
+                <tr th:each="report : ${recentReports}" th:data-href="@{/admin/report_detail/{id}(id=${report.id})}">
                     <td th:text="${report.id}"></td>
                     <td th:text="${report.reporterName}"></td>
                     <td th:text="${report.carModel}"></td>
                     <td th:text="${report.vin}"></td>
-                    <td th:text="${#temporals.format(report.reportDate, 'yyyy-MM-dd')}"></td>
+                    <td th:text="${#dates.format(report.reportDate, 'yyyy-MM-dd')}"></td>
                 </tr>
                 </tbody>
             </table>
@@ -63,6 +66,14 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     document.addEventListener("DOMContentLoaded", function() {
+        // 테이블 행 클릭 이벤트 처리
+        const rows = document.querySelectorAll("tr[data-href]");
+        rows.forEach(row => {
+            row.addEventListener("click", () => {
+                window.location.href = row.dataset.href;
+            });
+        });
+
         // 서버로부터 받은 일별 통계 데이터
         const dailyStatsData = /*[[${dailyStats}]]*/ [];
         console.log("서버에서 받은 원본 데이터 (dailyStatsData):", dailyStatsData);
