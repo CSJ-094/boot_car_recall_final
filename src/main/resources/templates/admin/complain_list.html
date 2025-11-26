@@ -38,7 +38,7 @@
                 <td class="text-left" th:text="${item.title}"></td>
                 <td th:text="${item.reporter_name}"></td>
                 <td th:text="${item.complain_type}"></td>
-                <td th:text="${#dates.format(item.complainDate, 'yyyy-MM-dd')}"></td>
+                <td th:text="${#strings.substring(item.complainDate, 0, 10)}"></td>
                 <td>
                     <span th:if="${!#strings.isEmpty(item.answer)}" class="badge badge-success">답변 완료</span>
                     <span th:unless="${!#strings.isEmpty(item.answer)}" class="badge badge-warning">답변 대기</span>

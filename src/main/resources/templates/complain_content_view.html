@@ -146,7 +146,7 @@
 		        </tr>
 		        <tr>
 		            <th>문의날짜</th>
-		            <td th:text="${#dates.format(content_view.complainDate, 'yyyy-MM-dd HH:mm')}"></td>
+		            <td th:text="*{complainDate}"></td>
 		        </tr>
 		        <tr>
 		            <th>답변내용</th>
