@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default_layout}">
 <head>
-    <title th:text="${content_view.boardTitle}">보도자료 상세</title>
+    <title th:text="${board.boardTitle}">보도자료 상세</title>
     <th:block layout:fragment="css">
         <style>
         body {
@@ -117,30 +117,27 @@
     </th:block>
 </head>
 <div layout:fragment="content">
-<div class="container" th:if="${content_view != null}" th:object="${content_view}">
-    <h2 th:text="*{boardTitle}"></h2>
+<div class="container" th:if="${board != null}" th:object="${board}">
+    <h2 th:text="*{boardTitle}">제목</h2>
 
     <hr>
 
     <div class="info-line">
         <div><strong>작성자</strong> | <span th:text="*{boardName}"></span></div>
-        <div><strong>조회수</strong> | <span th:text="*{boardHit}"></span></div>
+        <div><strong>조회수</strong> | <span th:text="*{hit}"></span></div>
     </div>
 
     <hr>
 
     <div class="info-line">
-        <div><strong>작성일</strong> | <span th:text="*{boardDate}"></span></div>
+        <div><strong>작성일</strong> | <span th:text="${#dates.format(board.boardDate, 'yyyy-MM-dd HH:mm')}"></span></div>
     </div>
 
     <hr>
 
     <div class="uploadResult">
         <ul></ul>
-        <div class="file-check" style="display:none; color:#666; text-align:left; font-size:15px;"
-             th:if="${#lists.isEmpty(content_view.attachList)}">
-            첨부된 파일이 없습니다.
-        </div>
+        <div class="file-check" style="display:none; color:#666; text-align:left; font-size:15px;">첨부된 파일이 없습니다.</div>
     </div>
 
     <div class="bigPicture">
@@ -150,73 +147,73 @@
     <hr>
 
     <div class="content">
-        <p th:utext="*{boardContent}"></p>
+        <p th:utext="*{boardContent}"></p> <!-- HTML 태그를 포함하여 내용을 표시 -->
     </div>
 
 
     <div class="actions">
-		<a th:href="@{/board/report_recallInfo(pageNum=${pageNum}, amount=${amount})}">목록으로</a>
+		<a th:href="@{/board/list(pageNum=${cri.pageNum}, amount=${cri.amount}, type=${cri.type}, keyword=${cri.keyword})}">목록으로</a>
     </div>
 
-	<form method="get" id="actionForm" th:action="@{/board/report_recallInfo}">
-        <input type="hidden" name="pageNum" th:value="${pageNum}">
-        <input type="hidden" name="amount" th:value="${amount}">
+	<form method="get" id="actionForm" th:action="@{/board/list}">
+        <input type="hidden" name="pageNum" th:value="${cri.pageNum}">
+        <input type="hidden" name="amount" th:value="${cri.amount}">
+        <input type="hidden" name="type" th:value="${cri.type}">
+        <input type="hidden" name="keyword" th:value="${cri.keyword}">
         <input type="hidden" name="boardNo" th:value="*{boardNo}">
     </form>
 </div>
 </div>
 <th:block layout:fragment="script">
     <script th:inline="javascript">
-    $(document).ready(function () {
-        const boardNo = /*[[${content_view.boardNo}]]*/ '';
+    document.addEventListener('DOMContentLoaded', function () {
+        const boardNo = /*[[${board.boardNo}]]*/ '';
+        const uploadResult = document.querySelector(".uploadResult ul");
+        const fileCheck = document.querySelector(".file-check");
 
-        $.getJSON("/getFileList", {boardNo: boardNo}, function (arr) {
-            let str = "";
-            $(arr).each(function (i, obj) {
-                const path = obj.uploadPath + "/" + obj.uuid + "_" + obj.fileName;
-                str += "<li data-path='" + obj.uploadPath + "' data-uuid='" + obj.uuid + "' data-filename='" + obj.fileName + "' data-type='" + obj.image + "'>";
-                str += "<span>" + obj.fileName + "</span>";
-
-                if (obj.image) {
-                    str += "<img src='/display?fileName=" + path + "' width='80'>";
-                } else {
-                    str += "<img src='" + /*[[@{/img/attach.png}]]*/ '' + "' width='25'>";
+        fetch(/*[[@{/getFileList}]]*/'' + '?boardNo=' + boardNo)
+            .then(response => response.json())
+            .then(arr => {
+                if (!arr || arr.length === 0) {
+                    fileCheck.style.display = 'block';
+                    return;
                 }
+                let str = "";
+                arr.forEach(obj => {
+                    const path = encodeURIComponent(obj.uploadPath + "/" + obj.uuid + "_" + obj.fileName);
+                    str += `<li data-path="${obj.uploadPath}" data-uuid="${obj.uuid}" data-filename="${obj.fileName}" data-type="${obj.image}">`;
+                    str += `<span>${obj.fileName}</span>`;
 
-                str += "</li>";
+                    if (obj.image) {
+                        str += `<img src="/display?fileName=${path}" width="80">`;
+                    } else {
+                        str += `<img src="/*[[@{/img/attach.png}]]*/''" width="25">`;
+                    }
+                    str += `</li>`;
+                });
+                uploadResult.innerHTML = str;
             });
-            $(".uploadResult ul").html(str);
-            if (arr.length === 0) $(".file-check").show();
-        });
 
-        $(".uploadResult").on("click", "li", function () {
-            const liObj = $(this);
-            const path = liObj.data("path") + "/" + liObj.data("uuid") + "_" + liObj.data("filename");
-            if (liObj.data("type")) {
+        uploadResult.addEventListener('click', function (e) {
+            const targetLi = e.target.closest('li');
+            if (!targetLi) return;
+
+            const path = encodeURIComponent(targetLi.dataset.path + "/" + targetLi.dataset.uuid + "_" + targetLi.dataset.filename);
+            if (targetLi.dataset.type === "true") {
                 showImage(path);
             } else {
-                self.location = "/download?fileName=" + path;
+                window.location.href = /*[[@{/download}]]*/'' + '?fileName=' + path;
             }
         });
 
+        const bigPicture = document.querySelector('.bigPicture');
         function showImage(fileCallPath) {
-            $(".bigPicture").css("display", "flex").show();
-            $(".bigPic").html("<img src='/display?fileName=" + fileCallPath + "'>")
-                .animate({width: "100%", height: "100%"}, 400);
+            bigPicture.style.display = 'flex';
+            bigPicture.querySelector('.bigPic').innerHTML = `<img src="/display?fileName=${fileCallPath}">`;
         }
 
-        $(".bigPicture").on("click", function () {
-            $(".bigPic").animate({width: "0%", height: "0%"}, 400);
-            setTimeout(function () {
-                $(".bigPicture").hide();
-            }, 400);
-        });
-
-        $("#deleteBtn").on("click", function (e) {
-            e.preventDefault();
-            if (confirm("삭제하시겠습니까?")) {
-                $("#deleteForm").submit();
-            }
+        bigPicture.addEventListener('click', function () {
+            this.style.display = 'none';
         });
     });
 </script>

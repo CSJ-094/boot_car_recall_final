@@ -136,7 +136,7 @@
             <a class="move_link" th:href="${dto.boardNo}" th:text="${dto.boardTitle}"></a>
         </div>
         <div class="post-content" th:text="${dto.boardContent}"></div>
-        <div class="post-info" th:text="|${dto.boardName} | ${dto.boardDate} | 조회수 ${dto.hit}|"></div>
+        <div class="post-info" th:text="${dto.boardName} + ' | ' + ${dto.boardDate} + ' | 조회수 ' + ${dto.hit}"></div>
     </div>
 
     <!-- 페이징 -->
@@ -180,6 +180,7 @@
 
         var targetBno = $(this).attr("href");
 
+<<<<<<< Updated upstream
         //버그처리
         var bno = actionForm.find("input[name='boardNo']").val();
         if (bno != "") {
@@ -187,8 +188,14 @@
         }
 
 
+=======
+        // 기존에 boardNo 파라미터가 있다면 제거
+        actionForm.find("input[name='boardNo']").remove();
+    
+        // 새로운 boardNo 파라미터를 추가하여 상세 페이지로 이동
+>>>>>>> Stashed changes
         actionForm.append("<input type='hidden' name='boardNo' value='" + targetBno + "'>");
-        actionForm.attr("action", /*[[@{/board/report_content_view}]]*/).submit();
+        actionForm.attr("action", /*[[@{/board/get}]]*/).submit();
 
     }); //end of paginate_button click
     /*]]>*/
