@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,13 +40,14 @@ public class BoardController {
     }
 
     @PostMapping("/write")
-    public String write(@RequestParam HashMap<String, String> param) {
+    public String write(BoardDTO boardDTO) {
         log.info("@# write()");
-        log.info("@# param=>"+param);
+        log.info("@# boardDTO=>"+boardDTO);
 
-        service.write(param);
+        // 서비스 계층에서 파일 정보를 포함하여 게시글을 저장하도록 호출
+        service.write(boardDTO);
 
-        return "redirect:/board/list";
+        return "redirect:/admin/press/list"; // 관리자 목록 페이지로 리다이렉트
     }
 
     @GetMapping("/write_view")
@@ -54,18 +56,14 @@ public class BoardController {
         return "report_write_view"; // 확장자 없음 - OK
     }
 
-    @GetMapping("/report_content_view")
-    public String content_view(@RequestParam("boardNo") int boardNo,
-                               @RequestParam("pageNum") int pageNum,
-                               @RequestParam("amount") int amount,
-                               Model model) {
-        log.info("@# report_content_view()");
+    @GetMapping("/get")
+    public String get(@RequestParam("boardNo") int boardNo, @ModelAttribute("cri") Criteria cri, Model model) {
+        log.info("@# /get");
 
-        // BoardServiceImpl의 contentView에서 조회수 증가를 처리하므로 hitUp 호출 제거
+        // service.contentView() 메서드에 조회수 증가 로직이 포함되어 있으므로 별도 호출 불필요
         BoardDTO dto = service.contentView(boardNo);
-        model.addAttribute("content_view", dto);
-        model.addAttribute("pageNum", pageNum);
-        model.addAttribute("amount", amount);
+        model.addAttribute("board", dto); // 모델 이름을 'board'로 변경
+        // @ModelAttribute("cri")는 cri 객체를 모델에 자동으로 추가해줍니다.
         return "report_content_view"; // 확장자 없음 - OK
     }
 
@@ -84,20 +82,20 @@ public class BoardController {
     }
 
     @PostMapping("/report_modify")
-    public String report_modify(@RequestParam HashMap<String, String> param, RedirectAttributes rttr) {
+    public String report_modify(BoardDTO boardDTO, Criteria cri, RedirectAttributes rttr) {
         log.info("@# report_modify()");
-        service.modify(param);
-        rttr.addAttribute("pageNum", param.get("pageNum"));
-        rttr.addAttribute("amount", param.get("amount"));
+        service.modify(boardDTO);
+        rttr.addAttribute("pageNum", cri.getPageNum());
+        rttr.addAttribute("amount", cri.getAmount());
         return "redirect:/board/list";
     }
 
     @PostMapping("/report_delete")
-    public String report_delete(@RequestParam HashMap<String, String> param, RedirectAttributes rttr) {
+    public String report_delete(@RequestParam("boardNo") int boardNo, Criteria cri, RedirectAttributes rttr) {
         log.info("@# report_delete()");
-        service.delete(param);
-        rttr.addAttribute("pageNum", param.get("pageNum"));
-        rttr.addAttribute("amount", param.get("amount"));
+        service.delete(boardNo);
+        rttr.addAttribute("pageNum", cri.getPageNum());
+        rttr.addAttribute("amount", cri.getAmount());
         return "redirect:/board/list";
     }
 }

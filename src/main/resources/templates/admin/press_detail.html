@@ -105,7 +105,7 @@
         </div>
         <hr>
         <div class="info-line">
-            <div><strong>작성일</strong> | <span th:text="${#dates.format(board.boardDate, 'yyyy-MM-dd')}"></span></div>
+            <div><strong>작성일</strong> | <span th:text="${#temporals.format(board.boardDate, 'yyyy-MM-dd')}"></span></div>
         </div>
         <hr>
         <div class="uploadResult">

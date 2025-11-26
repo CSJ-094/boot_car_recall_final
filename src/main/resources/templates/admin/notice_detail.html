@@ -33,7 +33,7 @@
         <div class="d-flex justify-content-between text-muted small mt-2">
             <span th:text="|조회수: ${notice.views}|"></span>
             <span>작성일:
-                <span th:text="${#temporals.format(notice.created_at, 'yyyy-MM-dd')}"></span>
+                <span th:text="${#strings.substring(notice.created_at, 0, 10)}"></span>
             </span>
         </div>
     </div>

@@ -20,7 +20,7 @@ public interface BoardDAO {
     public int getTotalCount(Criteria cri);
 
     // 게시글 작성 (인자는 HashMap으로 유지)
-    public void write(HashMap<String, String> param);
+    public void write(BoardDTO board);
 
     // 💡 게시글 내용 조회 (int 타입 boardNo를 받고 @Param 적용)
     public BoardDTO contentView(@Param("boardNo") int boardNo);
@@ -29,10 +29,10 @@ public interface BoardDAO {
     public void hitUp(@Param("boardNo") int boardNo);
 
     // 게시글 수정
-    public void modify(HashMap<String, String> param);
+    public void modify(BoardDTO board);
 
     // 게시글 삭제
-    public void delete(HashMap<String, String> param);
+    public void delete(int boardNo);
 
     // 키워드 검색
     List<BoardDTO> searchByKeyword(@Param("keyword") String keyword);

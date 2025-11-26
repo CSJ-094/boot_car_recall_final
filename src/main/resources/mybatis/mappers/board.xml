@@ -6,7 +6,7 @@
 <mapper namespace="com.boot.dao.BoardDAO">
 
 
-    <insert id="write" parameterType="hashmap" useGeneratedKeys="true" keyProperty="boardNo">
+    <insert id="write" parameterType="com.boot.dto.BoardDTO" useGeneratedKeys="true" keyProperty="boardNo">
         INSERT INTO RECALL_BOARD (
         BOARD_TITLE,
         BOARD_CONTENT,
@@ -64,7 +64,7 @@
         WHERE BOARD_NO = #{boardNo}
     </update>
 
-    <update id="modify" parameterType="hashmap">
+    <update id="modify" parameterType="com.boot.dto.BoardDTO">
         UPDATE RECALL_BOARD
         SET BOARD_TITLE = #{boardTitle},
         BOARD_CONTENT = #{boardContent},

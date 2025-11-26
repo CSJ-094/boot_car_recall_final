@@ -43,7 +43,7 @@
                 <span th:text="${item.title}"></span>
                 </td>
             <td th:text="${item.views}"></td>
-            <td th:text="${#temporals.format(item.created_at, 'yyyy-MM-dd')}"></td>
+            <td th:text="${#strings.substring(item.created_at, 0, 10)}"></td>
             </tr>
         </tbody>
     </table>

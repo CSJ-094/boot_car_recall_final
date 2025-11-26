@@ -321,9 +321,10 @@ public class AdminController {
 
     // 보도자료 작성 처리
     @PostMapping("/press/write")
-    public String pressWrite(@RequestParam HashMap<String, String> param, RedirectAttributes rttr) {
-        log.info("@# press write process: {}", param);
-        boardService.write(param);
+    public String pressWrite(BoardDTO boardDTO, RedirectAttributes rttr) {
+        log.info("@# press write process: {}", boardDTO);
+        // 파일 정보가 포함된 DTO를 서비스로 전달
+        boardService.write(boardDTO);
         rttr.addFlashAttribute("result", "write_success");
         return "redirect:/admin/press/list";
     }
@@ -339,9 +340,9 @@ public class AdminController {
 
     // 보도자료 수정 처리
     @PostMapping("/press/modify")
-    public String pressModify(@RequestParam HashMap<String, String> param, Criteria cri, RedirectAttributes rttr) {
-        log.info("@# press modify process: {}", param);
-        boardService.modify(param);
+    public String pressModify(BoardDTO boardDTO, Criteria cri, RedirectAttributes rttr) {
+        log.info("@# press modify process: {}", boardDTO);
+        boardService.modify(boardDTO);
         rttr.addFlashAttribute("result", "modify_success");
         rttr.addAttribute("pageNum", cri.getPageNum());
         rttr.addAttribute("amount", cri.getAmount());
@@ -350,9 +351,9 @@ public class AdminController {
 
     // 보도자료 삭제 처리
     @PostMapping("/press/delete")
-    public String pressDelete(@RequestParam HashMap<String, String> param, RedirectAttributes rttr) {
-        log.info("@# press delete: {}", param);
-        boardService.delete(param);
+    public String pressDelete(@RequestParam("boardNo") int boardNo, Criteria cri, RedirectAttributes rttr) {
+        log.info("@# press delete: {}", boardNo);
+        boardService.delete(boardNo);
         rttr.addFlashAttribute("result", "delete_success");
         return "redirect:/admin/press/list";
     }

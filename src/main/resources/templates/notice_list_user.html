@@ -36,11 +36,11 @@
           <tr class="nu-empty" th:if="${list.isEmpty()}">
             <td colspan="4">등록된 공지사항이 없습니다.</td>
           </tr>
-          <tr class="nu-row" th:each="item : ${list}" th:data-href="@{/notice/detail(notice_id=${item.notice_id})}">
+          <tr class="nu-row" th:each="item : ${list}" th:data-href="@{/notice/{id}(id=${item.notice_id})}">
             <td class="nu-cell--center" th:text="${item.notice_id}"></td>
             <td class="nu-cell--left">
               <span class="nu-chip nu-chip--danger" th:if="${item.is_urgent == 'Y'}" aria-label="필독">필독</span>
-              <a th:href="@{/notice/detail(notice_id=${item.notice_id})}" class="nu-link" th:text="${item.title}"></a>
+              <a th:href="@{/notice/{id}(id=${item.notice_id})}" class="nu-link" th:text="${item.title}"></a>
             </td>
             <td class="nu-cell--center" th:text="${item.created_at}"></td>
             <td class="nu-cell--center" th:text="${item.views}"></td>

@@ -61,7 +61,7 @@
     </table>
 
     <!-- Pagination -->
-    <nav>
+    <nav th:if="${pageMaker.total > 0}">
         <ul class="pagination">
             <li class="page-item" th:if="${pageMaker.prev}">
                 <a class="page-link" th:href="@{/admin/defect_reports(pageNum=${pageMaker.startPage - 1}, keyword=${pageMaker.cri.keyword})}">이전</a>
@@ -77,39 +77,4 @@
         </ul>
     </nav>
 </div>
-
-</body>
-</html>
-            <tr>
-                <td colspan="6" class="text-center">등록된 결함 신고가 없습니다.</td>
-            </tr>
-        </c:if>
-        </tbody>
-    </table>
-
-    <!-- Pagination -->
-    <nav>
-        <ul class="pagination">
-            <c:if test="${pageMaker.prev}">
-                <li class="page-item">
-                    <a class="page-link" href="${pageContext.request.contextPath}/admin/defect_reports?pageNum=${pageMaker.startPage - 1}&keyword=${pageMaker.cri.keyword}">이전</a>
-                </li>
-            </c:if>
-
-            <c:forEach var="num" begin="${pageMaker.startPage}" end="${pageMaker.endPage}">
-                <li class="page-item ${pageMaker.cri.pageNum == num ? 'active' : ''}">
-                    <a class="page-link" href="${pageContext.request.contextPath}/admin/defect_reports?pageNum=${num}&keyword=${pageMaker.cri.keyword}">${num}</a>
-                </li>
-            </c:forEach>
-
-            <c:if test="${pageMaker.next}">
-                <li class="page-item">
-                    <a class="page-link" href="${pageContext.request.contextPath}/admin/defect_reports?pageNum=${pageMaker.endPage + 1}&keyword=${pageMaker.cri.keyword}">다음</a>
-                </li>
-            </c:if>
-        </ul>
-    </nav>
-</div>
-<%@ include file="../fragment/footer.jsp" %>
-</body>
 </html>
