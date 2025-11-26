@@ -40,7 +40,7 @@
                 <td th:text="${item.faq_id}"></td>
                 <td><span class="badge badge-info" th:text="${item.category}"></span></td>
                 <td class="text-left" th:text="${item.question}"></td>
-                <td th:text="${#dates.format(item.created_at, 'yyyy-MM-dd')}"></td>
+                <td th:text="${#temporals.format(item.created_at, 'yyyy-MM-dd')}"></td>
             </tr>
             </tbody>
         </table>

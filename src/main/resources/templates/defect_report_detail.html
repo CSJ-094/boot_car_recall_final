@@ -98,7 +98,7 @@
                 <label>차대번호 (VIN):</label><span th:text="*{vin}"></span>
             </div>
             <div class="detail-item">
-                <label>신고일:</label><span th:text="${#dates.format(report.reportDate, 'yyyy-MM-dd HH:mm')}"></span>
+                <label>신고일:</label><span th:text="${#temporals.format(report.reportDate, 'yyyy-MM-dd HH:mm')}"></span>
             </div>
             <div class="detail-item">
                 <label>결함 내용:</label>
