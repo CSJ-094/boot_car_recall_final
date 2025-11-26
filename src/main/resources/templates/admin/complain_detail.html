@@ -41,7 +41,7 @@
             <div class="col-md-4 font-weight-bold" th:text="*{reporter_name}"></div>
             <div class="col-md-2 detail-label">작성일</div>
             <div class="col-md-4 font-weight-bold">
-                <span th:text="${#temporals.format(complain.complainDate, 'yyyy-MM-dd HH:mm')}"></span>
+                <span th:text="${#dates.format(complain.complainDate, 'yyyy-MM-dd HH:mm')}"></span>
             </div>
         </div>
         <div class="row detail-item">

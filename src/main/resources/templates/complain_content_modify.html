@@ -130,9 +130,9 @@
                         <tr>
                             <th>상담구분</th>
                             <td>
-								<input type="radio" name="complain_type" value="제작결함"
+								<input type="radio" name="complain_type" value="1"
 								   th:checked="*{complain_type == '제작결함'}" /> 제작결함
-								<input type="radio" name="complain_type" value="기타"
+								<input type="radio" name="complain_type" value="2"
 								   th:checked="*{complain_type == '기타'}" /> 기타
                             </td>
                         </tr>
@@ -146,7 +146,7 @@
                         </tr>
                         <tr>
                             <th>문의날짜</th>
-                            <td th:text="*{complainDate}"></td>
+                            <td th:text="${#dates.format(m_param.complainDate, 'yyyy-MM-dd HH:mm')}"></td>
                         </tr>
                     </table>
 

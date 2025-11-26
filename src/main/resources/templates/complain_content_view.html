@@ -131,7 +131,10 @@
 		        </tr>
 		        <tr>
 		            <th>상담구분</th>
-		            <td th:text="*{complain_type}"></td>
+		            <td>
+                        <span th:if="*{complain_type == '1'}">제작결함</span>
+                        <span th:if="*{complain_type == '2'}">기타</span>
+                    </td>
 		        </tr>
 		        <tr>
 		            <th>내용</th>
@@ -143,7 +146,7 @@
 		        </tr>
 		        <tr>
 		            <th>문의날짜</th>
-		            <td th:text="*{complainDate}"></td>
+		            <td th:text="${#dates.format(content_view.complainDate, 'yyyy-MM-dd HH:mm')}"></td>
 		        </tr>
 		        <tr>
 		            <th>답변내용</th>

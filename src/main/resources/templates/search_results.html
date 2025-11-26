@@ -118,7 +118,7 @@
                     <li th:each="item : ${results.notices}" class="result-item">
                         <a th:href="@{/notice/{id}(id=${item.notice_id})}" th:text="${item.title}"></a>
                         <div class="meta">
-                            <span><strong>작성일:</strong> </span><span th:text="${item.created_at}"></span>
+                            <span><strong>작성일:</strong> </span><span th:text="${#dates.format(item.created_at, 'yyyy-MM-dd')}"></span>
                         </div>
                     </li>
                 </ul>
@@ -131,7 +131,7 @@
                     <li th:each="item : ${results.pressReleases}" class="result-item">
                         <a th:href="@{/board/get(boardNo=${item.boardNo})}" th:text="${item.boardTitle}"></a>
                         <div class="meta">
-                            <span><strong>작성일:</strong> </span><span th:text="${item.boardDate}"></span>
+                            <span><strong>작성일:</strong> </span><span th:text="${#dates.format(item.boardDate, 'yyyy-MM-dd')}"></span>
                         </div>
                     </li>
                 </ul>
