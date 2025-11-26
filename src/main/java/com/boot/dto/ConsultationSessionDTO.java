@@ -23,24 +23,31 @@ public class ConsultationSessionDTO {
     private String id;
     
     private String sessionId;           // 고객 UUID
-    private String status;              // "WAITING", "CONNECTED", "CLOSED"
+    private String status;              // "WAITING", "CONNECTED", "CHATTING", "CLOSED"
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String agentId;             // 담당 상담사 ID
     private String agentName;           // 담당 상담사 이름
     private List<String> messageIds;    // 메시지 ID 목록
+    private boolean agentReplied;       // 상담사가 답장했는지 여부
     
     public ConsultationSessionDTO(String sessionId) {
         this.sessionId = sessionId;
         this.status = "WAITING";
         this.startTime = LocalDateTime.now();
         this.messageIds = new ArrayList<>();
+        this.agentReplied = false;
     }
     
     public void connectAgent(String agentId, String agentName) {
         this.agentId = agentId;
         this.agentName = agentName;
         this.status = "CONNECTED";
+    }
+    
+    public void startChatting() {
+        this.status = "CHATTING";
+        this.agentReplied = true;
     }
     
     public void close() {

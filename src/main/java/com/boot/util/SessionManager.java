@@ -138,6 +138,27 @@ public class SessionManager {
     }
     
     /**
+     * 모든 상담사에게 메시지 브로드캐스트
+     */
+    public void broadcastToAllAgents(String customerSessionId, String senderType, String message) {
+        MessageNotificationDTO notification = new MessageNotificationDTO(
+                customerSessionId, senderType, message
+        );
+        String json = gson.toJson(notification);
+        
+        agentSessions.forEach((agentId, agentSession) -> {
+            if (agentSession != null && agentSession.isOpen()) {
+                try {
+                    agentSession.sendMessage(new TextMessage(json));
+                    log.debug("상담사에게 브로드캐스트 전송: agentId={}, sessionId={}", agentId, customerSessionId);
+                } catch (IOException e) {
+                    log.error("상담사 브로드캐스트 오류: agentId={}", agentId, e);
+                }
+            }
+        });
+    }
+    
+    /**
      * 고객에게 메시지 전송 (상담사 -> 고객)
      * 보내는 메시지는 고객측 chat.js에서 처리할 수 있도록 WebSocketMessageDTO 형식(type="MESSAGE")으로 전송합니다.
      */
@@ -163,10 +184,16 @@ public class SessionManager {
         if (customerSession != null && customerSession.getWebSocketSession().isOpen()) {
             try {
                 WebSocketMessageDTO event = new WebSocketMessageDTO(eventType, customerSessionId, message, null);
-                customerSession.getWebSocketSession().sendMessage(new TextMessage(gson.toJson(event)));
+                String json = gson.toJson(event);
+                log.info("고객에게 이벤트 전송: sessionId={}, eventType={}, message={}, json={}", 
+                         customerSessionId, eventType, message, json);
+                customerSession.getWebSocketSession().sendMessage(new TextMessage(json));
+                log.info("고객에게 이벤트 전송 완료: sessionId={}, eventType={}", customerSessionId, eventType);
             } catch (IOException e) {
                 log.error("고객 이벤트 전송 오류: sessionId={}, eventType={}", customerSessionId, eventType, e);
             }
+        } else {
+            log.warn("고객 세션을 찾을 수 없거나 WebSocket이 닫혀있음: sessionId={}", customerSessionId);
         }
     }
     
@@ -181,6 +208,20 @@ public class SessionManager {
             }
         });
         return waiting;
+    }
+    
+    /**
+     * 모든 활성 고객 조회 (WAITING, AGENT_CHAT 상태)
+     */
+    public Map<String, CustomerSession> getActiveCustomers() {
+        Map<String, CustomerSession> active = new ConcurrentHashMap<>();
+        customerSessions.forEach((sessionId, session) -> {
+            String status = session.getStatus();
+            if ("WAITING".equals(status) || "AGENT_CHAT".equals(status)) {
+                active.put(sessionId, session);
+            }
+        });
+        return active;
     }
     
     /**

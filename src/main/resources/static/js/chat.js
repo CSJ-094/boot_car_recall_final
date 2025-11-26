@@ -329,31 +329,18 @@ document.addEventListener("DOMContentLoaded", function () {
         appendMessage("user", msg);
         inputField.value = "";
 
-        if (chatMode === "gpt") {
-            // GPT에게 메시지 전송
-            try {
-                const response = await fetch("/api/chat", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({ message: msg })
-                });
-                
-                const data = await response.json();
-                appendMessage("assistant", data.answer);
-            } catch (e) {
-                console.error("GPT 응답 오류:", e);
-                appendMessage("system", "응답을 받을 수 없습니다.");
-            }
-        } else if (chatMode === "agent") {
-            // 상담사에게 메시지 전송 (WebSocket)
-            if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-                const message = {
-                    type: "MESSAGE",
-                    sessionId: customerSessionId,
-                    message: msg
-                };
-                webSocket.send(JSON.stringify(message));
-            }
+        // 모든 메시지는 WebSocket을 통해 전송
+        if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+            const message = {
+                type: "MESSAGE",
+                sessionId: customerSessionId,
+                message: msg
+            };
+            console.log("메시지 전송:", message);
+            webSocket.send(JSON.stringify(message));
+        } else {
+            console.error("WebSocket이 연결되지 않음");
+            appendMessage("system", "연결이 끊어졌습니다. 페이지를 새로고침해주세요.");
         }
     }
 

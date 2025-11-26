@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", function() {
     let agentWebSocket = null;
     let customerWebSockets = new Map(); // sessionId -> WebSocket
     let isConsultationEnded = false;  // 상담 종료 상태 추적
+    let chatHistoryCache = new Map(); // sessionId -> 채팅 내용 HTML 캐시
+    let acceptedCustomers = new Set(); // 이미 수락한 고객 목록
 
     // 컬러 스킴 (고객 챗 UI와 일치시키기)
     const PRIMARY_COLOR = "#8ECFFB"; // pastel sky blue
@@ -31,6 +33,8 @@ document.addEventListener("DOMContentLoaded", function() {
             agentWebSocket.onmessage = (evt) => {
                 try {
                     const data = JSON.parse(evt.data);
+                    
+                    console.log("Agent WebSocket 메시지 수신:", data);
                     
                     // 상담 종료 이벤트 처리
                     if (data.type === "CONSULTATION_ENDED") {
@@ -58,8 +62,45 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (sessionId && sessionId === selectedCustomerSessionId) {
                         const role = senderType === "CUSTOMER" ? "user" : (senderType === "SYSTEM" ? "system" : "assistant");
                         appendChatMessage(role, message);
+                    } else if (sessionId) {
+                        // 선택되지 않은 고객의 메시지는 캐시에 추가
+                        console.log("선택되지 않은 고객의 메시지 - 캐시에 추가:", sessionId);
+                        const role = senderType === "CUSTOMER" ? "user" : (senderType === "SYSTEM" ? "system" : "assistant");
+                        
+                        // 임시로 메시지를 생성하여 캐시에 추가
+                        const tempDiv = document.createElement("div");
+                        tempDiv.style.display = "flex";
+                        tempDiv.style.justifyContent = role === "user" ? "flex-start" : "flex-end";
+                        tempDiv.style.alignItems = "flex-end";
+                        tempDiv.style.animation = "slideIn 0.3s ease";
+                        tempDiv.style.gap = "8px";
+
+                        const bubble = document.createElement("div");
+                        bubble.style.padding = "10px 14px";
+                        bubble.style.borderRadius = "12px";
+                        bubble.style.wordWrap = "break-word";
+                        bubble.style.lineHeight = "1.5";
+
+                        if (role === "user") {
+                            bubble.style.background = "#E6EEF9";
+                            bubble.style.color = "#0b1020";
+                        } else if (role === "system") {
+                            bubble.style.background = "#475569";
+                            bubble.style.color = "#CBD5E1";
+                            bubble.style.fontSize = "12px";
+                            bubble.style.textAlign = "center";
+                        } else {
+                            bubble.style.background = "#3B82F6";
+                            bubble.style.color = "white";
+                        }
+
+                        bubble.innerHTML = message.replace(/\n/g, "<br>");
+                        tempDiv.appendChild(bubble);
+                        
+                        // 캐시에 메시지 추가
+                        const existingCache = chatHistoryCache.get(sessionId) || "";
+                        chatHistoryCache.set(sessionId, existingCache + tempDiv.outerHTML);
                     }
-                    // 그리고 고객 리스트나 알림 UI를 갱신하려면 추가 로직을 여기서 넣을 수 있음
                 } catch (e) {
                     console.error("Agent WebSocket 메시지 파싱 오류", e);
                 }
@@ -93,7 +134,6 @@ document.addEventListener("DOMContentLoaded", function() {
     dashboard.style.borderRadius = "16px";
     dashboard.style.boxShadow = "0 12px 32px rgba(16, 33, 80, 0.13)";
     dashboard.style.zIndex = "10000";
-    dashboard.style.display = "flex";
     dashboard.style.flexDirection = "row";
     dashboard.style.overflow = "hidden";
     
@@ -239,7 +279,7 @@ document.addEventListener("DOMContentLoaded", function() {
     toggleBtn.id = "agent-dashboard-toggle";
     toggleBtn.innerText = "👩‍💼";
     toggleBtn.title = "상담 대시보드 열기/닫기";
-    toggleBtn.style.position = "fixed";
+    toggleBtn.style.position = "relative";
     toggleBtn.style.bottom = "24px";
     toggleBtn.style.right = "24px";
     // 고객 챗 버튼과 동일한 스타일
@@ -260,10 +300,40 @@ document.addEventListener("DOMContentLoaded", function() {
     toggleBtn.addEventListener("mouseenter", () => { toggleBtn.style.transform = "scale(1.1)"; toggleBtn.style.boxShadow = "0 12px 24px rgba(142, 207, 251, 0.45)"; });
     toggleBtn.addEventListener("mouseleave", () => { toggleBtn.style.transform = "scale(1)"; toggleBtn.style.boxShadow = "0 8px 20px rgba(142, 207, 251, 0.35)"; });
 
+    // 알림 뱃지 생성
+    const notificationBadge = document.createElement("div");
+    notificationBadge.id = "agent-notification-badge";
+    notificationBadge.style.position = "absolute";
+    notificationBadge.style.top = "-4px";
+    notificationBadge.style.right = "-4px";
+    notificationBadge.style.minWidth = "22px";
+    notificationBadge.style.height = "22px";
+    notificationBadge.style.borderRadius = "11px";
+    notificationBadge.style.background = "#EF4444";
+    notificationBadge.style.color = "white";
+    notificationBadge.style.fontSize = "12px";
+    notificationBadge.style.fontWeight = "700";
+    notificationBadge.style.display = "none";
+    notificationBadge.style.alignItems = "center";
+    notificationBadge.style.justifyContent = "center";
+    notificationBadge.style.padding = "0 6px";
+    notificationBadge.style.boxShadow = "0 2px 8px rgba(239, 68, 68, 0.4)";
+    notificationBadge.style.border = "2px solid white";
+    toggleBtn.appendChild(notificationBadge);
+    
+    // 버튼 컨테이너 (fixed positioning용)
+    const toggleBtnContainer = document.createElement("div");
+    toggleBtnContainer.style.position = "fixed";
+    toggleBtnContainer.style.bottom = "24px";
+    toggleBtnContainer.style.right = "24px";
+    toggleBtnContainer.style.zIndex = "10001";
+    toggleBtnContainer.appendChild(toggleBtn);
+
     toggleBtn.addEventListener("click", () => {
         if (dashboard.style.display === "none") {
             dashboard.style.display = "flex";
             toggleBtn.innerText = "✕";
+            notificationBadge.style.display = "none"; // 대시보드 열면 뱃지 숨김
             // WebSocket 연결이 아직 안되어 있으면 시도
             if (!agentWebSocket || agentWebSocket.readyState === WebSocket.CLOSED) {
                 connectAgentWebSocket();
@@ -271,6 +341,8 @@ document.addEventListener("DOMContentLoaded", function() {
         } else {
             dashboard.style.display = "none";
             toggleBtn.innerText = "👩‍💼";
+            // 대시보드 닫을 때 대기 고객 있으면 다시 뱃지 표시
+            refreshCustomerList();
         }
     });
 
@@ -278,7 +350,7 @@ document.addEventListener("DOMContentLoaded", function() {
     dashboard.appendChild(leftPanel);
     dashboard.appendChild(rightPanel);
     document.body.appendChild(dashboard);
-    document.body.appendChild(toggleBtn);
+    document.body.appendChild(toggleBtnContainer);
     
     const messageInput = inputArea.querySelector("#message-input");
     const sendBtn = inputArea.querySelector("#send-btn");
@@ -288,13 +360,23 @@ document.addEventListener("DOMContentLoaded", function() {
     // --- 고객 목록 새로고침 ---
     async function refreshCustomerList() {
         try {
-            const response = await fetch(`/api/admin/consultation/waiting-customers`, {
+            const response = await fetch(`/api/admin/consultation/waiting-customers?t=${Date.now()}`, {
                 method: "GET",
                 headers: {"Content-Type": "application/json"}
             });
             
             const data = await response.json();
+            console.log("고객 목록 조회 결과:", data); // 디버깅용
             customerList.innerHTML = "";
+            
+            // 대기 중인 고객 수 업데이트 (대시보드가 닫혀있을 때만 뱃지 표시)
+            const waitingCount = data.customers.length;
+            if (dashboard.style.display === "none" && waitingCount > 0) {
+                notificationBadge.innerText = waitingCount > 99 ? "99+" : waitingCount.toString();
+                notificationBadge.style.display = "flex";
+            } else {
+                notificationBadge.style.display = "none";
+            }
             
             if (data.customers.length === 0) {
                 customerList.innerHTML = `<div style="padding:18px 0;color:#b0b8c1;text-align:center;font-size:14px;">대기 중인 고객이 없습니다</div>`;
@@ -342,6 +424,11 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // --- 고객 선택 ---
     async function selectCustomer(sessionId) {
+        // 현재 선택된 고객의 채팅 내용 저장
+        if (selectedCustomerSessionId && messageArea.innerHTML) {
+            chatHistoryCache.set(selectedCustomerSessionId, messageArea.innerHTML);
+        }
+        
         selectedCustomerSessionId = sessionId;
         // 고객 선택 시 대기목록 색상 동기화
         Array.from(customerList.children).forEach(item => {
@@ -353,7 +440,29 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
         isConsultationEnded = false;  // 고객 선택 시 상태 초기화
-        messageArea.innerHTML = "";
+        
+        // 캐시된 채팅 내용이 있으면 복원, 없으면 서버에서 로드
+        if (chatHistoryCache.has(sessionId)) {
+            messageArea.innerHTML = chatHistoryCache.get(sessionId);
+            messageArea.scrollTop = messageArea.scrollHeight;
+        } else {
+            messageArea.innerHTML = "";
+            // 기존 메시지 로드
+            try {
+                const response = await fetch(`/api/admin/consultation/messages/${sessionId}`);
+                const messages = await response.json();
+                
+                messages.forEach(msg => {
+                    const role = msg.messageType === "CUSTOMER" ? "user" : "assistant";
+                    appendChatMessage(role, msg.message);
+                });
+                // 로드 후 캐시에 저장
+                chatHistoryCache.set(sessionId, messageArea.innerHTML);
+            } catch (e) {
+                console.error("메시지 조회 오류:", e);
+            }
+        }
+        
         chatTitle.innerText = `고객 ${sessionId.substring(0, 8)}과 채팅 중`;
         endChatBtn.style.display = "block";
         messageInput.disabled = false;
@@ -363,27 +472,17 @@ document.addEventListener("DOMContentLoaded", function() {
         sendBtn.style.opacity = "1";
         sendBtn.style.cursor = "pointer";
         
-        // 기존 메시지 로드
-        try {
-            const response = await fetch(`/api/admin/consultation/messages/${sessionId}`);
-            const messages = await response.json();
-            
-            messages.forEach(msg => {
-                const role = msg.messageType === "CUSTOMER" ? "user" : "assistant";
-                appendChatMessage(role, msg.message);
-            });
-        } catch (e) {
-            console.error("메시지 조회 오류:", e);
-        }
-        
-        // 고객 수락
-        try {
-            await fetch(`/api/admin/consultation/accept-customer/${sessionId}?agentId=${agentId}&agentName=${encodeURIComponent(agentName)}`, {
-                method: "POST"
-            });
-            appendChatMessage("system", "이 고객과의 상담을 시작했습니다.");
-        } catch (e) {
-            console.error("고객 수락 오류:", e);
+        // 고객 수락 (첫 선택 시에만)
+        if (!acceptedCustomers.has(sessionId)) {
+            try {
+                await fetch(`/api/admin/consultation/accept-customer/${sessionId}?agentId=${agentId}&agentName=${encodeURIComponent(agentName)}`, {
+                    method: "POST"
+                });
+                acceptedCustomers.add(sessionId);
+                appendChatMessage("system", "이 고객과의 상담을 시작했습니다.");
+            } catch (e) {
+                console.error("고객 수락 오류:", e);
+            }
         }
     }
     
@@ -422,6 +521,11 @@ document.addEventListener("DOMContentLoaded", function() {
         msgDiv.appendChild(bubble);
         messageArea.appendChild(msgDiv);
         messageArea.scrollTop = messageArea.scrollHeight;
+        
+        // 현재 선택된 고객의 채팅 내용 캐시 업데이트
+        if (selectedCustomerSessionId) {
+            chatHistoryCache.set(selectedCustomerSessionId, messageArea.innerHTML);
+        }
     }
     
     // --- 메시지 전송 ---
@@ -461,10 +565,25 @@ document.addEventListener("DOMContentLoaded", function() {
     endChatBtn.addEventListener("click", async () => {
         if (!selectedCustomerSessionId) return;
         
+        console.log("상담 종료 버튼 클릭:", selectedCustomerSessionId);
+        
         try {
-            await fetch(`/api/admin/consultation/end-consultation/${selectedCustomerSessionId}`, {
+            const endedSessionId = selectedCustomerSessionId;
+            const response = await fetch(`/api/admin/consultation/end-consultation/${endedSessionId}`, {
                 method: "POST"
             });
+            
+            console.log("상담 종료 응답:", response.status, response.statusText);
+            
+            if (!response.ok) {
+                console.error("상담 종료 실패:", response.status);
+                return;
+            }
+            
+            // 캐시에서 해당 고객의 채팅 내용 삭제
+            chatHistoryCache.delete(endedSessionId);
+            // 수락한 고객 목록에서 제거
+            acceptedCustomers.delete(endedSessionId);
             
             selectedCustomerSessionId = null;
             messageArea.innerHTML = "";

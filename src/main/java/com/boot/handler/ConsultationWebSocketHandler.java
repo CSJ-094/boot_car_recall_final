@@ -1,9 +1,11 @@
 package com.boot.handler;
 
+import com.boot.OpenAiClient.OpenAiClient;
 import com.boot.domain.ConsultationMessageRepository;
 import com.boot.domain.ConsultationSessionRepository;
 import com.boot.dto.ConsultationMessageDTO;
 import com.boot.dto.ConsultationSessionDTO;
+import com.boot.dto.OpenAiResponseDTO;
 import com.boot.dto.WebSocketMessageDTO;
 import com.boot.util.CustomerSession;
 import com.boot.util.SessionManager;
@@ -31,6 +33,7 @@ public class ConsultationWebSocketHandler extends TextWebSocketHandler {
     private final SessionManager sessionManager;
     private final ConsultationMessageRepository consultationMessageRepository;
     private final ConsultationSessionRepository consultationSessionRepository;
+    private final OpenAiClient openAiClient;
     private final Gson gson;
     
     @Override
@@ -39,9 +42,10 @@ public class ConsultationWebSocketHandler extends TextWebSocketHandler {
         String sessionId = UUID.randomUUID().toString();
         log.info("새로운 고객 연결: sessionId={}, wsSessionId={}", sessionId, session.getId());
         
-        // 고객 세션 저장
+        // 고객 세션 저장 (초기 상태: GPT_CHAT)
         CustomerSession customerSession = new CustomerSession(sessionId, session);
         sessionManager.addCustomerSession(sessionId, customerSession);
+        log.info("고객 세션 생성 완료: sessionId={}, 초기 상태={}", sessionId, customerSession.getStatus());
         
         // 상담 세션 MongoDB에 저장
         ConsultationSessionDTO sessionDTO = new ConsultationSessionDTO(sessionId);
@@ -111,13 +115,60 @@ public class ConsultationWebSocketHandler extends TextWebSocketHandler {
         ConsultationMessageDTO messageDTO = new ConsultationMessageDTO(
                 sessionId, "CUSTOMER", messageText
         );
-        consultationMessageRepository.save(messageDTO).subscribe();
+        consultationMessageRepository.save(messageDTO)
+                .doOnSuccess(saved -> log.info("메시지 저장 완료: id={}, sessionId={}", saved.getId(), sessionId))
+                .doOnError(error -> log.error("메시지 저장 실패: sessionId={}", sessionId, error))
+                .subscribe();
         
-        // 담당 상담사에게 메시지 전송
+        // 고객 세션 확인
         CustomerSession customerSession = sessionManager.getCustomerSession(sessionId);
-        if (customerSession != null && "AGENT_CHAT".equals(customerSession.getStatus())) {
+        
+        if (customerSession == null) {
+            log.warn("고객 세션 없음: sessionId={}", sessionId);
+            return;
+        }
+        
+        String status = customerSession.getStatus();
+        
+        // AGENT_CHAT 상태면 담당 상담사에게만 전송
+        if ("AGENT_CHAT".equals(status)) {
             String agentId = customerSession.getAgentId();
+            log.info("담당 상담사에게 메시지 전송: agentId={}, sessionId={}", agentId, sessionId);
             sessionManager.sendMessageToAgent(agentId, sessionId, "CUSTOMER", messageText);
+        } 
+        // WAITING 상태면 모든 상담사에게 브로드캐스트 (새 메시지 알림용)
+        else if ("WAITING".equals(status)) {
+            log.info("대기 중인 고객 메시지 - 모든 상담사에게 브로드캐스트: sessionId={}", sessionId);
+            sessionManager.broadcastToAllAgents(sessionId, "CUSTOMER", messageText);
+        }
+        // GPT_CHAT 상태면 GPT에게 요청하여 응답 반환
+        else if ("GPT_CHAT".equals(status)) {
+            log.info("GPT 모드 - GPT에게 요청: sessionId={}", sessionId);
+            try {
+                OpenAiResponseDTO gptResponse = openAiClient.getChatCompletion(messageText);
+                if (gptResponse != null && gptResponse.getChoices() != null && !gptResponse.getChoices().isEmpty()) {
+                    String gptMessage = gptResponse.getChoices().get(0).getMessage().getContent();
+                    
+                    // GPT 응답 저장
+                    ConsultationMessageDTO gptMessageDTO = new ConsultationMessageDTO(
+                            sessionId, "ASSISTANT", gptMessage
+                    );
+                    consultationMessageRepository.save(gptMessageDTO).subscribe();
+                    
+                    // 고객에게 GPT 응답 전송
+                    sessionManager.sendMessageToCustomer(sessionId, "ASSISTANT", gptMessage);
+                    log.info("GPT 응답 전송 완료: sessionId={}", sessionId);
+                } else {
+                    log.warn("GPT 응답이 비어있음: sessionId={}", sessionId);
+                }
+            } catch (Exception e) {
+                log.error("GPT 응답 처리 오류: sessionId={}", sessionId, e);
+                // 에러 메시지 전송
+                sessionManager.sendMessageToCustomer(sessionId, "SYSTEM", "죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            }
+        }
+        else {
+            log.warn("알 수 없는 상태: sessionId={}, status={}", sessionId, status);
         }
     }
     

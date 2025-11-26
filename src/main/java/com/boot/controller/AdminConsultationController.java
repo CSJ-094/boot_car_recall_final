@@ -32,15 +32,15 @@ public class AdminConsultationController {
     private final SessionManager sessionManager;
     
     /**
-     * 대기 중인 고객 목록
+     * 대기 중인 고객 목록 (활성 상태: WAITING, CONNECTED, CHATTING)
      */
     @GetMapping("/waiting-customers")
     public ResponseEntity<Map<String, Object>> getWaitingCustomers() {
-        Map<String, CustomerSession> waitingCustomers = sessionManager.getWaitingCustomers();
+        Map<String, CustomerSession> activeCustomers = sessionManager.getActiveCustomers();
         Map<String, Object> result = new HashMap<>();
         
         List<Map<String, String>> customers = new ArrayList<>();
-        waitingCustomers.forEach((sessionId, session) -> {
+        activeCustomers.forEach((sessionId, session) -> {
             Map<String, String> customer = new HashMap<>();
             customer.put("sessionId", sessionId);
             customer.put("status", session.getStatus());
@@ -121,7 +121,19 @@ public class AdminConsultationController {
         return consultationSessionRepository.findBySessionId(sessionId)
                 .flatMap(session -> {
                     session.close();
+                    
+                    log.info("상담 종료: sessionId={}", sessionId);
+                    
+                    // 고객에게 상담 종료 이벤트 전송
+                    sessionManager.sendEventToCustomer(
+                            sessionId,
+                            "CONSULTATION_ENDED",
+                            "상담사가 상담을 종료했습니다."
+                    );
+                    
+                    // 메시지 전송 후 연결 해제
                     sessionManager.disconnectCustomerFromAgent(sessionId);
+                    
                     return consultationSessionRepository.save(session)
                             .then(Mono.just(ResponseEntity.ok("상담이 종료되었습니다")));
                 })
@@ -149,13 +161,24 @@ public class AdminConsultationController {
         
         return consultationMessageRepository.save(messageDTO)
                 .flatMap(saved -> {
-                    // 고객에게 메시지 전송 (WebSocket 또는 다른 방식)
-                    sessionManager.sendMessageToCustomer(
-                            messageDTO.getSessionId(),
-                            "AGENT",
-                            messageDTO.getMessage()
-                    );
-                    return Mono.just(ResponseEntity.ok("메시지 전송 완료"));
+                    // 첫 답장 시 상태를 CHATTING으로 변경
+                    return consultationSessionRepository.findBySessionId(messageDTO.getSessionId())
+                            .flatMap(session -> {
+                                if (!session.isAgentReplied()) {
+                                    session.startChatting();
+                                    return consultationSessionRepository.save(session);
+                                }
+                                return Mono.just(session);
+                            })
+                            .then(Mono.defer(() -> {
+                                // 고객에게 메시지 전송 (WebSocket 또는 다른 방식)
+                                sessionManager.sendMessageToCustomer(
+                                        messageDTO.getSessionId(),
+                                        "AGENT",
+                                        messageDTO.getMessage()
+                                );
+                                return Mono.just(ResponseEntity.ok("메시지 전송 완료"));
+                            }));
                 })
                 .onErrorResume(e -> {
                     log.error("메시지 저장 오류", e);
