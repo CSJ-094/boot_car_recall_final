@@ -31,6 +31,7 @@ public class ComplainController {
 		log.info("@# complain_write");
 		log.info("@# param=>"+param);
 		
+		param.put("status", "접수");
 		service.complain_write(param);
 		
 		return "redirect:complain_list";
@@ -100,4 +101,20 @@ public class ComplainController {
 		return "redirect:complain_list";
 	}
 
+	@RequestMapping("/complain_check_view")
+	public String complain_check_view() {
+		log.info("@# complain_check_view");
+		return "complain_check_view";
+	}
+
+	@RequestMapping("/complain_check")
+	public String complain_check(@RequestParam("report_id") int reportId, @RequestParam("password") String password, Model model) {
+		log.info("@# complain_check");
+		ComplainDTO complain = service.getComplainById(reportId);
+		if (complain != null && complain.getPassword().equals(password)) {
+			model.addAttribute("complain", complain);
+			return "complain_status_view";
+		}
+		return "redirect:complain_check_view?error";
+	}
 }
