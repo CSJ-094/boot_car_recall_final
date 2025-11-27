@@ -5,17 +5,19 @@ import com.boot.dao.DefectReportDAO;
 import com.boot.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,8 @@ public class DefectReportServiceImpl implements DefectReportService {
     private final DefectReportDAO defectReportDAO;
     private final DefectImageDAO defectImageDAO;
     private final NotificationService notificationService; // NotificationService 주입
+    private static final String FLASK_API_URL = "http://localhost:5000/predict";
+    private static final String FLASK_RECOMMEND_URL = "http://localhost:5000/recommend";
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -203,59 +207,74 @@ public class DefectReportServiceImpl implements DefectReportService {
 
     @Override
     public List<RecallSimilarDTO> findSimilarRecalls(String carModel, String defectText, List<RecallDTO> recallList) {
-        String targetText = preprocessKoreanSimple(carModel + " " + defectText);
+        String searchText = (carModel != null ? carModel : "") + " " + defectText;
 
-        List<String> corpus = new ArrayList<>();
-        corpus.add(targetText);
-        corpus.addAll(recallList.stream()
-                .map(r -> r.getModelName() + " " + r.getRecallReason())
-                .toList());
+        try {
+            RestTemplate restTemplate = new RestTemplate();
 
-        // TF-IDF 변환
-        TfidfVectorizer vectorizer = new TfidfVectorizer();
-        List<double[]> vectors = vectorizer.fitTransform(corpus);
+            // 헤더 설정
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // 벡터 분리
-        double[] targetVector = vectors.get(0); // 첫 번째가 신고 텍스트
-        List<double[]> recallVectors = vectors.subList(1, vectors.size()); // 나머지가 DB
+            // 바디 설정
+            Map<String, String> body = new HashMap<>();
+            body.put("defect_text", searchText);
 
-        // 코사인 유사도 계산
-        List<RecallSimilarDTO> scoredList = new ArrayList<>();
-        for (int i = 0; i < recallVectors.size(); i++) {
-            double similarity = cosineSimilarity(targetVector, recallVectors.get(i));
-            if (similarity > 0.0) { // 0보다 큰 경우만 로그 출력
-                System.out.println(recallList.get(i).getModelName() + " / "
-                        + recallList.get(i).getRecallReason()
-                        + " : " + similarity);
-            }
-            scoredList.add(new RecallSimilarDTO(recallList.get(i), similarity));
+            HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+            // Python에게 요청 보내기 (List로 받아옴)
+            ResponseEntity<List<RecallRecommendDTO>> response = restTemplate.exchange(
+                    FLASK_RECOMMEND_URL,
+                    HttpMethod.POST,
+                    requestEntity,
+                    new ParameterizedTypeReference<List<RecallRecommendDTO>>() {}
+            );
+
+            List<RecallRecommendDTO> pythonResult = response.getBody();
+            if (pythonResult == null) return new ArrayList<>();
+
+            // 화면 출력용 DTO로 변환
+            return pythonResult.stream()
+                    .map(r -> {
+                        RecallDTO dummyRecall = new RecallDTO();
+                        dummyRecall.setMaker(r.getMaker());
+                        dummyRecall.setModelName(r.getModelName());
+                        dummyRecall.setRecallDate(r.getRecallDate());
+                        dummyRecall.setRecallReason(r.getRecallReason());
+
+                        return new RecallSimilarDTO(dummyRecall, r.getSimilarity());
+                    })
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            // ★ 에러가 나면 콘솔에 빨간 줄로 이유를 알려줌 (매우 중요)
+            e.printStackTrace();
+            return new ArrayList<>();
         }
-
-        // 유사도 높은 순 정렬 및 10개 반환
-        return scoredList.stream()
-                .sorted((a, b) -> Double.compare(b.getSimilarity(), a.getSimilarity()))
-                .limit(10)
-                .toList();
     }
 
+    @Override
+    public RecallPredictionDTO getPredictionFromAi(String defectText) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
 
-    private double cosineSimilarity(double[] a, double[] b) {
-        double dot = 0, normA = 0, normB = 0;
-        for (int i = 0; i < a.length; i++) {
-            dot += a[i] * b[i];
-            normA += Math.pow(a[i], 2);
-            normB += Math.pow(b[i], 2);
+            // 1. 요청 헤더 설정
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // 2. 요청 바디 설정 (JSON: {"defect_text": "..."})
+            Map<String, String> body = new HashMap<>();
+            body.put("defect_text", defectText);
+
+            HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+            // 3. POST 요청 보내기 및 응답 받기
+            return restTemplate.postForObject(FLASK_API_URL, requestEntity, RecallPredictionDTO.class);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 에러 발생 시 빈 객체 혹은 null 반환 (서비스가 죽지 않도록 처리)
+            return new RecallPredictionDTO();
         }
-        return dot / (Math.sqrt(normA) * Math.sqrt(normB) + 1e-9);
     }
-
-    private String preprocessKoreanSimple(String text) {
-        if (text == null) return "";
-        text = text.toLowerCase();                 // 소문자화
-        text = text.replaceAll("[^가-힣a-z0-9 ]", " "); // 특수문자 제거
-        text = text.replaceAll("\\s+", " ").trim();    // 공백 정리
-        return text;
-    }
-
-    private record RecallSimilarityScore(RecallDTO recall, double similarity) {}
 }
