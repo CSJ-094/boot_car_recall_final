@@ -485,6 +485,6 @@ public class MainController {
         model.addAttribute("report", report);
         model.addAttribute("similarRecalls", similarRecalls);
 
-        return "recall_similar_status"; // 새 JSP
+        return "recall_similar_status";
     }
 }

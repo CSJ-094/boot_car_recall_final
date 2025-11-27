@@ -8,17 +8,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RecallPredictionDTO {
 
-    // Python이 보내주는 JSON 키값("recall_probability")을 자바 변수명과 매핑
+    // Flask에서 보내주는 변수값 매칭
     @JsonProperty("recall_probability")
+    //정확도
     private Double recallProbability;
 
+    //예상 부품
     @JsonProperty("predicted_part")
     private String predictedPart;
 
+    //유사 사례
     @JsonProperty("similar_case")
     private SimilarCaseDetailDTO similarCase;
 
-    // Python의 "similar_case" 안에 들어있는 데이터를 받을 내부 클래스
+    //similar_case 안에 들어있는 데이터를 받을 내부 클래스.
     @Data
     @NoArgsConstructor
     public static class SimilarCaseDetailDTO {

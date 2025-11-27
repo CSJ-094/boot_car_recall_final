@@ -138,23 +138,23 @@
                 </div>
             </div>
 
-            <c:if test="${not empty recallPrediction}">
+            <div th:if="${recallPrediction != null}">
                 <div class="detail-item">
                     <label>리콜 가능성:</label>
-                    <fmt:formatNumber value="${recallPrediction.recallProbability}" type="percent" maxFractionDigits="2"/>
+                    <span th:text="${#numbers.formatPercent(recallPrediction.recallProbability, 1, 2)}"></span>
                 </div>
 
-                <c:if test="${recallPrediction.recallProbability ne 0}">
+                <th:block th:if="${recallPrediction.recallProbability != 0}">
                     <div class="detail-item">
                         <label>유사 사례:</label>
-                        <span>${recallPrediction.similarCase.reason}</span>
+                        <span th:text="${recallPrediction.similarCase.reason}"></span>
                     </div>
                     <div class="detail-item">
                         <label>예상 고장 부위:</label>
-                        <span>${recallPrediction.predictedPart}</span>
+                        <span th:text="${recallPrediction.predictedPart}"></span>
                     </div>
-                </c:if>
-            </c:if>
+                </th:block>
+            </div>
 
             <div class="btn-group">
                 <button type="button" class="edit-btn" onclick="showPasswordModal('edit')">수정</button>
