@@ -1,9 +1,6 @@
 package com.boot.service;
 
-import com.boot.dto.Criteria;
-import com.boot.dto.DefectReportDTO;
-import com.boot.dto.RecallDTO;
-import com.boot.dto.RecallSimilarDTO;
+import com.boot.dto.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -21,4 +18,5 @@ public interface DefectReportService {
     List<RecallSimilarDTO> findSimilarRecalls(String carModel,
                                               String defectText,
                                               List<RecallDTO> recallList);
+    public RecallPredictionDTO getPredictionFromAi(String defectText);
 }

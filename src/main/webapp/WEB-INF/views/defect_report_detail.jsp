@@ -125,6 +125,24 @@
                 </div>
             </c:if>
 
+            <c:if test="${not empty recallPrediction}">
+                <div class="detail-item">
+                    <label>리콜 가능성:</label>
+                    <fmt:formatNumber value="${recallPrediction.recallProbability}" type="percent" maxFractionDigits="2"/>
+                </div>
+
+                <c:if test="${recallPrediction.recallProbability ne 0}">
+                    <div class="detail-item">
+                        <label>유사 사례:</label>
+                        <span>${recallPrediction.similarCase.reason}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>예상 고장 부위:</label>
+                        <span>${recallPrediction.predictedPart}</span>
+                    </div>
+                </c:if>
+            </c:if>
+
             <div class="btn-group">
                 <button type="button" class="edit-btn" onclick="showPasswordModal('edit')">수정</button>
                 <button type="button" class="delete-btn" onclick="showPasswordModal('delete')">삭제</button>

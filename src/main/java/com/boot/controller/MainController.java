@@ -205,6 +205,13 @@ public class MainController {
     @GetMapping("/report/detail")
     public String defectReportDetail(@RequestParam("id") Long id, Model model) {
         DefectReportDTO report = defectReportService.getReportById(id);
+        if (report != null) {
+            // 2. AI(Python) 서버에 예측 요청 (결함 내용 전달)
+            RecallPredictionDTO prediction = defectReportService.getPredictionFromAi(report.getDefectDetails());
+
+            // 3. 모델에 담기 (JSP에서 recallPrediction 으로 사용 중)
+            model.addAttribute("recallPrediction", prediction);
+        }
         model.addAttribute("report", report);
         return "defect_report_detail";
     }

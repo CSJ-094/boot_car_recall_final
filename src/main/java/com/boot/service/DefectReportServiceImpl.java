@@ -5,17 +5,19 @@ import com.boot.dao.DefectReportDAO;
 import com.boot.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class DefectReportServiceImpl implements DefectReportService {
     private final DefectReportDAO defectReportDAO;
     private final DefectImageDAO defectImageDAO;
     private final NotificationService notificationService; // NotificationService 주입
+    private static final String FLASK_API_URL = "http://localhost:5000/predict";
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -236,6 +239,31 @@ public class DefectReportServiceImpl implements DefectReportService {
                 .sorted((a, b) -> Double.compare(b.getSimilarity(), a.getSimilarity()))
                 .limit(10)
                 .toList();
+    }
+
+    @Override
+    public RecallPredictionDTO getPredictionFromAi(String defectText) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            // 1. 요청 헤더 설정
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // 2. 요청 바디 설정 (JSON: {"defect_text": "..."})
+            Map<String, String> body = new HashMap<>();
+            body.put("defect_text", defectText);
+
+            HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+            // 3. POST 요청 보내기 및 응답 받기
+            return restTemplate.postForObject(FLASK_API_URL, requestEntity, RecallPredictionDTO.class);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 에러 발생 시 빈 객체 혹은 null 반환 (서비스가 죽지 않도록 처리)
+            return new RecallPredictionDTO();
+        }
     }
 
 
