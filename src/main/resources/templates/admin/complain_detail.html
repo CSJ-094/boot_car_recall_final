@@ -22,6 +22,56 @@
                 min-height: 150px;
                 border: 1px solid #dee2e6;
             }
+            /* 첨부파일 표시 스타일 */
+            .uploadResult ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .uploadResult li {
+                display: flex;
+                align-items: center;
+                margin-bottom: 8px;
+            }
+            .uploadResult li a {
+                color: #0066cc;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+            }
+            .uploadResult li a:hover {
+                text-decoration: underline;
+            }
+            .uploadResult li img {
+                width: 100px; /* 썸네일 크기 조정 */
+                height: 100px; /* 썸네일 크기 조정 */
+                object-fit: cover; /* 이미지 비율 유지하며 채우기 */
+                margin-right: 8px;
+                border: 1px solid #eee;
+                border-radius: 4px;
+                cursor: pointer; /* 클릭 가능 표시 */
+            }
+
+            /* 이미지 확대 모달 스타일 */
+            .bigPicture {
+                position: fixed;
+                display: none; /* 초기에는 숨김 */
+                justify-content: center;
+                align-items: center;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background-color: rgba(0,0,0,0.8);
+                z-index: 10000; /* 다른 요소 위에 표시 */
+                cursor: pointer;
+            }
+            .bigPic img {
+                max-width: 90%;
+                max-height: 90%;
+                border-radius: 8px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            }
         </style>
     </th:block>
 </head>
@@ -34,14 +84,14 @@
     
         <div class="row detail-item">
             <div class="col-md-2 detail-label">문의유형</div>
-            <div class="col-md-10 font-weight-bold" th:text="*{complain_type}"></div>
+            <div class="col-md-10 font-weight-bold" th:text="*{complain_type == '1' ? '제작결함' : '기타'}"></div>
         </div>
         <div class="row detail-item">
             <div class="col-md-2 detail-label">신고인</div>
             <div class="col-md-4 font-weight-bold" th:text="*{reporter_name}"></div>
             <div class="col-md-2 detail-label">작성일</div>
             <div class="col-md-4 font-weight-bold">
-                <span th:text="${#strings.substring(complain.complainDate, 0, 16)}"></span>
+                <span th:text="${#dates.format(complain.complainDate, 'yyyy-MM-dd HH:mm')}"></span>
             </div>
         </div>
         <div class="row detail-item">
@@ -52,6 +102,30 @@
             <div class="row">
                 <div class="col-md-2 detail-label">문의 내용</div>
                 <div class="col-md-10 detail-content-box bg-light" th:text="*{content}"></div>
+            </div>
+        </div>
+
+        <!-- 첨부파일 표시 영역 -->
+        <div class="detail-item" th:if="${not #lists.isEmpty(complain.attachList)}">
+            <div class="row">
+                <div class="col-md-2 detail-label">첨부파일</div>
+                <div class="col-md-10">
+                    <div class="uploadResult">
+                        <ul>
+                            <li th:each="file : ${complain.attachList}">
+                                <a th:href="@{/download(uuid=${file.uuid}, type='complain')}">
+                                    <img th:if="${file.image}"
+                                         th:src="@{/display(uuid=${file.uuid}, type='complain')}"
+                                         th:data-original-uuid="${file.uuid}"
+                                         th:data-original-type="complain"
+                                         alt="thumbnail">
+                                    <img th:unless="${file.image}" th:src="@{/img/attach.png}" alt="attach_icon">
+                                    <span th:text="${file.fileName}"></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     
@@ -75,6 +149,11 @@
             </div>
         </form>
     </div>
+
+    <!-- 이미지 확대 모달 -->
+    <div class="bigPicture">
+        <div class="bigPic"></div>
+    </div>
 </div>
 <th:block layout:fragment="script">
 <script>
@@ -87,6 +166,34 @@
                 }
             });
         }
+
+        // 이미지 확대 기능
+        const uploadResult = document.querySelector('.uploadResult ul');
+        const bigPicture = document.querySelector('.bigPicture');
+        const bigPic = document.querySelector('.bigPic');
+
+        if (uploadResult) {
+            uploadResult.addEventListener('click', function(e) {
+                const targetImg = e.target.closest('img');
+                if (targetImg && targetImg.dataset.originalUuid) { // 이미지 썸네일 클릭 시
+                    e.preventDefault(); // 기본 링크 동작 방지
+                    const uuid = targetImg.dataset.originalUuid;
+                    const type = targetImg.dataset.originalType;
+                    const originalImageUrl = `/display?uuid=${uuid}&type=${type}`; // 원본 이미지 URL
+                    showImage(originalImageUrl);
+                }
+            });
+        }
+
+        function showImage(imageUrl) {
+            bigPic.innerHTML = `<img src="${imageUrl}" alt="확대 이미지">`;
+            bigPicture.style.display = 'flex';
+        }
+
+        bigPicture.addEventListener('click', function() {
+            bigPicture.style.display = 'none';
+            bigPic.innerHTML = ''; // 이미지 제거
+        });
     });
 </script>
 </th:block>

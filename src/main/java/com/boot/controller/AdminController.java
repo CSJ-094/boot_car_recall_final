@@ -7,6 +7,7 @@ import com.boot.dto.Criteria;
 import com.boot.dto.DailyStatsDTO;
 import com.boot.dto.DefectReportDTO;
 import com.boot.dto.FaqDTO;
+import com.boot.dto.MemberDto; // MemberDTO import 추가
 import com.boot.dto.NoticeDTO;
 import com.boot.dto.PageDTO;
 import com.boot.service.AdminService;
@@ -15,6 +16,9 @@ import com.boot.service.ComplainService;
 import com.boot.service.DefectReportService;
 import com.boot.service.StatsService;
 import com.boot.service.FaqService;
+import com.boot.service.MailService;
+import com.boot.service.MemberService;
+import com.boot.service.NotificationService;
 import com.boot.service.NoticeService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +68,15 @@ public class AdminController {
 
     @Autowired
     private ComplainService complainService;
+
+    @Autowired
+    private NotificationService notificationService;
+    
+    @Autowired
+    private MailService mailService;
+
+    @Autowired
+    private MemberService memberService;
 
     // ===============================================
     // 인증 및 메인 페이지 (Spring Security 적용 가정)
@@ -373,23 +386,52 @@ public class AdminController {
 
     // 고객 문의 상세 및 답변 폼
     @GetMapping("/complain/detail")
-    public String complainDetail(@RequestParam("report_id") String report_id, Model model) {
+    public String complainDetail(@RequestParam("report_id") int report_id, Model model) { // report_id 타입을 int로 변경
         log.info("@# complain detail: {}", report_id);
-        HashMap<String, String> param = new HashMap<>();
-        param.put("report_id", report_id);
-        ComplainDTO complain = complainService.contentView(param);
+        ComplainDTO complain = complainService.getComplainById(report_id); // getComplainById 사용
         model.addAttribute("complain", complain);
         return "admin/complain_detail";
     }
 
     // 고객 문의 답변 등록 처리
     @PostMapping("/complain/answer")
-    public String complainAnswer(@RequestParam("report_id") String report_id, @RequestParam("answer") String answer, RedirectAttributes rttr) {
+    public String complainAnswer(@RequestParam("report_id") int report_id, @RequestParam("answer") String answer, RedirectAttributes rttr) {
         log.info("@# complain answer process: report_id={}, answer={}", report_id, answer);
+        
+        // 1. 답변 저장
         HashMap<String, String> param = new HashMap<>();
-        param.put("report_id", report_id);
+        param.put("report_id", String.valueOf(report_id)); // int를 String으로 변환
         param.put("answer", answer);
         complainService.addAnswer(param);
+
+        // 2. 문의 정보 조회
+        ComplainDTO complain = complainService.getComplainById(report_id);
+        if (complain != null) {
+            String reporterName = complain.getReporter_name();
+            String complainTitle = complain.getTitle();
+
+            // 3. 알림 발송
+            String notificationMessage = String.format("작성하신 문의 '%s'에 답변이 등록되었습니다.", complainTitle);
+            String notificationLink = "/complain_content_view?report_id=" + report_id;
+            notificationService.sendNotification(reporterName, notificationMessage, notificationLink);
+            log.info("@# Notification sent to {}: {}", reporterName, notificationMessage);
+
+            // 4. 이메일 발송
+            MemberDto member = memberService.getMemberByUsername(reporterName);
+            if (member != null && member.getEmail() != null && !member.getEmail().isEmpty()) {
+                String to = member.getEmail();
+                String subject = "[자동차 리콜 통합센터] 문의하신 '" + complainTitle + "'에 답변이 등록되었습니다.";
+                String body = String.format("안녕하세요, %s님.\n\n문의하신 '%s'에 대한 답변이 등록되었습니다.\n\n답변 내용:\n%s\n\n자세한 내용은 홈페이지에서 확인해주세요.\n%s/complain_content_view?report_id=%d",
+                                            reporterName, complainTitle, answer, "http://localhost:8484", report_id); // TODO: 실제 도메인으로 변경
+                mailService.sendMail(to, subject, body);
+                log.info("@# Email sent to {}: {}", to, subject);
+            } else {
+                log.warn("@# Member email not found or empty for reporter: {}", reporterName);
+            }
+        } else {
+            log.warn("@# Complain not found for report_id: {}", report_id);
+        }
+
         rttr.addFlashAttribute("result", "answer_success");
         return "redirect:/admin/complain/detail?report_id=" + report_id;
     }

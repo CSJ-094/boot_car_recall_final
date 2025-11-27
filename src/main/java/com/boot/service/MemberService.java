@@ -2,7 +2,7 @@ package com.boot.service;
 
 import com.boot.dao.AdminMapper;
 import com.boot.dao.MemberDao;
-import com.boot.dto.MemberDto;
+import com.boot.dto.MemberDto; // MemberDTO import
 import com.boot.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -142,7 +142,8 @@ public class MemberService implements UserDetailsService {
         return memberDao.findByEmail(email) != null;
     }
 
-    public Optional<MemberDto> getMemberByUsername(String username) {
-        return Optional.ofNullable(memberDao.findByUsername(username));
+    // Optional<MemberDto> -> MemberDTO로 변경
+    public MemberDto getMemberByUsername(String username) {
+        return memberDao.findByUsername(username);
     }
 }
