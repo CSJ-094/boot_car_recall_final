@@ -87,6 +87,10 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout -> logout
+                .logoutUrl("/logout") // 기본 로그아웃 URL 설정
+                .logoutSuccessUrl("/login?logout") // 로그아웃 성공 시 리다이렉트될 URL
+                .invalidateHttpSession(true) // HTTP 세션 무효화
+                .deleteCookies("JSESSIONID") // JSESSIONID 쿠키 삭제
                 .permitAll()
             )
             .userDetailsService(memberService)
