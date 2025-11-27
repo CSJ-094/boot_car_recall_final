@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
     minimizeBtn.style.fontSize = "18px";
     minimizeBtn.addEventListener("click", () => {
         dashboard.style.display = "none";
-        toggleBtn.innerText = "💬";
+        toggleBtn.innerText = "🙂";
     });
 
     // 닫기 버튼
@@ -340,7 +340,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         } else {
             dashboard.style.display = "none";
-            toggleBtn.innerText = "👩‍💼";
+            toggleBtn.innerText = "🙂";
             // 대시보드 닫을 때 대기 고객 있으면 다시 뱃지 표시
             refreshCustomerList();
         }

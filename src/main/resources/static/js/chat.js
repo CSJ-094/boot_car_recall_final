@@ -257,7 +257,7 @@ document.addEventListener("DOMContentLoaded", function () {
             
             webSocket.onopen = function(event) {
                 console.log("WebSocket 연결 성공");
-                appendMessage("system", "연결 완료. 안녕하세요! 😊");
+                appendMessage("system", "연결 완료. 안녕하세요! 😊 리콜 서비스 센터 입니다 도움이 필요하시면 도움이라고 보내주세요!");
             };
             
             webSocket.onmessage = function(event) {
