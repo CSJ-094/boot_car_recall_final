@@ -39,7 +39,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse; // 이 import 문을 추가합니다.
 import com.opencsv.CSVWriter;
 
 @Controller
@@ -192,7 +192,14 @@ public class MainController {
     // URL: /report/history
     // -------------------------------------------------------------------
     @GetMapping("/report/history")
-    public String defectReportList(Criteria cri, Model model, Principal principal) { // Principal 추가
+    public String defectReportList(Criteria cri, Model model, Principal principal, HttpServletResponse response) { // HttpServletResponse 추가
+        log.info("@# Get report history for user: {}", principal != null ? principal.getName() : "anonymous");
+
+        // 캐시 제어 헤더 추가
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
+        response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+        response.setHeader("Expires", "0"); // Proxies
+
         String username = null;
         if (principal != null) {
             username = principal.getName();
