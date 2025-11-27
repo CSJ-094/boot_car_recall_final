@@ -35,3 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Python ###
+python_ai/venv/
+python_ai/__pycache__/
+python_ai/.pytest_cache/
+*.pyc
