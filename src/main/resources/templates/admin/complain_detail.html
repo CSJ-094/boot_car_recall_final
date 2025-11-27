@@ -41,7 +41,7 @@
             <div class="col-md-4 font-weight-bold" th:text="*{reporter_name}"></div>
             <div class="col-md-2 detail-label">작성일</div>
             <div class="col-md-4 font-weight-bold">
-                <span th:text="${#dates.format(complain.complainDate, 'yyyy-MM-dd HH:mm')}"></span>
+                <span th:text="${#strings.substring(complain.complainDate, 0, 16)}"></span>
             </div>
         </div>
         <div class="row detail-item">
@@ -60,7 +60,7 @@
         <div class="detail-item">
             <div class="row">
                 <div class="col-md-2 detail-label">답변 내용</div>
-                <div class="col-md-10 detail-content-box font-weight-bold" th:classappend="${#strings.isEmpty(answer)} ? 'text-muted'" th:text="*{answer} ?: '아직 등록된 답변이 없습니다.'"></div>
+                <div class="col-md-10 detail-content-box font-weight-bold" th:classappend="${#strings.isEmpty(complain.answer)} ? 'text-muted'" th:text="*{answer} ?: '아직 등록된 답변이 없습니다.'"></div>
             </div>
         </div>
     
