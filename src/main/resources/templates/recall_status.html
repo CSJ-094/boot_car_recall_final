@@ -13,34 +13,50 @@
         }
         .search-container {
             padding: 20px;
-            background: #fff;
+            background: #f8f9fa;
             margin-top: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center; /* 폼 자체를 중앙 정렬하기 위함 */
         }
-        .search-container form {
-            display: flex; /* flexbox를 사용하여 내부 요소 정렬 */
-            justify-content: center; /* 가로 중앙 정렬 */
-            align-items: center; /* 세로 중앙 정렬 */
-            max-width: 500px; /* 폼의 최대 너비 제한 */
-            margin: 0 auto; /* 폼 자체를 부모 요소 내에서 중앙 정렬 */
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: center;
         }
-        .search-container input[type="text"] {
-            flex-grow: 1; /* 남은 공간을 채우도록 설정 */
-            padding: 10px;
+        .search-form .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .search-form label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        .search-form input[type="text"],
+        .search-form input[type="date"] {
+            padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            margin-right: 10px; /* 입력 필드와 버튼 사이 간격 */
-            min-width: 150px; /* 최소 너비 지정 */
         }
-        .search-container button {
-            padding: 10px 20px;
+        .search-form .form-actions {
+            grid-column: 1 / -1; /* 버튼을 전체 너비로 확장 */
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .search-form button {
+            padding: 10px 25px;
             background: #0d47a1;
             color: white;
             border: none;
             cursor: pointer;
             border-radius: 4px;
+            font-size: 1em;
+        }
+        .search-form button.btn-reset {
+            background-color: #6c757d;
         }
         table {
             width: 100%;
@@ -111,9 +127,27 @@
         </div>
 
         <div class="search-container">
-            <form th:action="@{/recall-status}" method="get">
-                <input type="text" id="searchInput" name="keyword" placeholder="제조사 또는 차종으로 검색..." th:value="${pageMaker.cri.keyword}">
-                <button type="submit">검색</button>
+            <form th:action="@{/recall-status}" method="get" class="search-form">
+                <div class="form-group">
+                    <label for="maker">제조사</label>
+                    <input type="text" id="maker" name="maker" placeholder="예: 현대자동차" th:value="${pageMaker.cri.maker}">
+                </div>
+                <div class="form-group">
+                    <label for="modelName">모델명</label>
+                    <input type="text" id="modelName" name="modelName" placeholder="예: 소나타" th:value="${pageMaker.cri.modelName}">
+                </div>
+                <div class="form-group">
+                    <label for="startDate">리콜 시작일</label>
+                    <input type="date" id="startDate" name="startDate" th:value="${pageMaker.cri.startDate}">
+                </div>
+                <div class="form-group">
+                    <label for="endDate">리콜 종료일</label>
+                    <input type="date" id="endDate" name="endDate" th:value="${pageMaker.cri.endDate}">
+                </div>
+                <div class="form-actions">
+                    <button type="submit">검색</button>
+                    <button type="button" class="btn-reset" onclick="location.href='/recall-status'">초기화</button>
+                </div>
             </form>
         </div>
         
@@ -150,12 +184,12 @@
 
             <!-- Pagination -->
             <div class="pagination">
-                <a th:if="${pageMaker.prev}" th:href="@{/recall-status(pageNum=${pageMaker.startPage - 1}, keyword=${pageMaker.cri.keyword})}">&laquo;</a>
+                <a th:if="${pageMaker.prev}" th:href="@{/recall-status(pageNum=${pageMaker.startPage - 1}, maker=${pageMaker.cri.maker}, modelName=${pageMaker.cri.modelName}, startDate=${pageMaker.cri.startDate}, endDate=${pageMaker.cri.endDate})}">&laquo;</a>
                 <th:block th:each="num : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}">
                     <strong th:if="${pageMaker.cri.pageNum == num}" th:text="${num}"></strong>
-                    <a th:unless="${pageMaker.cri.pageNum == num}" th:href="@{/recall-status(pageNum=${num}, keyword=${pageMaker.cri.keyword})}" th:text="${num}"></a>
+                    <a th:unless="${pageMaker.cri.pageNum == num}" th:href="@{/recall-status(pageNum=${num}, maker=${pageMaker.cri.maker}, modelName=${pageMaker.cri.modelName}, startDate=${pageMaker.cri.startDate}, endDate=${pageMaker.cri.endDate})}" th:text="${num}"></a>
                 </th:block>
-                <a th:if="${pageMaker.next}" th:href="@{/recall-status(pageNum=${pageMaker.endPage + 1}, keyword=${pageMaker.cri.keyword})}">&raquo;</a>
+                <a th:if="${pageMaker.next}" th:href="@{/recall-status(pageNum=${pageMaker.endPage + 1}, maker=${pageMaker.cri.maker}, modelName=${pageMaker.cri.modelName}, startDate=${pageMaker.cri.startDate}, endDate=${pageMaker.cri.endDate})}">&raquo;</a>
             </div>
         </div>
         <div th:if="${recallList.isEmpty() and errorMessage == null}">

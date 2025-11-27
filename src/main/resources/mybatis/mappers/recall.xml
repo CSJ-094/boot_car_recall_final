@@ -35,6 +35,23 @@
         <result property="registrationNumber" column="REGISTRATION_NUMBER" />
     </resultMap>
 
+    <sql id="searchCondition">
+        <where>
+            <if test="maker != null and maker != ''">
+                AND UPPER(MAKER) LIKE CONCAT('%', UPPER(#{maker}), '%')
+            </if>
+            <if test="modelName != null and modelName != ''">
+                AND UPPER(MODEL_NAME) LIKE CONCAT('%', UPPER(#{modelName}), '%')
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND RECALL_DATE &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND RECALL_DATE &lt;= #{endDate}
+            </if>
+        </where>
+    </sql>
+
     <select id="selectAllWithoutPagings" resultMap="recallResultMap">
         SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON
         FROM RECALL
@@ -44,28 +61,14 @@
     <select id="selectAll" parameterType="com.boot.dto.Criteria" resultMap="recallResultMap">
         SELECT ID, MAKER, MODEL_NAME, MAKE_START, MAKE_END, RECALL_DATE, RECALL_REASON, VIN, REGISTRATION_NUMBER
         FROM RECALL
-        <where>
-            <if test="keyword != null and keyword != ''">
-                UPPER(MAKER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-                OR UPPER(MODEL_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-                OR UPPER(REGISTRATION_NUMBER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-            </if>
-        </where>
+        <include refid="searchCondition" />
         ORDER BY ID DESC
         LIMIT #{amount} OFFSET ${(pageNum - 1) * amount}
     </select>
 
     <select id="count" parameterType="com.boot.dto.Criteria" resultType="int">
         SELECT COUNT(*) FROM RECALL
-        <where>
-            <if test="keyword != null and keyword != ''">
-                UPPER(MAKER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-                OR UPPER(MODEL_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-                OR UPPER(VIN) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-                OR UPPER(REGISTRATION_NUMBER) LIKE CONCAT('%', UPPER(#{keyword}), '%')
-            </if>
-        </where>
+        <include refid="searchCondition" />
     </select>
 
     <select id="searchByModelName" parameterType="string" resultMap="recallResultMap">

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/default_layout}">
 <head>
     <title>자주 묻는 질문 (FAQ)</title>
@@ -56,7 +57,7 @@
         </ul>
       </nav>
       <!-- 문의하기 버튼 -->
-      <div class="fq-footer-action">
+      <div class="fq-footer-action" sec:authorize="isAuthenticated()">
         <a th:href="@{/complain_write_view}" class="fq-btn">문의하기</a>
       </div>
     </div>

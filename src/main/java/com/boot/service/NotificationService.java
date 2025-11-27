@@ -34,20 +34,20 @@ public class NotificationService {
 
         notificationDao.save(notification);
 
-        // 사용자에게 이메일 알림 발송 로직 제거
-        // try {
-        //     MemberDto memberDto = memberService.getMemberByUsername(username);
-        //     if (memberDto != null && memberDto.getEmail() != null && !memberDto.getEmail().isEmpty()) {
-        //         String emailContent = "<h3>" + title + "</h3>"
-        //                             + "<p>" + message + "</p>"
-        //                             + (link != null ? "<p><a href=\"" + link + "\">자세히 보기</a></p>" : "");
-        //         emailService.sendEmail(memberDto.getEmail(), "[자동차 리콜 통합센터] " + title, emailContent);
-        //     } else {
-        //         log.warn("NotificationService: Member email not found or empty for user: {}", username);
-        //     }
-        // } catch (Exception e) {
-        //     log.error("이메일 발송 중 오류 발생", e);
-        // }
+        // 사용자에게 이메일 알림 발송 로직
+        try {
+            MemberDto memberDto = memberService.getMemberByUsername(username);
+            if (memberDto != null && memberDto.getEmail() != null && !memberDto.getEmail().isEmpty()) {
+                String emailContent = "<h3>" + title + "</h3>"
+                                    + "<p>" + message + "</p>"
+                                    + (link != null ? "<p><a href=\"" + link + "\">자세히 보기</a></p>" : "");
+                emailService.sendEmail(memberDto.getEmail(), "[자동차 리콜 통합센터] " + title, emailContent);
+            } else {
+                log.warn("NotificationService: Member email not found or empty for user: {}", username);
+            }
+        } catch (Exception e) {
+            log.error("이메일 발송 중 오류 발생", e);
+        }
     }
 
     // AdminController에서 호출할 메소드 추가

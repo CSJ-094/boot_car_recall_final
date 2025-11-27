@@ -14,6 +14,12 @@ public class Criteria {
     private String type = "";  // 기본값 "" (빈 문자열)로 초기화
     private String keyword = ""; // 기본값 "" (빈 문자열)로 초기화
 
+    // 고급 검색 필드 추가
+    private String maker;
+    private String modelName;
+    private String startDate;
+    private String endDate;
+
     // 두 번째 코드에 있던 페이지 번호와 수량만 받는 생성자를 오버로딩
     public Criteria(int pageNum, int amount) {
         this.pageNum = pageNum;

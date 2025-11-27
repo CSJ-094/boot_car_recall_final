@@ -494,4 +494,29 @@ public class MainController {
 
         return "recall_similar_status";
     }
+
+    // ===================================================================
+    // 테스트용: K7 리콜 알림 발송
+    // ===================================================================
+    @GetMapping("/test/send-k7-recall")
+    public String testSendK7Recall(RedirectAttributes rttr) {
+        log.info("@# 테스트: K7 리콜 알림 발송 시작");
+
+        // 1. 가상의 리콜 정보 생성
+        RecallDTO k7Recall = new RecallDTO();
+        k7Recall.setMaker("현대자동차");
+        k7Recall.setModelName("k7"); // 모델명은 DB에 저장된 값과 정확히 일치해야 합니다.
+        k7Recall.setRecallDate("2024-05-21");
+        k7Recall.setRecallReason("엔진 소프트웨어 결함으로 인한 주행 중 시동 꺼짐 가능성 (테스트 데이터)");
+        k7Recall.setMakeStart("2022-01-01");
+        k7Recall.setMakeEnd("2022-12-31");
+
+        // 2. 알림 발송 로직 호출
+        // 이 메서드는 내부적으로 DB에 리콜 정보를 저장하고, 알림을 발송합니다.
+        recallService.checkAndSendRecallNotifications(k7Recall);
+
+        log.info("@# 테스트: K7 리콜 알림 발송 완료");
+        rttr.addFlashAttribute("message", "K7 리콜 알림 테스트가 실행되었습니다. '내 알림'과 이메일을 확인해주세요.");
+        return "redirect:/";
+    }
 }

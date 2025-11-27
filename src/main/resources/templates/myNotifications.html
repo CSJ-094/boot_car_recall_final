@@ -138,7 +138,7 @@
                                 <span th:text="${notification.formattedCreatedAt}"></span>
                             </span>
                         </div>
-                        <div class="notification-message" th:text="${notification.message}"></div>
+                        <div class="notification-message" th:utext="${notification.message}"></div>
                         <div class="notification-actions">
                             <a th:if="${not #strings.isEmpty(notification.link)}" th:href="${notification.link}" class="notification-link">자세히 보기</a>
                             <form th:if="${!notification.read}" th:action="@{/my-notifications/mark-as-read}" method="post" style="display: inline;">
