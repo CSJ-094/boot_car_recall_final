@@ -39,9 +39,15 @@
             ID, USERNAME, REPORTER_NAME, CONTACT, CAR_MODEL, VIN, DEFECT_DETAILS, REPORT_DATE, PASSWORD, STATUS
         FROM DEFECT_REPORT
         <where>
-            <if test="username != null and username != 'admin'">
-                USERNAME = #{username}
-            </if>
+            <choose>
+                <when test="username == null">
+                    USERNAME IS NULL
+                </when>
+                <when test="username != 'admin'">
+                    USERNAME = #{username}
+                </when>
+                <!-- else (username == 'admin'): no WHERE clause for username, show all -->
+            </choose>
             <if test="cri.keyword != null and cri.keyword != ''">
                 AND (UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{cri.keyword}), '%')
                 OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{cri.keyword}), '%')
@@ -66,9 +72,15 @@
     <select id="count" resultType="int">
         SELECT COUNT(*) FROM DEFECT_REPORT
         <where>
-            <if test="username != null and username != 'admin'">
-                USERNAME = #{username}
-            </if>
+            <choose>
+                <when test="username == null">
+                    USERNAME IS NULL
+                </when>
+                <when test="username != 'admin'">
+                    USERNAME = #{username}
+                </when>
+                <!-- else (username == 'admin'): no WHERE clause for username, show all -->
+            </choose>
             <if test="keyword != null and keyword != ''">
                 AND (UPPER(REPORTER_NAME) LIKE CONCAT('%', UPPER(#{keyword}), '%')
                 OR UPPER(CAR_MODEL) LIKE CONCAT('%', UPPER(#{keyword}), '%')
