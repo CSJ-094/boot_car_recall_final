@@ -29,6 +29,29 @@
                 color: #555;
                 font-weight: normal;
             }
+            .category-filters {
+                text-align: center;
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            .category-filters .btn {
+                background-color: #e0e0e0;
+                color: #333;
+                border: none;
+                padding: 8px 15px;
+                margin: 0 5px;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: background-color 0.2s, color 0.2s;
+            }
+            .category-filters .btn:hover {
+                background-color: #c0c0c0;
+            }
+            .category-filters .btn.active {
+                background-color: #3949ab;
+                color: white;
+            }
             .results-section {
                 margin-bottom: 40px;
             }
@@ -93,12 +116,20 @@
                 <small>에 대한 통합 검색 결과입니다.</small>
             </h1>
 
+            <div class="category-filters">
+                <button class="btn" data-category="all" th:classappend="${selectedCategory == 'all' || selectedCategory == null} ? 'active'">전체</button>
+                <button class="btn" data-category="recall" th:classappend="${selectedCategory == 'recall'} ? 'active'">리콜 정보</button>
+                <button class="btn" data-category="notice" th:classappend="${selectedCategory == 'notice'} ? 'active'">공지사항</button>
+                <button class="btn" data-category="press" th:classappend="${selectedCategory == 'press'} ? 'active'">보도자료</button>
+                <button class="btn" data-category="faq" th:classappend="${selectedCategory == 'faq'} ? 'active'">FAQ</button>
+            </div>
+
             <div th:if="${results.empty}" class="no-results">
                 <p>모든 카테고리에서 검색 결과가 없습니다.</p>
             </div>
 
             <!-- 리콜 정보 결과 -->
-            <section th:if="${not #lists.isEmpty(results.recalls)}" class="results-section">
+            <section th:if="${(selectedCategory == 'all' || selectedCategory == 'recall') and not #lists.isEmpty(results.recalls)}" class="results-section">
                 <h2><i class="fa-solid fa-car-crash"></i>리콜 정보 (<span th:text="${#lists.size(results.recalls)}"></span>건)</h2>
                 <ul class="result-list">
                     <li th:each="item : ${results.recalls}" class="result-item">
@@ -112,7 +143,7 @@
             </section>
 
             <!-- 공지사항 결과 -->
-            <section th:if="${not #lists.isEmpty(results.notices)}" class="results-section">
+            <section th:if="${(selectedCategory == 'all' || selectedCategory == 'notice') and not #lists.isEmpty(results.notices)}" class="results-section">
                 <h2><i class="fa-solid fa-bullhorn"></i>공지사항 (<span th:text="${#lists.size(results.notices)}"></span>건)</h2>
                 <ul class="result-list">
                     <li th:each="item : ${results.notices}" class="result-item">
@@ -125,7 +156,7 @@
             </section>
 
             <!-- 보도자료 결과 -->
-            <section th:if="${not #lists.isEmpty(results.pressReleases)}" class="results-section">
+            <section th:if="${(selectedCategory == 'all' || selectedCategory == 'press') and not #lists.isEmpty(results.pressReleases)}" class="results-section">
                 <h2><i class="fa-solid fa-newspaper"></i>보도자료 (<span th:text="${#lists.size(results.pressReleases)}"></span>건)</h2>
                 <ul class="result-list">
                     <li th:each="item : ${results.pressReleases}" class="result-item">
@@ -138,7 +169,7 @@
             </section>
 
             <!-- FAQ 결과 -->
-            <section th:if="${not #lists.isEmpty(results.faqs)}" class="results-section">
+            <section th:if="${(selectedCategory == 'all' || selectedCategory == 'faq') and not #lists.isEmpty(results.faqs)}" class="results-section">
                 <h2><i class="fa-solid fa-question-circle"></i>FAQ (<span th:text="${#lists.size(results.faqs)}"></span>건)</h2>
                 <ul class="result-list">
                     <li th:each="item : ${results.faqs}" class="result-item">
@@ -149,4 +180,24 @@
         </div>
     </main>
 </div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryButtons = document.querySelectorAll('.category-filters .btn');
+            const currentQuery = /*[[${results.query}]]*/ '';
+            const currentCategory = /*[[${selectedCategory}]]*/ 'all';
+
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    let url = '/search?query=' + encodeURIComponent(currentQuery);
+                    if (category !== 'all') {
+                        url += '&category=' + encodeURIComponent(category);
+                    }
+                    window.location.href = url;
+                });
+            });
+        });
+    </script>
+</th:block>
 </html>

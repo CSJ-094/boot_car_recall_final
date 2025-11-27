@@ -1,7 +1,7 @@
 package com.boot.service;
 
 import com.boot.dao.NotificationDao;
-import com.boot.dto.MemberDTO; // MemberDTO import 추가
+import com.boot.dto.MemberDto; // MemberDto로 수정
 import com.boot.dto.NotificationDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class NotificationService {
 
         // 사용자에게 이메일 알림 발송 로직 제거
         // try {
-        //     MemberDTO memberDto = memberService.getMemberByUsername(username);
+        //     MemberDto memberDto = memberService.getMemberByUsername(username);
         //     if (memberDto != null && memberDto.getEmail() != null && !memberDto.getEmail().isEmpty()) {
         //         String emailContent = "<h3>" + title + "</h3>"
         //                             + "<p>" + message + "</p>"

@@ -2,7 +2,7 @@ package com.boot.service;
 
 import com.boot.dao.AdminMapper;
 import com.boot.dao.MemberDao;
-import com.boot.dto.MemberDto; // MemberDTO import
+import com.boot.dto.MemberDto; // MemberDto로 수정
 import com.boot.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -117,7 +117,7 @@ public class MemberService implements UserDetailsService {
                                 + "비밀번호를 재설정하시려면 다음 링크를 클릭해주세요:<br>"
                                 + "<a href=\"" + resetLink + "\">비밀번호 재설정하기</a><br>"
                                 + "이 링크는 일정 시간 후 만료됩니다.";
-            emailService.sendEmail(email, "자동차 리콜 통합센터 - 비밀번호 재설정", emailContent);
+            emailService.sendEmail(member.getEmail(), "자동차 리콜 통합센터 - 비밀번호 재설정", emailContent);
             return true;
         }
         return false;
@@ -142,7 +142,7 @@ public class MemberService implements UserDetailsService {
         return memberDao.findByEmail(email) != null;
     }
 
-    // Optional<MemberDto> -> MemberDTO로 변경
+    // Optional<MemberDto> -> MemberDto로 변경
     public MemberDto getMemberByUsername(String username) {
         return memberDao.findByUsername(username);
     }

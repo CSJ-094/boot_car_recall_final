@@ -7,7 +7,7 @@ import com.boot.dto.Criteria;
 import com.boot.dto.DailyStatsDTO;
 import com.boot.dto.DefectReportDTO;
 import com.boot.dto.FaqDTO;
-import com.boot.dto.MemberDto; // MemberDTO import 추가
+import com.boot.dto.MemberDto; // MemberDto로 수정
 import com.boot.dto.NoticeDTO;
 import com.boot.dto.PageDTO;
 import com.boot.service.AdminService;
@@ -226,9 +226,6 @@ public class AdminController {
         log.info("@# noticeDelete, notice_id: {}", notice_id);
         noticeService.delete(notice_id);
         rttr.addFlashAttribute("result", "delete_success");
-        // 두 번째 코드에 있던 페이징 정보를 유지하는 속성을 추가합니다.
-        rttr.addAttribute("pageNum", cri.getPageNum());
-        rttr.addAttribute("amount", cri.getAmount());
         return "redirect:/admin/notice/list";
     }
 

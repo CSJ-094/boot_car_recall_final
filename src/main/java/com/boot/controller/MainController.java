@@ -99,9 +99,13 @@ public class MainController {
     // 통합 검색 처리
     // -------------------------------------------------------------------
     @GetMapping("/search")
-    public String search(@RequestParam(value = "query") String query, Model model) {
-        SearchResultsDTO results = searchService.searchAll(query);
+    public String search(@RequestParam(value = "query") String query,
+                         @RequestParam(value = "category", required = false, defaultValue = "all") String category,
+                         Model model) {
+        log.info("@# Search query: {}, category: {}", query, category);
+        SearchResultsDTO results = searchService.searchAll(query, category);
         model.addAttribute("results", results);
+        model.addAttribute("selectedCategory", category); // 현재 선택된 카테고리를 뷰로 전달
         return "search_results";
     }
 
@@ -257,7 +261,7 @@ public class MainController {
     public String defectReportDelete(@RequestParam("id") Long id, @RequestParam("password") String password, RedirectAttributes rttr) {
         try {
             if (!defectReportService.checkPassword(id, password)) {
-                rttr.addFlashAttribute("errorMessage", "비밀번호가 일치하지 않아 삭제에 실패했습니다.");
+                rttr.addFlashAttribute("errorMessage", "비밀번호가 일치하지 않습니다.");
                 return "redirect:/report/detail?id=" + id;
             }
             defectReportService.deleteReport(id);
