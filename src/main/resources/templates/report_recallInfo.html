@@ -108,13 +108,63 @@
         .write-btn:hover {
             background-color: #0056b3;
         }
+
+        /* 검색창 스타일 */
+        .search-container {
+            display: flex;
+            justify-content: flex-end; /* 오른쪽 정렬 */
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e9ecef; /* 연한 회색 배경 */
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .search-container form {
+            display: flex;
+            gap: 10px; /* 요소들 사이 간격 */
+            align-items: center;
+        }
+
+        .search-container select,
+        .search-container input[type="text"] {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .search-container select {
+            min-width: 80px;
+        }
+
+        .search-container input[type="text"] {
+            flex-grow: 1; /* 가능한 공간을 채우도록 확장 */
+            min-width: 150px;
+        }
+
+        .search-container button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .search-container button:hover {
+            background-color: #0056b3;
+        }
         </style>
     </th:block>
 </head>
 <div layout:fragment="content">
     <div class="container">
     <h2>리콜 보도자료</h2>
-    <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px;">
+    <div class="search-container"> <!-- 클래스 적용 -->
         <form method="get" id="searchForm" th:action="@{/board/list}">
             <select name="type">
                 <option value="" th:selected="${pageMaker.cri.type == null}">--</option>

@@ -95,6 +95,10 @@
             color: #777;
             padding: 40px 0;
         }
+        /* 행 클릭 가능하도록 커서 변경 */
+        tbody tr {
+            cursor: pointer;
+        }
     </style>
 </th:block>
 <div layout:fragment="content">
@@ -111,24 +115,24 @@
                         <th>신청인</th>
                         <th>문의날짜</th>
                         <th>답변상태</th>
+                        <!-- 상세보기 버튼 컬럼 제거 -->
                     </tr>
                 </thead>
 
                 <tbody>
                     <tr th:if="${list.isEmpty()}">
-                        <td colspan="6" class="no-data">등록된 신청 내역이 없습니다.</td>
+                        <td colspan="6" class="no-data">등록된 신청 내역이 없습니다.</td> <!-- colspan 7에서 6으로 변경 -->
                     </tr>
-                    <tr th:each="dto : ${list}">
+                    <tr th:each="dto : ${list}" th:data-href="@{/complain_content_view(report_id=${dto.report_id})}"> <!-- th:data-href 추가 -->
                         <td th:text="${dto.report_id}"></td>
                         <td>
-                            <a th:href="@{/complain_content_view(report_id=${dto.report_id})}">
-                                <th:block th:if="${dto.is_public == 'N'}">
-                                    <span class="lock-icon">🔒</span> 비공개 글입니다.
-                                </th:block>
-                                <th:block th:unless="${dto.is_public == 'N'}">
-                                    <span th:text="${dto.title}"></span>
-                                </th:block>
-                            </a>
+                            <!-- 링크는 행 클릭 이벤트로 대체되므로 제거 -->
+                            <th:block th:if="${dto.is_public == 'N'}">
+                                <span class="lock-icon">🔒</span> 비공개 글입니다.
+                            </th:block>
+                            <th:block th:unless="${dto.is_public == 'N'}">
+                                <span th:text="${dto.title}"></span>
+                            </th:block>
                         </td>
                         <td>
                             <span th:text="${dto.complain_type == '1' ? '제작결함' : '기타'}"></span>
@@ -139,6 +143,7 @@
                             <span th:if="${#strings.equals(dto.status, '답변 완료')}" class="badge badge-success">답변 완료</span>
                             <span th:unless="${#strings.equals(dto.status, '답변 완료')}" class="badge badge-warning">접수</span>
                         </td>
+                        <!-- 상세보기 버튼 제거 -->
                     </tr>
                 </tbody>
             </table>
@@ -148,5 +153,17 @@
             </div>
         </div>
     </div>
-</html>
 </div>
+<th:block layout:fragment="script">
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll("tr[data-href]");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+    </script>
+</th:block>
+</html>
