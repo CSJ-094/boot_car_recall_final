@@ -96,7 +96,7 @@
             padding: 40px 0;
         }
     </style>
-</head>
+</th:block>
 <div layout:fragment="content">
     <div class="page-wrapper">
         <div class="board-container">
@@ -131,14 +131,13 @@
                             </a>
                         </td>
                         <td>
-                            <span th:if="${dto.complain_type == '1'}">제작결함</span>
-                            <span th:if="${dto.complain_type == '2'}">기타</span>
+                            <span th:text="${dto.complain_type == '1' ? '제작결함' : '기타'}"></span>
                         </td>
                         <td th:text="${dto.reporter_name}"></td>
-                        <td th:text="${#dates.format(dto.complainDate, 'yyyy-MM-dd')}"></td>
+                        <td th:text="${#dates.format(dto.complainDate, 'yyyy-MM-dd HH:mm')}"></td>
                         <td>
-                            <span th:if="${!#strings.isEmpty(dto.answer)}" class="badge badge-success">답변 완료</span>
-                            <span th:if="${#strings.isEmpty(dto.answer)}" class="badge badge-warning">답변 대기</span>
+                            <span th:if="${#strings.equals(dto.status, '답변 완료')}" class="badge badge-success">답변 완료</span>
+                            <span th:unless="${#strings.equals(dto.status, '답변 완료')}" class="badge badge-warning">접수</span>
                         </td>
                     </tr>
                 </tbody>

@@ -1,7 +1,9 @@
 package com.boot.service;
 
+import com.boot.dao.ComplainAttachDAO;
 import com.boot.dao.UploadDAO;
 import com.boot.dto.BoardAttachDTO;
+import com.boot.dto.ComplainAttachDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ public class UploadServiceImpl implements UploadService{
 	@Autowired
 	private SqlSession sqlSession;
 
+	@Autowired
+	private ComplainAttachDAO complainAttachDAO;
+
 	@Override
 	public void insertFile(BoardAttachDTO vo) {
 		log.info("@# insertFile()");
@@ -41,7 +46,6 @@ public class UploadServiceImpl implements UploadService{
 		return dao.getFileList(boardNo);
 	}
 
-//	폴더에 저장된 파일들 삭제
 	@Override
 	public void deleteFile(List<BoardAttachDTO> fileList) {
 		log.info("@# deleteFile()");
@@ -65,18 +69,13 @@ public class UploadServiceImpl implements UploadService{
 				String uploadFileName = attach.getUuid()+"_"+attach.getFileName();
 				File saveFile = new File(uploadPath, uploadFileName);
 				
-//				이미지파일인지 체크하기 위한 타입(probeContentType)
-//				String contentType = Files.probeContentType(file.toPath());
-//				boolean contentType = Files.probeContentType(file).startsWith("image");
 				String contentType = Files.probeContentType(saveFile.toPath());
 				log.info("@# contentType=>"+contentType);
 
-//				probeContentType 메소드 버그로 로직 추가
 				if (contentType == null) {
 					return;
 				}
 				
-//				썸네일 삭제(이미지인 경우)
 				if (Files.probeContentType(file).startsWith("image")) {
 					Path thumbNail = Paths.get("C:\\temp3\\upload\\"+attach.getUploadPath()+"\\s_"
 															 +attach.getUuid()+"_"
@@ -90,7 +89,6 @@ public class UploadServiceImpl implements UploadService{
 		});
 	}
 	
-//	날짜별 폴더 생성
 	public String getFolder() {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		Date date=new Date();
@@ -111,17 +109,9 @@ public class UploadServiceImpl implements UploadService{
 		UploadDAO dao = sqlSession.getMapper(UploadDAO.class);
 		dao.deleteFileDB(uuid);
 	}
-	
+
+	@Override
+	public ComplainAttachDTO findComplainAttachByUuid(String uuid) {
+		return complainAttachDAO.findByUuid(uuid);
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-

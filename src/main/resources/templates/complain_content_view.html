@@ -67,7 +67,7 @@
 	    color: #555;
 	}
 
-	.answer-box {
+	.answer-box, .question-box {
 	    background: #f9f9f9;
 	    border: 1px solid #ddd;
 	    padding: 20px;
@@ -75,15 +75,7 @@
 	    font-size: 14px;
 	    color: #444;
 	    border-radius: 5px;
-	}
-	.question-box {
-	    background: #f9f9f9;
-	    border: 1px solid #ddd;
-	    padding: 20px;
-	    line-height: 1.6;
-	    font-size: 14px;
-	    color: #444;
-	    border-radius: 5px;
+        white-space: pre-wrap;
 	}
 
 	.btn-box {
@@ -113,6 +105,51 @@
 	.btn.gray:hover {
 	    background-color: #444;
 	}
+
+    .uploadResult ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .uploadResult li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .uploadResult li a {
+        color: #0066cc;
+        text-decoration: none;
+    }
+    .uploadResult li a:hover {
+        text-decoration: underline;
+    }
+    .uploadResult li img {
+        width: 100px; /* 썸네일 크기 조정 */
+        height: 100px; /* 썸네일 크기 조정 */
+        object-fit: cover; /* 이미지 비율 유지하며 채우기 */
+        margin-right: 8px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        cursor: pointer; /* 클릭 가능 표시 */
+    }
+
+    /* 이미지 확대 모달 스타일 */
+    .bigPicture {
+        position: fixed;
+        display: none; /* 초기에는 숨김 */
+        justify-content: center;
+        align-items: center;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(0,0,0,0.8);
+        z-index: 10000; /* 다른 요소 위에 표시 */
+        cursor: pointer;
+    }
+    .bigPic img {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
 </style>
 </th:block>
 </head>
@@ -140,19 +177,39 @@
 		            <th>내용</th>
 					<td>
 						<div class="question-box">
-			            	<pre th:text="*{content}"></pre>
+			            	<p th:text="*{content}"></p>
 						</div>
 					</td>	
 		        </tr>
+                <tr th:if="${not #lists.isEmpty(content_view.attachList)}">
+                    <th>첨부파일</th>
+                    <td>
+                        <div class="uploadResult">
+                            <ul>
+                                <li th:each="file : ${content_view.attachList}">
+                                    <a th:href="@{/download(uuid=${file.uuid}, type='complain')}">
+                                        <img th:if="${file.image}"
+                                             th:src="@{/display(uuid=${file.uuid}, type='complain')}"
+                                             th:data-original-uuid="${file.uuid}"
+                                             th:data-original-type="complain"
+                                             alt="thumbnail">
+                                        <img th:unless="${file.image}" th:src="@{/img/attach.png}" alt="attach_icon">
+                                        <span th:text="${file.fileName}"></span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
 		        <tr>
 		            <th>문의날짜</th>
-		            <td th:text="*{complainDate}"></td>
+		            <td th:text="${#dates.format(content_view.complainDate, 'yyyy-MM-dd HH:mm')}"></td>
 		        </tr>
 		        <tr>
 		            <th>답변내용</th>
 		            <td>
 		                <div class="answer-box">
-		                    <pre th:text="*{answer} ?: '아직 등록된 답변이 없습니다.'"></pre>
+		                    <p th:text="*{answer} ?: '아직 등록된 답변이 없습니다.'"></p>
 		                </div>
 		            </td>
 		        </tr>
@@ -164,5 +221,43 @@
 		    </div>
 		</div>
 	</div>
+
+    <!-- 이미지 확대 모달 -->
+    <div class="bigPicture">
+        <div class="bigPic"></div>
+    </div>
 </div>
+
+<th:block layout:fragment="script">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadResult = document.querySelector('.uploadResult ul');
+            const bigPicture = document.querySelector('.bigPicture');
+            const bigPic = document.querySelector('.bigPic');
+
+            if (uploadResult) {
+                uploadResult.addEventListener('click', function(e) {
+                    const targetImg = e.target.closest('img');
+                    if (targetImg && targetImg.dataset.originalUuid) { // 이미지 썸네일 클릭 시
+                        e.preventDefault(); // 기본 링크 동작 방지
+                        const uuid = targetImg.dataset.originalUuid;
+                        const type = targetImg.dataset.originalType;
+                        const originalImageUrl = `/display?uuid=${uuid}&type=${type}`; // 원본 이미지 URL
+                        showImage(originalImageUrl);
+                    }
+                });
+            }
+
+            function showImage(imageUrl) {
+                bigPic.innerHTML = `<img src="${imageUrl}" alt="확대 이미지">`;
+                bigPicture.style.display = 'flex';
+            }
+
+            bigPicture.addEventListener('click', function() {
+                bigPicture.style.display = 'none';
+                bigPic.innerHTML = ''; // 이미지 제거
+            });
+        });
+    </script>
+</th:block>
 </html>

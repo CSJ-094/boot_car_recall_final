@@ -70,6 +70,8 @@
                         <ul class="submenu">
                             <li><a th:href="@{/notice/list}">공지사항</a></li>
                             <li><a th:href="@{/faq/list}">FAQ</a></li>
+                            <li sec:authorize="isAuthenticated()"><a th:href="@{/complain_write_view}">온라인 상담</a></li>
+                            <li sec:authorize="isAuthenticated()"><a th:href="@{/complain_list}">내 문의 내역</a></li>
                             <li><a th:href="@{/centers/about}">리콜센터 소개</a></li>
                             <li><a th:href="@{/centers/map}">주변 리콜센터 찾기</a></li>
                         </ul>

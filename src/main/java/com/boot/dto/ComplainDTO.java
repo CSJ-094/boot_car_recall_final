@@ -1,6 +1,8 @@
 package com.boot.dto;
 
-
+import java.util.Date; // Date import 추가
+import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,8 +19,14 @@ public class ComplainDTO {
 	private String complain_type;
 	private String carNum ;
 	private String is_public;
-	private String complainDate;
+	private Date complainDate; // String -> Date 변경
 	private String content;
 	private String answer;
 	private String status;
+
+	// 파일 업로드를 위한 필드
+	private List<MultipartFile> uploadFiles;
+
+	// 첨부파일 정보를 위한 필드
+	private List<ComplainAttachDTO> attachList;
 }

@@ -26,7 +26,7 @@
                 <th>신고인</th>
                 <th>문의유형</th>
                 <th>작성일</th>
-                <th style="width: 10%;">답변상태</th>
+                <th style="width: 10%;">처리상태</th>
             </tr>
             </thead>
             <tbody class="text-center">
@@ -37,11 +37,11 @@
                 <td th:text="${item.report_id}"></td>
                 <td class="text-left" th:text="${item.title}"></td>
                 <td th:text="${item.reporter_name}"></td>
-                <td th:text="${item.complain_type}"></td>
-                <td th:text="${#strings.substring(item.complainDate, 0, 10)}"></td>
+                <td th:text="${item.complain_type == '1' ? '제작결함' : '기타'}"></td>
+                <td th:text="${#dates.format(item.complainDate, 'yyyy-MM-dd HH:mm')}"></td>
                 <td>
-                    <span th:if="${!#strings.isEmpty(item.answer)}" class="badge badge-success">답변 완료</span>
-                    <span th:unless="${!#strings.isEmpty(item.answer)}" class="badge badge-warning">답변 대기</span>
+                    <span th:if="${#strings.equals(item.status, '답변 완료')}" class="badge badge-success">답변 완료</span>
+                    <span th:unless="${#strings.equals(item.status, '답변 완료')}" class="badge badge-warning">접수</span>
                 </td>
             </tr>
             </tbody>

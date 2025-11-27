@@ -3,28 +3,15 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default_layout}">
 <head>
-    <title>신청인 정보</title>
+    <title>상담 내용 수정</title>
     <th:block layout:fragment="css">
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            font-family: "맑은 고딕", sans-serif;
-            background-color: #f7f9fb;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 메인 컨텐츠 래퍼 */
         #content-wrap {
-            flex: 1; /* footer 밀어내기 */
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 40px 0;
         }
-
         .container {
             width: 800px;
             background: #fff;
@@ -33,7 +20,6 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
             padding: 30px;
         }
-
         h2 {
             color: #0066cc;
             font-size: 20px;
@@ -41,47 +27,33 @@
             padding-left: 10px;
             margin-bottom: 25px;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-
         th, td {
             border: 1px solid #ddd;
             padding: 12px 15px;
             text-align: left;
             font-size: 14px;
         }
-
         th {
             width: 20%;
             background-color: #f2f5f8;
             font-weight: bold;
             color: #333;
         }
-
-        td {
-            background-color: #fff;
-            color: #555;
+        td input[type="text"], td textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
-
-        .question-box {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 20px;
-            line-height: 1.6;
-            font-size: 14px;
-            color: #444;
-            border-radius: 5px;
-        }
-
         .btn-box {
             text-align: center;
             margin-top: 25px;
         }
-
         .btn {
             display: inline-block;
             background-color: #0066cc;
@@ -91,16 +63,15 @@
             text-decoration: none;
             margin: 0 5px;
             transition: 0.2s;
+            border: none;
+            cursor: pointer;
         }
-
         .btn:hover {
             background-color: #004c99;
         }
-
         .btn.gray {
             background-color: #666;
         }
-
         .btn.gray:hover {
             background-color: #444;
         }
@@ -110,54 +81,48 @@
 <div layout:fragment="content">
     <div id="content-wrap">
         <div class="container">
-            <h2>신청인 정보</h2>
+            <h2>상담 내용 수정</h2>
+            <form id="modifyForm" th:if="${m_param != null}" th:action="@{/complain_modify}" method="post" th:object="${m_param}" onsubmit="return confirm('수정하시겠습니까?');">
+                <input type="hidden" name="report_id" th:value="*{report_id}" />
+                <table>
+                    <tr>
+                        <th>신청인</th>
+                        <td th:text="*{reporter_name}"></td>
+                    </tr>
+                    <tr>
+                        <th>제목</th>
+                        <td>
+                            <input type="text" name="title" th:value="*{title}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>상담구분</th>
+                        <td>
+                            <input type="radio" name="complain_type" value="1" th:checked="*{complain_type == '1'}" /> 제작결함
+                            <input type="radio" name="complain_type" value="2" th:checked="*{complain_type == '2'}" /> 기타
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>내용</th>
+                        <td>
+                            <textarea name="content" th:text="*{content}" style="width:100%; height: 150px;"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>문의날짜</th>
+                        <td th:text="${#dates.format(m_param.complainDate, 'yyyy-MM-dd HH:mm')}"></td>
+                    </tr>
+                </table>
 
-            <!-- m_param이 단일 객체라고 가정합니다. -->
-            <div th:if="${m_param != null}" th:object="${m_param}">
-                <form th:action="@{/complain_modify}" method="post">
-					<input type="hidden" name="report_id" th:value="*{report_id}" />
-                    <table>
-                        <tr>
-                            <th>신청인</th>
-                            <td th:text="*{reporter_name}"></td>
-                        </tr>
-                        <tr>
-                            <th>제목</th>
-                            <td>
-                                <input type="text" name="title" th:value="*{title}" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>상담구분</th>
-                            <td>
-								<input type="radio" name="complain_type" value="1"
-								   th:checked="*{complain_type == '제작결함'}" /> 제작결함
-								<input type="radio" name="complain_type" value="2"
-								   th:checked="*{complain_type == '기타'}" /> 기타
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>내용</th>
-                            <td>
-                                <div>
-                                    <textarea name="content" th:text="*{content}" style="width:100%; height: 100px;"></textarea>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>문의날짜</th>
-                            <td th:text="${#dates.format(m_param.complainDate, 'yyyy-MM-dd HH:mm')}"></td>
-                        </tr>
-                    </table>
-
-                    <div class="btn-box">
-                        <input class="btn" type="submit" value="수정하기" />
-                        <a th:href="@{/complain_list}" class="btn gray">목록</a>
-                    </div>
-                </form>
+                <div class="btn-box">
+                    <button class="btn" type="submit">수정하기</button>
+                    <a th:href="@{/complain_list}" class="btn gray">취소</a>
+                </div>
+            </form>
+            <div th:unless="${m_param != null}">
+                <p>수정할 정보를 불러오지 못했습니다.</p>
             </div>
         </div>
     </div>
-
 </div>
 </html>
