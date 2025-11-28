@@ -6,7 +6,8 @@
             username,
             password,
             email,
-            email_verified as emailVerified
+            email_verified as emailVerified,
+            email_verification_token as emailVerificationToken
         FROM
             member
         WHERE
@@ -18,21 +19,36 @@
             username,
             password,
             email,
-            email_verified as emailVerified
+            email_verified as emailVerified,
+            email_verification_token as emailVerificationToken
         FROM
             member
         WHERE
             email = #{email}
     </select>
 
+    <select id="findByToken" resultType="com.boot.dto.MemberDto">
+        SELECT
+            username,
+            password,
+            email,
+            email_verified as emailVerified,
+            email_verification_token as emailVerificationToken
+        FROM
+            member
+        WHERE
+            email_verification_token = #{token}
+    </select>
+
     <insert id="save" parameterType="com.boot.dto.MemberDto">
-        INSERT INTO member (username, password, email, email_verified)
-        VALUES (#{username}, #{password}, #{email}, #{emailVerified})
+        INSERT INTO member (username, password, email, email_verified, email_verification_token)
+        VALUES (#{username}, #{password}, #{email}, #{emailVerified}, #{emailVerificationToken})
     </insert>
 
     <update id="updateEmailVerified">
         UPDATE member
-        SET email_verified = #{isVerified}
+        SET email_verified = #{emailVerified},
+            email_verification_token = null
         WHERE username = #{username}
     </update>
 

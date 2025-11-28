@@ -2,7 +2,7 @@ package com.boot.service;
 
 import com.boot.dao.AdminMapper;
 import com.boot.dao.MemberDao;
-import com.boot.dto.MemberDto; // MemberDto로 수정
+import com.boot.dto.MemberDto;
 import com.boot.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,21 +15,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService implements UserDetailsService {
 
     private final MemberDao memberDao;
-    private final AdminMapper adminMapper; // AdminMapper 주입
+    private final AdminMapper adminMapper;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    private final ConcurrentHashMap<String, String> emailVerificationTokens = new ConcurrentHashMap<>();
+    // 비밀번호 재설정 토큰은 보안상 만료 시간이 필요하므로 메모리에서 관리 (실제 운영에서는 Redis 등 사용 권장)
     private final ConcurrentHashMap<String, String> passwordResetTokens = new ConcurrentHashMap<>();
 
     @Override
@@ -47,8 +45,8 @@ public class MemberService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
 
-        // boolean enabled = member.isEmailVerified(); // 이메일 인증 여부 확인 로직 비활성화
-        boolean enabled = true; // 테스트를 위해 항상 true로 설정
+        // 이메일 인증 여부에 따라 계정 활성화 상태 결정
+        boolean enabled = member.isEmailVerified();
 
         return new User(
             member.getUsername(),
@@ -70,12 +68,12 @@ public class MemberService implements UserDetailsService {
             throw new IllegalArgumentException("Email already registered.");
         }
 
+        String verificationToken = UUID.randomUUID().toString();
         memberDto.setPassword(passwordEncoder.encode(memberDto.getPassword()));
         memberDto.setEmailVerified(false);
+        memberDto.setEmailVerificationToken(verificationToken);
+        
         memberDao.save(memberDto);
-
-        String verificationToken = UUID.randomUUID().toString();
-        emailVerificationTokens.put(verificationToken, memberDto.getUsername());
 
         String verificationLink = "http://localhost:8484/verify-email?token=" + verificationToken;
         String emailContent = "안녕하세요, " + memberDto.getUsername() + "님!<br>"
@@ -86,10 +84,9 @@ public class MemberService implements UserDetailsService {
 
     @Transactional
     public boolean verifyEmail(String token) {
-        String username = emailVerificationTokens.get(token);
-        if (username != null) {
-            memberDao.updateEmailVerified(username, true);
-            emailVerificationTokens.remove(token);
+        MemberDto member = memberDao.findByToken(token);
+        if (member != null) {
+            memberDao.updateEmailVerified(member.getUsername(), true);
             return true;
         }
         return false;
@@ -142,7 +139,6 @@ public class MemberService implements UserDetailsService {
         return memberDao.findByEmail(email) != null;
     }
 
-    // Optional<MemberDto> -> MemberDto로 변경
     public MemberDto getMemberByUsername(String username) {
         return memberDao.findByUsername(username);
     }

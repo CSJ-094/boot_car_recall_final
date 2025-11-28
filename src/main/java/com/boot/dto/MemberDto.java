@@ -10,4 +10,5 @@ public class MemberDto {
     private String password;
     private String email;
     private boolean emailVerified; // 이메일 인증 여부
+    private String emailVerificationToken; // 이메일 인증 토큰
 }
