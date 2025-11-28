@@ -12,9 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileInputStream; // FileInputStream import 추가
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,8 @@ public class ComplainServiceImpl implements ComplainService {
     @Autowired
     private ComplainAttachDAO complainAttachDAO;
 
+    private final String uploadFolder = "C:\\upload\\complain";
+
     @Override
     public ArrayList<ComplainDTO> complain_list() {
         return complainDAO.complain_list();
@@ -44,60 +47,14 @@ public class ComplainServiceImpl implements ComplainService {
     @Override
     public void complain_write(ComplainDTO complainDTO) {
         log.info("@# ComplainServiceImpl.complain_write() start");
-        log.info("@# complainDTO (before DB insert) => " + complainDTO);
-
         complainDAO.complain_write(complainDTO);
-        log.info("@# complain_write 후 report_id (after DB insert) => " + complainDTO.getReport_id());
+        log.info("@# complain_write 후 report_id => " + complainDTO.getReport_id());
 
         if (complainDTO.getUploadFiles() != null && !complainDTO.getUploadFiles().isEmpty()) {
-            String uploadFolder = "C:\\upload\\complain";
-            File uploadPath = new File(uploadFolder);
-
-            if (!uploadPath.exists()) {
-                uploadPath.mkdirs();
-            }
-
-            for (MultipartFile multipartFile : complainDTO.getUploadFiles()) {
-                if (multipartFile.getSize() == 0) continue;
-
-                ComplainAttachDTO attachDTO = new ComplainAttachDTO();
-                String originalFileName = multipartFile.getOriginalFilename();
-                String uuid = UUID.randomUUID().toString();
-                String uploadFileName = uuid + "_" + originalFileName;
-
-                File saveFile = new File(uploadPath, uploadFileName);
-
-                try {
-                    log.info("@# Saving file: " + saveFile.getAbsolutePath());
-                    multipartFile.transferTo(saveFile);
-                    log.info("@# File saved successfully: " + saveFile.exists());
-
-                    attachDTO.setUuid(uuid);
-                    attachDTO.setUploadPath(uploadFolder);
-                    attachDTO.setFileName(originalFileName);
-                    attachDTO.setReport_id(complainDTO.getReport_id()); // 여기서 report_id 설정
-
-                    if (multipartFile.getContentType().startsWith("image")) {
-                        attachDTO.setImage(true);
-                        File thumbnailFile = new File(uploadPath, "s_" + uploadFileName);
-                        log.info("@# Creating thumbnail: " + thumbnailFile.getAbsolutePath());
-                        FileOutputStream thumbnail = new FileOutputStream(thumbnailFile);
-                        // multipartFile.getInputStream() 대신 저장된 파일의 FileInputStream 사용
-                        Thumbnailator.createThumbnail(new FileInputStream(saveFile), thumbnail, 100, 100);
-                        thumbnail.close();
-                        log.info("@# Thumbnail created successfully: " + thumbnailFile.exists());
-                    }
-                    log.info("@# Attaching file to DB: " + attachDTO); // attachDTO 내용 로깅
-                    complainAttachDAO.insert(attachDTO);
-                    log.info("@# File attachment DB insert successful.");
-                } catch (IOException e) {
-                    log.error("File upload error", e);
-                }
-            }
+            saveFiles(complainDTO.getUploadFiles(), complainDTO.getReport_id());
         }
         log.info("@# ComplainServiceImpl.complain_write() end");
     }
-
 
     @Override
     public ComplainDTO contentView(HashMap<String, String> param) {
@@ -112,18 +69,46 @@ public class ComplainServiceImpl implements ComplainService {
         return dto;
     }
 
+    @Transactional
     @Override
-    public void complain_modify(HashMap<String, String> param) {
-        complainDAO.complain_modify(param);
+    public void complain_modify(ComplainDTO complainDTO, List<MultipartFile> newUploadFiles, List<String> existingFileNames) {
+        // 1. 텍스트 정보 업데이트
+        complainDAO.update(complainDTO);
+
+        // 2. 기존 파일 처리 (삭제된 파일 제거)
+        List<ComplainAttachDTO> currentFiles = complainAttachDAO.findByReportId(complainDTO.getReport_id());
+        if (currentFiles != null) {
+            for (ComplainAttachDTO file : currentFiles) {
+                if (existingFileNames == null || !existingFileNames.contains(file.getFileName())) {
+                    // DB에서 파일 정보 삭제
+                    complainAttachDAO.delete(file.getUuid());
+                    // 실제 파일 및 썸네일 삭제
+                    deleteFile(file.getUploadPath(), file.getUuid(), file.getFileName(), file.isImage());
+                }
+            }
+        }
+
+        // 3. 새로운 파일 저장
+        if (newUploadFiles != null && !newUploadFiles.isEmpty()) {
+            saveFiles(newUploadFiles, complainDTO.getReport_id());
+        }
     }
 
     @Override
     public void complain_delete(HashMap<String, String> param) {
         log.info("@# ComplainServiceImpl delete()");
-        log.info("@# report_id=>" + param.get("report_id"));
         int report_id = Integer.parseInt(param.get("report_id"));
 
+        // 첨부 파일 먼저 삭제
+        List<ComplainAttachDTO> attachList = complainAttachDAO.findByReportId(report_id);
+        if (attachList != null) {
+            for (ComplainAttachDTO attach : attachList) {
+                deleteFile(attach.getUploadPath(), attach.getUuid(), attach.getFileName(), attach.isImage());
+            }
+        }
         complainAttachDAO.deleteAll(report_id);
+
+        // 게시글 삭제
         complainDAO.complain_delete(param);
     }
 
@@ -145,5 +130,60 @@ public class ComplainServiceImpl implements ComplainService {
     @Override
     public List<ComplainDTO> getComplainListByReporterName(String reporterName) {
         return complainDAO.getComplainListByReporterName(reporterName);
+    }
+
+    // 파일 저장 헬퍼 메서드
+    private void saveFiles(List<MultipartFile> files, int reportId) {
+        File uploadPath = new File(uploadFolder);
+        if (!uploadPath.exists()) {
+            uploadPath.mkdirs();
+        }
+
+        for (MultipartFile multipartFile : files) {
+            if (multipartFile.getSize() == 0) continue;
+
+            ComplainAttachDTO attachDTO = new ComplainAttachDTO();
+            String originalFileName = multipartFile.getOriginalFilename();
+            String uuid = UUID.randomUUID().toString();
+            String uploadFileName = uuid + "_" + originalFileName;
+
+            File saveFile = new File(uploadPath, uploadFileName);
+
+            try {
+                multipartFile.transferTo(saveFile);
+
+                attachDTO.setUuid(uuid);
+                attachDTO.setUploadPath(uploadFolder);
+                attachDTO.setFileName(originalFileName);
+                attachDTO.setReport_id(reportId);
+
+                if (multipartFile.getContentType().startsWith("image")) {
+                    attachDTO.setImage(true);
+                    File thumbnailFile = new File(uploadPath, "s_" + uploadFileName);
+                    try (FileOutputStream thumbnail = new FileOutputStream(thumbnailFile);
+                         FileInputStream fis = new FileInputStream(saveFile)) {
+                        Thumbnailator.createThumbnail(fis, thumbnail, 100, 100);
+                    }
+                }
+                complainAttachDAO.insert(attachDTO);
+            } catch (IOException e) {
+                log.error("File upload error", e);
+            }
+        }
+    }
+
+    // 파일 삭제 헬퍼 메서드
+    private void deleteFile(String uploadPath, String uuid, String fileName, boolean isImage) {
+        if (fileName == null || uuid == null || uploadPath == null) return;
+        try {
+            File file = new File(uploadPath, uuid + "_" + fileName);
+            Files.deleteIfExists(file.toPath());
+            if (isImage) {
+                File thumbnail = new File(uploadPath, "s_" + uuid + "_" + fileName);
+                Files.deleteIfExists(thumbnail.toPath());
+            }
+        } catch (IOException e) {
+            log.error("File delete error", e);
+        }
     }
 }

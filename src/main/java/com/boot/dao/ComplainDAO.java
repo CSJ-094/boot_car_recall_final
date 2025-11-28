@@ -15,7 +15,7 @@ public interface ComplainDAO {
 	public ArrayList<ComplainDTO> find_modify_content(HashMap<String, String> param);
 	public void complain_write(ComplainDTO complainDTO);
 	public ComplainDTO contentView(HashMap<String, String> param);
-	public void complain_modify(HashMap<String, String> param);
+	public void update(ComplainDTO complainDTO); // complain_modify를 대체
 	public void complain_delete(HashMap<String, String> param);
 	public void updateAnswer(HashMap<String, String> param);
 	public ComplainDTO getComplainById(int reportId);

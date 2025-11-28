@@ -75,6 +75,41 @@
         .btn.gray:hover {
             background-color: #444;
         }
+        /* 이미지 미리보기 스타일 */
+        .uploadResult ul {
+            display: flex;
+            flex-wrap: wrap;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .uploadResult li {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 5px;
+        }
+        .uploadResult li img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .uploadResult li .remove-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ff4d4f;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
     </style>
     </th:block>
 </head>
@@ -82,7 +117,7 @@
     <div id="content-wrap">
         <div class="container">
             <h2>상담 내용 수정</h2>
-            <form id="modifyForm" th:if="${m_param != null}" th:action="@{/complain_modify}" method="post" th:object="${m_param}" onsubmit="return confirm('수정하시겠습니까?');">
+            <form id="modifyForm" th:if="${m_param != null}" th:action="@{/complain_modify}" method="post" enctype="multipart/form-data" th:object="${m_param}" onsubmit="return confirm('수정하시겠습니까?');">
                 <input type="hidden" name="report_id" th:value="*{report_id}" />
                 <table>
                     <tr>
@@ -108,6 +143,29 @@
                             <textarea name="content" th:text="*{content}" style="width:100%; height: 150px;"></textarea>
                         </td>
                     </tr>
+                    <!-- 기존 첨부파일 -->
+                    <tr th:if="${not #lists.isEmpty(m_param.attachList)}">
+                        <th>기존 첨부파일</th>
+                        <td>
+                            <div class="uploadResult">
+                                <ul>
+                                    <li th:each="file : ${m_param.attachList}" th:data-uuid="${file.uuid}">
+                                        <img th:if="${file.image}" th:src="@{/display(uuid=${file.uuid}, type='complain')}" alt="thumbnail">
+                                        <img th:unless="${file.image}" th:src="@{/img/attach.png}" alt="attach_icon">
+                                        <button type="button" class="remove-btn">X</button>
+                                        <input type="hidden" name="existingFileNames" th:value="${file.fileName}">
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- 새 파일 첨부 -->
+                    <tr>
+                        <th>파일 추가</th>
+                        <td>
+                            <input type="file" name="newUploadFiles" multiple="multiple">
+                        </td>
+                    </tr>
                     <tr>
                         <th>문의날짜</th>
                         <td th:text="${#dates.format(m_param.complainDate, 'yyyy-MM-dd HH:mm')}"></td>
@@ -125,4 +183,21 @@
         </div>
     </div>
 </div>
+<th:block layout:fragment="script">
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadResult = document.querySelector('.uploadResult ul');
+    if (uploadResult) {
+        uploadResult.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-btn')) {
+                const li = e.target.closest('li');
+                if (confirm('이 파일을 삭제하시겠습니까?')) {
+                    li.remove(); // 화면에서만 제거. 폼 제출 시 existingFileNames에 포함되지 않아 서버에서 삭제됨.
+                }
+            }
+        });
+    }
+});
+</script>
+</th:block>
 </html>

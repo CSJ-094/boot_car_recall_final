@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
@@ -107,13 +108,19 @@ public class ComplainController {
     }
 
     @RequestMapping("/complain_modify")
-    public String complain_modify(@RequestParam HashMap<String, String> param, RedirectAttributes rttr) {
+    public String complain_modify(@ModelAttribute ComplainDTO complainDTO,
+                                  @RequestParam(value = "newUploadFiles", required = false) List<MultipartFile> newUploadFiles,
+                                  @RequestParam(value = "existingFileNames", required = false) List<String> existingFileNames,
+                                  RedirectAttributes rttr) {
         log.info("@# complain_modify()");
-        log.info("@# param=>" + param);
-
-        service.complain_modify(param);
-
-        return "redirect:complain_list";
+        try {
+            service.complain_modify(complainDTO, newUploadFiles, existingFileNames);
+            rttr.addFlashAttribute("message", "상담 내용이 성공적으로 수정되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            rttr.addFlashAttribute("errorMessage", "오류가 발생하여 수정에 실패했습니다: " + e.getMessage());
+        }
+        return "redirect:/complain_content_view?report_id=" + complainDTO.getReport_id();
     }
 
     @RequestMapping("/complain_delete")

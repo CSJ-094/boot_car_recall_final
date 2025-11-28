@@ -42,9 +42,12 @@
         where REPORT_ID = #{report_id}
     </select>
     
-    <update id="complain_modify">
-    	update online_complain set title=#{title}, COMPLAIN_TYPE=#{complain_type}, content=#{content} 
-    	 where report_id=#{report_id}
+    <update id="update" parameterType="com.boot.dto.ComplainDTO">
+    	update online_complain 
+    	set title=#{title}, 
+    	    COMPLAIN_TYPE=#{complain_type}, 
+    	    content=#{content} 
+    	where report_id=#{report_id}
     </update>
     
     <delete id="complain_delete">
