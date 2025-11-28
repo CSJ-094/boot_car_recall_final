@@ -21,4 +21,8 @@
     <select id="findByUuid" resultType="com.boot.dto.ComplainAttachDTO">
         select * from complain_attach where uuid = #{uuid}
     </select>
+
+    <delete id="delete">
+        delete from complain_attach where uuid = #{uuid}
+    </delete>
 </mapper>
