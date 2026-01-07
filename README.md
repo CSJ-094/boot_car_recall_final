@@ -47,6 +47,19 @@
 
 ## ERD
 
+<img width="626" height="623" alt="image" src="https://github.com/user-attachments/assets/76bddd1a-ddc7-4457-803f-a2f816867ea0" />
+
+## UI/UX Screenshot
+
+<details>
+  <summary>**메인화면**</summary>
+
+- 구조:
+
+- 핵심 로직:
+
+  
+</details>
 
 
 ## 🏗 System Architecture
