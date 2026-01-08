@@ -66,9 +66,9 @@
 
 대시보드: 리콜 통계 및 사용자 활동 지표 모니터링.
 
-## ERD
 
-<img width="626" height="623" alt="image" src="https://github.com/user-attachments/assets/76bddd1a-ddc7-4457-803f-a2f816867ea0" />
+
+
 
 ## UI/UX Screenshot
 
@@ -100,8 +100,20 @@ graph TD
     CommunityService --> MySQL[(MySQL: Posts/Comments)]
     API_Client <--> Gov_API[[Public Data API]]
 ```
+**[ERD]**
+<img width="626" height="623" alt="image" src="https://github.com/user-attachments/assets/76bddd1a-ddc7-4457-803f-a2f816867ea0" />
+
+<br/> 
+
+**[업무 흐름도]**
+
+<img width="827" height="642" alt="Image" src="https://github.com/user-attachments/assets/aaf2e5f9-613c-467d-8199-5c9331d00afa" />
+[메인페이지]
+
 
 <br/>
+
+## 📂 Project Documents (기타 문서)
 
 ---
 
