@@ -99,6 +99,7 @@ graph TD
     RecallService --> MySQL[(MySQL: Recall Cache)]
     CommunityService --> MySQL[(MySQL: Posts/Comments)]
     API_Client <--> Gov_API[[Public Data API]]
+```
 
 <br/>
 
