@@ -1,4 +1,5 @@
 <img width="891" height="1260" alt="리드미 (2)" src="https://github.com/user-attachments/assets/f30796d5-c11c-416c-ae28-bf9bd5f6912a" />
+
 # 🚗 Car Recall Information System
 > **공공데이터 API 기반 자동차 리콜 정보 조회 및 커뮤니티 플랫폼**
 
