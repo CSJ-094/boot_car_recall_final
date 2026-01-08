@@ -114,6 +114,11 @@ graph TD
 <br/>
 
 ## 📂 Project Documents (기타 문서)
+| 문서 종류 | 파일명 | 형식 | 바로가기 |
+| :--- | :--- | :---: | :---: |
+| **메뉴 구조도** | 메뉴구조도.pdf | ![PDF](https://img.shields.io/badge/PDF-F40F02?style=flat-square&logo=adobe-acrobat-reader&logoColor=white) | [📄 문서 보기](./img/메뉴구조도_1팀.docx) |
+| **테이블 명세서** | 테이블명세서.xls | ![Excel](https://img.shields.io/badge/Excel-217346?style=flat-square&logo=microsoft-excel&logoColor=white) | [📊 시트 보기](./img/pilot_project2_테이블_명세서_제출용.xls) |
+| **화면 설계서** | 화면설계서.pdf | ![PDF](https://img.shields.io/badge/PDF-F40F02?style=flat-square&logo=adobe-acrobat-reader&logoColor=white) | [📄 문서 보기](./img/메뉴구조도_1팀.docx) |
 
 ---
 
