@@ -111,8 +111,8 @@ graph TD
 
 <details>
   <summary><b>메인페이지</b></summary>
-    
-<img src="./video/Mainpage.gif" width="100%">
+
+  ![메인페이지](./video/Mainpage.gif)
 
   화면 설명
   - 메인페이지에서 차대번호, 차량 등록번호로 리콜 대상 여부 조회가 가능합니다.
