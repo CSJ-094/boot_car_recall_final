@@ -111,7 +111,7 @@ graph TD
 
 <details>
   <summary>메인페이지</summary>
-  
+  ![메인페이지](./video/Mainpage.gif)
   
 </details>
 
