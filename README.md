@@ -110,7 +110,7 @@ graph TD
 ## 🚀 결과
 
 <details>
-  <summary>메인페이지</summary>
+  <summary><b>메인페이지</b></summary>
     
   ![메인페이지](./video/Mainpage.gif)
 
