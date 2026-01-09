@@ -115,7 +115,71 @@ graph TD
   
 </details>
 
+---
 
+<details>
+  <summary>로그인</summary>
+  
+  
+</details>
+
+---
+
+<details>
+  <summary>회원가입</summary>
+  
+  
+</details>
+
+---
+
+<details>
+  <summary>차량관리</summary>
+  
+  
+</details>
+
+---
+
+<details>
+  <summary>내 알림</summary>
+  
+  
+</details>
+
+---
+
+<details>
+  <summary>결함신고</summary>
+  
+  
+</details>
+
+---
+
+<details>
+  <summary>리콜보도자료</summary>
+  
+  
+</details>
+
+---
+
+<details>
+  <summary>서비스 센터 찾기</summary>
+  
+  
+</details>
+
+---
+
+<details>
+  <summary>챗봇</summary>
+  
+  
+</details>
+
+---
 ## 👥 Team Members (팀원 및 역할)
 | 이름           | 포지션       | 담당 역할                                                                                                                                                     |
 | :----------- | :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
