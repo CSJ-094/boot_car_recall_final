@@ -67,22 +67,6 @@
 대시보드: 리콜 통계 및 사용자 활동 지표 모니터링.
 
 
-
-
-
-## UI/UX Screenshot
-
-<details>
-  <summary>**메인화면**</summary>
-
-- 구조:
-
-- 핵심 로직:
-
-  
-</details>
-
-
 ## 🏗 System Architecture
 
 ```mermaid
@@ -122,6 +106,9 @@ graph TD
 | **화면 설계서** | 화면설계서.pdf | ![PDF](https://img.shields.io/badge/PDF-F40F02?style=flat-square&logo=adobe-acrobat-reader&logoColor=white) | [📄 문서 보기](./img/디자인인(2).pdf) |
 
 ---
+
+## 🚀 결과
+
 
 ## 👥 Team Members (팀원 및 역할)
 | 이름           | 포지션       | 담당 역할                                                                                                                                                     |
