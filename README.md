@@ -122,56 +122,84 @@ graph TD
 ---
 
 <details>
-  <summary>로그인</summary>
-  
+  <summary><b>회원가입</b></summary>
+
+  ![메인페이지](./video/Register.gif)
+
+   화면 설명
+  - 회원가입 시 3가지 정보를 적습니다.
+</details>
+
+---
+
+<details>
+  <summary><b>로그인</b></summary>
+
+  ![메인페이지](./video/Login.gif)
+
+   화면 설명
+  - 회원가입 시 작성했던 이메일을 통해 인증을 받습니다.
+  - 인증 버튼을 누르면 로그인 페이지로 이동 후 로그인 시 세션을 가지고 메인페이지로 이동합니다.
+</details>
+
+---
+
+<details>
+  <summary><b>차량관리&내알림</b></summary>
+
+  ![메인페이지](./video/Mycar.gif)
+
+   화면 설명
+  - 내 차량을 클릭 해 본인의 차량을 등록, 삭제 할 수 있습니다.
+  - 차량 등록 시 리콜 정보 속에서 관련된 정보만 필터링이 가능합니다.
+  - 내 알림 기능으로 사이트 내 각종 알람등을 받을 수 있습니다.
+  - 읽지 않은 알람과 읽은 알람은 색상과 NEW뱃지 유무로 구분을 줘 알 수 있습니다.
+  - 해당 기능은 회원가입 통해 로그인 시 이용할 수 있는 기능입니다.
   
 </details>
 
 ---
 
 <details>
-  <summary>회원가입</summary>
-  
+  <summary><b>결함신고&신고내역</b></summary>
+
+  ![메인페이지](./video/RecallSubmit.gif)
+
+   화면 설명
+  - 결함신고 시 7개의 정보를 입력합니다.
+  - 신고 시 적었던 비밀번호로 결함신고 내역을 수정, 삭제를 할 수 있습니다.
+  - 신고 내역에서 검색을 할 수 있으며 CSV, PDF파일등으로 내역을 다운받을 수 있습니다.
+  - 신고 내역 상세보기를 통해 리콜 가능성과 유사 사례, 예상 고장 부위를 로지스틱 회귀 분석을 통해 예측 할 수 있습니다.
   
 </details>
 
 ---
 
 <details>
-  <summary>차량관리</summary>
-  
+  <summary><b>리콜현황</b></summary>
+
+  ![메인페이지](./video/RecallResourse.gif)
+
+   화면 설명
+  - 제조사/ 차종으로 리콜 사례들을 검색할 수 있습니다.
+  - 상세보기를 통해 자세한 정보를 볼 수 있습니다.
+  - 해당 내용 또한 CSV,PDF 파일로 받을 수 있습니다.
   
 </details>
 
 ---
 
 <details>
-  <summary>내 알림</summary>
-  
-  
-</details>
+  <summary><b>서비스 센터 찾기</b></summary>
 
----
-
-<details>
-  <summary>결함신고</summary>
   
-  
-</details>
+  ![메인페이지](./video/RecallMap.gif)
 
----
-
-<details>
-  <summary>리콜보도자료</summary>
-  
-  
-</details>
-
----
-
-<details>
-  <summary>서비스 센터 찾기</summary>
-  
+   화면 설명
+  - 사용자의 위치 기반으로 서비스 센터를 찾을 수 있습니다.
+  - 정비소 이름 또는 차종을 통해서 서비스 센터를 찾을 수 있습니다.
+  - 반경을 선택해 거리 제한을 둘 수 있습니다.
+  - 서비스 센터 리스트와 지도를 연동시켜 리스트에 표시된 센터는 지도에 반영되며 지도 이동시 자동으로 리스트를 새로고침합니다.
   
 </details>
 
