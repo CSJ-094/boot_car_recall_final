@@ -109,6 +109,12 @@ graph TD
 
 ## 🚀 결과
 
+<details>
+  <summary>메인페이지</summary>
+  
+  
+</details>
+
 
 ## 👥 Team Members (팀원 및 역할)
 | 이름           | 포지션       | 담당 역할                                                                                                                                                     |
