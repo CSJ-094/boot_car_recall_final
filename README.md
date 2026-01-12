@@ -46,6 +46,7 @@
 
 ## 📁 Project Structure (프로젝트 폴더 구조)
 
+```
 BOOT_CAR_RECALL/
 ├── python_ai/                   
 ├── src/
@@ -76,7 +77,8 @@ BOOT_CAR_RECALL/
 ├── recall_Pasing.py             
 ├── README.md                    
 └── tablesetting.txt             
-
+```
+<br/>
 ---
 
 ## ✨ Key Features
