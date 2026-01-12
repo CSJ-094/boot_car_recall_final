@@ -44,6 +44,41 @@
 
 ---
 
+## 📁 Project Structure (프로젝트 폴더 구조)
+
+BOOT_CAR_RECALL/
+├── python_ai/                   
+├── src/
+│   └── main/
+│       ├── java/com/boot/       
+│       │   ├── config/          
+│       │   ├── controller/      
+│       │   ├── dao/             
+│       │   ├── domain/         
+│       │   ├── handler/         
+│       │   ├── OpenAiClient/    
+│       │   ├── service/         
+│       │   ├── util/           
+│       │   └── BootCarRecallApplication.java  
+│       └── resources/           
+│           ├── mybatis/mappers/
+│           ├── static/          
+│           │   ├── css/
+│           │   ├── img/
+│           │   ├── js/
+│           │   ├── python/
+│           │   └── video/
+│           ├── templates/      
+│           ├── application.properties 
+│           └── mybatis-config.xml    
+├── build.gradle                 
+├── gradlew / gradlew.bat       
+├── recall_Pasing.py             
+├── README.md                    
+└── tablesetting.txt             
+
+---
+
 ## ✨ Key Features
 
 **🔍 리콜 정보 조회 (Recall Info)**
